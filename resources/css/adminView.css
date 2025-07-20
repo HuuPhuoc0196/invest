@@ -1,0 +1,72 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th,
+td {
+    padding: 12px 16px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #34495e;
+    color: white;
+}
+
+tr.yellow {
+    background-color: #fffae6; /* vàng nhạt */
+    color: #fae103ff;
+}
+
+tr.green {
+    background-color: #e6ffea; /* xanh nhạt */
+    color: #00aa00;
+}
+
+tr.purple {
+    background-color: #f3e6ff; /* tím nhạt */
+    color: #aa00aa;
+}
+tr.red {
+    background-color: #eee4e4ff; /* tím nhạt */
+    color: #b30606ff;
+}
+
+.risk-1 {
+    color: #2ecc71;
+}
+.risk-2 {
+    color: #f1c40f;
+}
+.risk-3 {
+    color: #e67e22;
+}
+.risk-4 {
+    color: #e74c3c;
+}
+
+.btn-delete {
+    background-color: #a01818;
+}
+
+.btn-delete:hover {
+    background-color: #610d0d;
+}
