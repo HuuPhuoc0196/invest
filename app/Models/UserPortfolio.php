@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class UserPortfolio extends Model
 {
     protected $table = 'user_portfolios';
-    protected $fillable = ['user_id', 'stock_id', 'buy_price', 'buy_date', 'quantity'];
+    protected $fillable = ['id', 'user_id', 'stock_id', 'buy_price', 'buy_date', 'quantity'];
 
     public static function getProfileUser($userId)
     {
