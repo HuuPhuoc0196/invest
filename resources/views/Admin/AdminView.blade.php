@@ -19,6 +19,7 @@
         <div class="actions-left">
             <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
             <a href="{{ url('/admin/insert') }}" class="button-link">➕ Thêm mới</a>
+            <button onclick="syncData()">🔄 Sync Giá hiện tại</button>
         </div>
 
         <div class="actions-right">
@@ -45,12 +46,21 @@
     <!-- Modal xác nhận xoá -->
     <div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background: white; padding: 20px; border-radius: 10px; width: 300px; text-align: center;">
-        <p>Bạn có chắc chắn muốn xoá?</p>
-        <button id="confirmYes">Có</button>
-        <button id="confirmNo">Không</button>
+        <div style="background: white; padding: 20px; border-radius: 10px; width: 300px; text-align: center;">
+            <p>Bạn có chắc chắn muốn xoá?</p>
+            <button id="confirmYes">Có</button>
+            <button id="confirmNo">Không</button>
+        </div>
     </div>
-</div>
+    <!-- Modal xác nhận xoá -->
+    <div id="confirmModalSync" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 20px; border-radius: 10px; width: 300px; text-align: center;">
+            <p>Bạn có chắc chắn muốn xoá?</p>
+            <button id="confirmYesSync">Có</button>
+            <button id="confirmNoSync">Không</button>
+        </div>
+    </div>
 </body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -95,6 +105,29 @@
         // Gọi hàm render lại bảng
         admin.renderTable(stocks);
     }
+
+    function syncData() {
+        // Biến dùng để xác định hành động hiện tại là gì
+        window.pendingAction = "sync";
+        document.getElementById("confirmModalSync").style.display = "flex";
+    }
+
+    document.getElementById("confirmYesSync").onclick = function () {
+        if (window.pendingAction === "sync") {
+            fetch(`${baseUrl}/api/admin/collect`, {
+                method: "GET",
+            })
+        }
+
+        // Đóng modal
+        document.getElementById("confirmModalSync").style.display = "none";
+        window.pendingAction = null;
+    };
+
+    document.getElementById("confirmNoSync").onclick = function () {
+        document.getElementById("confirmModalSync").style.display = "none";
+        window.pendingAction = null;
+    };
 
     document.getElementById("confirmYes").onclick = function () {
         window.location.href = deleteUrl;
