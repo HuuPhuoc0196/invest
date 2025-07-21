@@ -100,9 +100,17 @@ class User extends Controller
 
                 // Kiểm tra code đã tồn tại chưa
                 $userPortfolio = UserPortfolio::getStockHolding($user_id, $stock->id);
-                $quantity = $userPortfolio['total_quantity'];
 
-                if (!$userPortfolio || $quantity < $validated['quantity']) {
+                if (!$userPortfolio) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Cổ phiếu ' . $validated['code'] . ' chưa được mua.'
+                    ]);
+                }
+
+                // Kiểm tra quantity trước khi sell
+                $quantity = $userPortfolio['total_quantity'];
+                if ($quantity < $validated['quantity']) {
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Hiện tại: ' . $quantity . '. Số lượng cổ phiếu ' . $validated['code'] . ' không đủ.'
