@@ -80,4 +80,20 @@ class UserPortfolio extends Model
             'total_quantity' => $remaining
         ];
     }
+
+    public static function getPortfolioWithStockInfo($userId)
+    {
+        return DB::table('user_portfolios as up')
+            ->join('stocks as s', 'up.stock_id', '=', 's.id')
+            ->where('up.user_id', $userId)
+            ->select(
+                's.code',
+                'up.buy_price',
+                'up.quantity',
+                's.current_price',
+                's.risk_level',
+                'up.buy_date'
+            )
+            ->get();
+    }
 }

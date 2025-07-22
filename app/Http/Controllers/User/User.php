@@ -17,6 +17,15 @@ class User extends Controller
         return view('User.UserView', compact('stocks'));
     }
 
+    public function investmentPerformance()
+    {
+        $user_id = 1;
+        $userPortfolios = UserPortfolio::getPortfolioWithStockInfo($user_id);
+        $userPortfoliosSell = UserPortfolioSell::getPortfolioSellWithStockInfo($user_id);
+        $stocks = $userPortfolios->merge($userPortfoliosSell);
+        return view('User.UserInvestmentPerformance', compact('stocks'));
+    }
+
     public function profile()
     {
         $userId = 1;

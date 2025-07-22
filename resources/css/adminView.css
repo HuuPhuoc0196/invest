@@ -70,3 +70,11 @@ tr.red {
 .btn-delete:hover {
     background-color: #610d0d;
 }
+
+.Sell {
+    background-color: #dd250c;
+}
+
+.Buy {
+    background-color: #0cdd28;
+}

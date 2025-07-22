@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Laravel</title>
+    <title>Invest</title>
     @vite('resources/js/app.js')
     @vite('resources/css/app.css')
     @vite('resources/css/adminInsert.css')
@@ -18,7 +18,6 @@
 <body class="antialiased">
     <div class="actions">
         <div class="actions-left">
-            <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
             <a href="{{ url('/user/profile') }}" class="button-link">👤 Thông tin cá nhân</a>
         </div>
     </div>

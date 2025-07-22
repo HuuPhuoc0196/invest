@@ -15,6 +15,11 @@ class Stock extends Model
         return self::orderBy('code')->get();
     }
 
+    public static function getInvestmentPerformance()
+    {
+        return self::orderBy('code')->get();
+    }
+
     // Lấy stock theo mã code
     public static function getByCode(string $code): ?Stock
     {

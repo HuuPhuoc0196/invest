@@ -21,6 +21,7 @@ Route::get('/user', [User::class, 'show']);
 Route::get('/user/profile', [User::class, 'profile']);
 Route::get('/user/buy', [User::class, 'buy']);
 Route::get('/user/sell', [User::class, 'sell']);
+Route::get('/user/investment-performance', [User::class, 'investmentPerformance']);
 
 // GET
 // Admin

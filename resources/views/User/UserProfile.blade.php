@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Laravel</title>
+    <title>Invest</title>
     @vite('resources/js/app.js')
     @vite('resources/css/app.css')
     @vite('resources/css/adminView.css')
@@ -20,6 +20,7 @@
             <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
             <a href="{{ url('/user/buy') }}" class="button-link">➕ Mua cổ phiếu</a>
             <a href="{{ url('/user/sell') }}" class="button-link">❌ Bán cổ phiếu</a>
+            <a href="{{ url('/user/investment-performance') }}" class="button-link">📈 Hiệu quả đầu tư</a>
         </div>
 
         <div class="actions-right">
@@ -37,6 +38,7 @@
                 <th>Khối lượng nắm giữ</th>
                 <th>Giá vốn</th>
                 <th>Giá hiện tại</th>
+                <th>Giá trị giao dịch</th>
                 <th>Tiền lãi</th>
                 <th>% lãi</th>
             </tr>
@@ -58,7 +60,7 @@
     });
 
     function searchStock() {
-        user.searchStock(userPortfolios);
+        user.searchStockProfile(userPortfolios);
     }
 </script>
 
