@@ -96,7 +96,7 @@ export default class User{
             }
 
             row.innerHTML = `
-                <td>${stock.code}</td>
+                <td><a href="https://fireant.vn/dashboard/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
                 <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
                 <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
                 <td style="color: ${this.getRisk(stock.risk_level).color}">
@@ -151,7 +151,7 @@ export default class User{
             let percentSign = profitPercent > 0 ? '+' : profitPercent < 0 ? '-' : '+';
 
             row.innerHTML = `
-                <td>${userPortfolio.code}</td>
+                <td><a href="https://fireant.vn/dashboard/${userPortfolio.code}" target="_blank" style="color: inherit; text-decoration: none;">${userPortfolio.code}</a></td>
                 <td>${total_quantity.toLocaleString('vi-VN')}</td>
                 <td>${avg_price.toLocaleString('vi-VN')}</td>
                 <td>${current_price.toLocaleString('vi-VN')}</td>
@@ -240,7 +240,7 @@ export default class User{
 
             row.className = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
             row.innerHTML = `
-                <td>${stock.code}</td>
+                <td><a href="https://fireant.vn/dashboard/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
                 <td>${Number(stock.quantity).toLocaleString('vi-VN')}</td>
                 <td>${Number(stock.quantity * price).toLocaleString('vi-VN')}</td>
                 <td>${date}</td>
