@@ -78,3 +78,26 @@ tr.red {
 .Buy {
     background-color: #0cdd28;
 }
+
+.highlighted-row {
+    background-color: #fff5cc; /* màu vàng nhạt */
+    font-weight: bold;
+    border-left: 5px solid #ffcc00;
+}
+
+.action-cell {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+.profit {
+    font-weight: bold;
+}
+
+th:nth-child(5),
+td:nth-child(5) {
+    width: 170px;
+}

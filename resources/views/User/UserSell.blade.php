@@ -27,8 +27,10 @@
     <div class="form-container">
         <div class="form-group">
             <label for="code">Mã Cổ Phiếu:</label>
-            <input type="text" id="code" placeholder="VD: FPT">
-            <div class="error" id="errorCode">Vui lòng nhập Mã cổ phiếu</div>
+            <select id="code">
+                <option value="">-- Chọn mã cổ phiếu --</option>
+            </select>
+            <div class="error" id="errorCode">Vui lòng chọn Mã cổ phiếu</div>
         </div>
 
         <div class="form-group">
@@ -61,10 +63,37 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     const baseUrl = "{{ url('') }}";
+    const userPortfolios = @json($userPortfolios);
     const formatter = new Intl.NumberFormat('vi-VN');
     const sellPriceInput = document.getElementById("sellPrice");
     const quantityInput = document.getElementById("quantity");
     const sellDateInput = document.getElementById('sellDate');
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const select = document.getElementById("code");
+        const quantityInput = document.getElementById("quantity");
+
+        // Đổ option cho select
+        userPortfolios.forEach(p => {
+            const option = document.createElement("option");
+            option.value = p.code;
+            option.textContent = p.code;
+            select.appendChild(option);
+        });
+
+        // Khi chọn mã thì tự động cập nhật quantity
+        select.addEventListener("change", function () {
+            const selectedCode = this.value;
+            const selectedPortfolio = userPortfolios.find(p => p.code === selectedCode);
+            if (selectedPortfolio) {
+                quantityInput.value = selectedPortfolio.total_quantity;
+                formatToVND(quantityInput);
+            } else {
+                quantityInput.value = "";
+            }
+        });
+    });
+
 
     function isNumber(value) {
         return !isNaN(value) && value.trim() !== '';

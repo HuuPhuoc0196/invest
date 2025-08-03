@@ -4,23 +4,24 @@ export default class User{
 
     getRisk(rating) {
         switch (rating) {
-        case 1:
-            return 'Rất tốt';
-        case 2:
-            return 'Tốt';
-        case 3:
-            return 'Nguy hiểm';
-        case 4:
-            return 'Cực kỳ xấu';
-        default:
-            return 'Không xác định';
+            case 1:
+                return { label: 'An toàn', color: 'green' };
+            case 2:
+                return { label: 'Tốt', color: 'goldenrod' };
+            case 3:
+                return { label: 'Nguy hiểm', color: 'orange' };
+            case 4:
+                return { label: 'Cực kỳ xấu', color: 'red' };
+            default:
+                return { label: 'Không xác định', color: 'gray' };
         }
     }
 
-    searchStock(stocks) {
+
+    searchStock(stocks, userPortfolios) {
         const keyword = document.getElementById('searchInput').value.trim().toUpperCase();
         const filtered = stocks.filter(stock => stock.code.includes(keyword));
-        this.renderTable(filtered);
+        this.renderTable(filtered, userPortfolios);
     }
 
     searchStockProfile(stocks) {
@@ -56,19 +57,59 @@ export default class User{
         }
     }
 
-    renderTable(data) {
+    renderTable(data, userProfile) {
+         // 1. Tạo danh sách mã CK trong danh mục đầu tư
+        const portfolioCodes = userProfile.map(p => p.code);
+
+        // 2. Tách dữ liệu thành 2 nhóm: ưu tiên và còn lại
+        const prioritizedStocks = data.filter(stock => portfolioCodes.includes(stock.code));
+        const remainingStocks = data.filter(stock => !portfolioCodes.includes(stock.code));
+
+        // 3. Gộp lại: mã trong danh mục đầu tư sẽ hiển thị trước
+        const sortedData = [...prioritizedStocks, ...remainingStocks];
+
         const tbody = document.getElementById('stockTableBody');
         tbody.innerHTML = '';
-        data.forEach(stock => {
-        const row = document.createElement('tr');
-        row.className = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
-        row.innerHTML = `
-            <td>${stock.code}</td>
-            <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
-            <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
-            <td>${this.getRisk(stock.risk_level)}</td>
-        `;
-        tbody.appendChild(row);
+        sortedData.forEach(stock => {
+            const goodPrice = parseFloat(stock.recommended_buy_price);
+            const currentPrice = parseFloat(stock.current_price);
+            const valuation = currentPrice !== 0 ? ((currentPrice / goodPrice) * 100 - 100).toFixed(2) : 0;
+            
+            let valuationColor = 'yellow';
+            let sign = '';
+            if (valuation > 0) {
+                valuationColor = 'green';
+                sign = '+';
+            } else if (valuation < 0) {
+                valuationColor = 'red';
+                sign = '';
+            }
+
+            const row = document.createElement('tr');
+            // Gộp class màu định giá và class nổi bật
+            const isInPortfolio = userProfile.some(port => port.code === stock.code);
+            const valuationClass = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
+            if (isInPortfolio) {
+                row.className = `${valuationClass} highlighted-row`;
+            } else {
+                row.className = valuationClass;
+            }
+
+            row.innerHTML = `
+                <td>${stock.code}</td>
+                <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
+                <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
+                <td style="color: ${this.getRisk(stock.risk_level).color}">
+                    ${this.getRisk(stock.risk_level).label}
+                </td>
+                <td style="color: ${valuationColor}">
+                <div class="action-cell">
+                    <span class="profit">${sign}${valuation}%</span>
+                    ${isInPortfolio ? `<button class="btn-delete" onclick="confirmDelete('${stock.code}')">Delete</button>` : ''}
+                </div>
+                </td>
+            `;
+            tbody.appendChild(row);
         });
     }
 
@@ -83,42 +124,42 @@ export default class User{
         let totalInvested = 0;
 
         data.forEach(userPortfolio => {
-        const row = document.createElement('tr');
+            const row = document.createElement('tr');
 
-        const total_quantity = Number(userPortfolio.total_quantity);
-        const avg_price = Number(userPortfolio.avg_buy_price);
-        const current_price = Number(userPortfolio.current_price);
+            const total_quantity = Number(userPortfolio.total_quantity);
+            const avg_price = Number(userPortfolio.avg_buy_price);
+            const current_price = Number(userPortfolio.current_price);
 
-        const cost = avg_price * total_quantity;
-        const currentValue = current_price * total_quantity;
-        const profit = currentValue - cost;
-        const profitPercent = (profit / cost) * 100;
+            const cost = avg_price * total_quantity;
+            const currentValue = current_price * total_quantity;
+            const profit = currentValue - cost;
+            const profitPercent = (profit / cost) * 100;
 
-        // Cộng dồn cho dòng tổng
-        totalQuantity += total_quantity;
-        totalProfit += profit;
-        totalCost += cost;
-        totalCurrentValue += currentValue;
-        totalInvested += avg_price * total_quantity;
+            // Cộng dồn cho dòng tổng
+            totalQuantity += total_quantity;
+            totalProfit += profit;
+            totalCost += cost;
+            totalCurrentValue += currentValue;
+            totalInvested += avg_price * total_quantity;
 
-        // Màu và dấu tiền lãi
-        let profitColor = profit > 0 ? 'green' : profit < 0 ? 'red' : 'orange';
-        let profitSign = profit > 0 ? '+' : profit < 0 ? '-' : '+';
+            // Màu và dấu tiền lãi
+            let profitColor = profit > 0 ? 'green' : profit < 0 ? 'red' : 'orange';
+            let profitSign = profit > 0 ? '+' : profit < 0 ? '-' : '+';
 
-        // Màu và dấu % lãi
-        let percentColor = profitPercent > 0 ? 'green' : profitPercent < 0 ? 'red' : 'orange';
-        let percentSign = profitPercent > 0 ? '+' : profitPercent < 0 ? '-' : '+';
+            // Màu và dấu % lãi
+            let percentColor = profitPercent > 0 ? 'green' : profitPercent < 0 ? 'red' : 'orange';
+            let percentSign = profitPercent > 0 ? '+' : profitPercent < 0 ? '-' : '+';
 
-        row.innerHTML = `
-            <td>${userPortfolio.code}</td>
-            <td>${total_quantity.toLocaleString('vi-VN')}</td>
-            <td>${avg_price.toLocaleString('vi-VN')}</td>
-            <td>${current_price.toLocaleString('vi-VN')}</td>
-            <td>${(avg_price * total_quantity).toLocaleString('vi-VN')}</td>
-            <td style="color:${profitColor}">${profitSign}${Math.abs(profit).toLocaleString('vi-VN')}</td>
-            <td style="color:${percentColor}">${percentSign}${Math.abs(profitPercent).toFixed(2)}%</td>
-        `;
-        tbody.appendChild(row);
+            row.innerHTML = `
+                <td>${userPortfolio.code}</td>
+                <td>${total_quantity.toLocaleString('vi-VN')}</td>
+                <td>${avg_price.toLocaleString('vi-VN')}</td>
+                <td>${current_price.toLocaleString('vi-VN')}</td>
+                <td>${(avg_price * total_quantity).toLocaleString('vi-VN')}</td>
+                <td style="color:${profitColor}">${profitSign}${Math.abs(profit).toLocaleString('vi-VN')}</td>
+                <td style="color:${percentColor}">${percentSign}${Math.abs(profitPercent).toFixed(2)}%</td>
+            `;
+            tbody.appendChild(row);
         });
 
         // Tính tổng phần trăm lãi
@@ -165,47 +206,47 @@ export default class User{
         });
 
         data.forEach(stock => {
-        const price = stock.buy_price !== undefined && stock.buy_price !== null ? stock.buy_price : stock.sell_price;
-        const date = stock.buy_date !== undefined && stock.buy_date !== null ? stock.buy_date : stock.sell_date;
-        const type =  stock.buy_price !== undefined && stock.buy_price !== null ? "Buy" : "Sell";
-        const quantity = parseInt(stock.quantity);
-        const currentPrice = parseFloat(stock.current_price);
-        const row = document.createElement('tr');
+            const price = stock.buy_price !== undefined && stock.buy_price !== null ? stock.buy_price : stock.sell_price;
+            const date = stock.buy_date !== undefined && stock.buy_date !== null ? stock.buy_date : stock.sell_date;
+            const type =  stock.buy_price !== undefined && stock.buy_price !== null ? "Buy" : "Sell";
+            const quantity = parseInt(stock.quantity);
+            const currentPrice = parseFloat(stock.current_price);
+            const row = document.createElement('tr');
 
-         // Tính tổng số lượng và giá trị
-        totalQuantity += quantity;
-        totalValue += quantity * price;
+            // Tính tổng số lượng và giá trị
+            totalQuantity += quantity;
+            totalValue += quantity * price;
 
-        // Tính lãi/lỗ:
-        if (type === "Buy") {
-             const totalBuyCost = price * quantity;
+            // Tính lãi/lỗ:
+            if (type === "Buy") {
+                const totalBuyCost = price * quantity;
 
-            // Nếu có đủ tiền mặt thì dùng tiền mặt
-            if (cash >= totalBuyCost) {
-                cash -= totalBuyCost;
+                // Nếu có đủ tiền mặt thì dùng tiền mặt
+                if (cash >= totalBuyCost) {
+                    cash -= totalBuyCost;
+                } else {
+                    const needToInject = totalBuyCost - cash;
+                    capitalIn += needToInject; // phải nạp thêm tiền thật
+                    cash = 0;
+                }
+
+                totalProfit += (currentPrice - price) * quantity;
             } else {
-                const needToInject = totalBuyCost - cash;
-                capitalIn += needToInject; // phải nạp thêm tiền thật
-                cash = 0;
+                const totalSellRevenue = price * quantity;
+                cash += totalSellRevenue;
+
+                totalProfit += (price - currentPrice) * quantity; // hoặc điều chỉnh tuỳ logic bạn
             }
 
-            totalProfit += (currentPrice - price) * quantity;
-        } else {
-            const totalSellRevenue = price * quantity;
-            cash += totalSellRevenue;
-
-            totalProfit += (price - currentPrice) * quantity; // hoặc điều chỉnh tuỳ logic bạn
-        }
-
-        row.className = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
-        row.innerHTML = `
-            <td>${stock.code}</td>
-            <td>${Number(stock.quantity).toLocaleString('vi-VN')}</td>
-            <td>${Number(stock.quantity * price).toLocaleString('vi-VN')}</td>
-            <td>${date}</td>
-            <td><div class="${type}">${type}</div></td>
-        `;
-        tbody.appendChild(row);
+            row.className = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
+            row.innerHTML = `
+                <td>${stock.code}</td>
+                <td>${Number(stock.quantity).toLocaleString('vi-VN')}</td>
+                <td>${Number(stock.quantity * price).toLocaleString('vi-VN')}</td>
+                <td>${date}</td>
+                <td><div class="${type}">${type}</div></td>
+            `;
+            tbody.appendChild(row);
         });
 
         // Xác định màu dựa vào tổng lãi

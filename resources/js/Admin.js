@@ -4,16 +4,16 @@ export default class Admin{
 
     getRisk(rating) {
         switch (rating) {
-        case 1:
-            return 'Rất tốt';
-        case 2:
-            return 'Tốt';
-        case 3:
-            return 'Nguy hiểm';
-        case 4:
-            return 'Cực kỳ xấu';
-        default:
-            return 'Không xác định';
+            case 1:
+                return { label: 'An toàn', color: 'green' };
+            case 2:
+                return { label: 'Tốt', color: 'goldenrod' };
+            case 3:
+                return { label: 'Nguy hiểm', color: 'orange' };
+            case 4:
+                return { label: 'Cực kỳ xấu', color: 'red' };
+            default:
+                return { label: 'Không xác định', color: 'gray' };
         }
     }
 
@@ -48,17 +48,33 @@ export default class Admin{
         const tbody = document.getElementById('stockTableBody');
         tbody.innerHTML = '';
         data.forEach(stock => {
-        const row = document.createElement('tr');
-        row.className = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
-        row.innerHTML = `
-            <td>${stock.code}</td>
-            <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
-            <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
-            <td>${this.getRisk(stock.risk_level)}</td>
-            <td><button onclick="location.href='${baseUrl}/admin/update/${stock.code}'">Update</button>
-            <button class="btn-delete" onclick="confirmDelete('${stock.code}')">Delete</button></td>
-        `;
-        tbody.appendChild(row);
+            const goodPrice = parseFloat(stock.recommended_buy_price);
+            const currentPrice = parseFloat(stock.current_price);
+            const valuation = currentPrice !== 0 ? ((currentPrice / goodPrice) * 100 - 100).toFixed(2) : 0;
+
+            let valuationColor = 'yellow';
+            let sign = '';
+            if (valuation > 0) {
+                valuationColor = 'green';
+                sign = '+';
+            } else if (valuation < 0) {
+                valuationColor = 'red';
+                sign = '';
+            }
+            const row = document.createElement('tr');
+            row.className = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
+            row.innerHTML = `
+                <td>${stock.code}</td>
+                <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
+                <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
+                <td style="color: ${this.getRisk(stock.risk_level).color}">
+                    ${this.getRisk(stock.risk_level).label}
+                </td>
+                <td style="color: ${valuationColor}">${sign}${valuation}%</td>
+                <td><button onclick="location.href='${baseUrl}/admin/update/${stock.code}'">Update</button>
+                <button class="btn-delete" onclick="confirmDelete('${stock.code}')">Delete</button></td>
+            `;
+            tbody.appendChild(row);
         });
     }
 

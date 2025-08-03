@@ -43,6 +43,8 @@
             <input type="text" id="quantity" placeholder="VD: 5000">
             <div class="error" id="errorQuantity">Vui lòng nhập Khối lượng giao dịch</div>
             <div class="error" id="errorQuantityType">Vui lòng nhập Số</div>
+
+            <div id="totalAmount" style="color: red; font-weight: bold; margin-top: 5px;"></div>
         </div>
 
         <div class="form-group">
@@ -88,6 +90,27 @@
 
     quantityInput.addEventListener("input", () => {
         formatToVND(quantityInput);
+    });
+
+    function updateTotalAmount() {
+        const buy = parseInt(parseNumber(buyPriceInput.value));
+        const quantity = parseInt(parseNumber(quantityInput.value));
+        const total = isNaN(buy) || isNaN(quantity) ? 0 : buy * quantity;
+
+        document.getElementById("totalAmount").textContent = total > 0
+            ? `Tổng tiền: ${formatter.format(total)} VND`
+            : '';
+    }
+
+    // Gọi hàm khi nhập
+    buyPriceInput.addEventListener("input", () => {
+        formatToVND(buyPriceInput);
+        updateTotalAmount();
+    });
+
+    quantityInput.addEventListener("input", () => {
+        formatToVND(quantityInput);
+        updateTotalAmount();
     });
 
     function resetForm() {
@@ -170,7 +193,6 @@
                 quantity: quantity,
                 buy_date : buyDate
             };
-            console.log(data);
             $.ajax({
                 url: baseUrl + '/user/buy',
                 type: 'POST',
@@ -185,6 +207,7 @@
                         toast.innerHTML = `✅ Đã mua thành công mã <b>${code}</b><br>`;
                         toast.className = "toast show";
                         toastSuccess();
+                        document.getElementById("totalAmount").textContent = "";
                         setTimeout(() => {
                             toast.className = toast.className.replace("show", "");
                         }, 3000);

@@ -1,0 +1,96 @@
+body {
+    font-family: "Nunito", sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-container {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.login-btn {
+    width: 100%;
+    background-color: #3b82f6;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.login-btn:hover {
+    background-color: #2563eb;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+    text-align: center;
+    display: none;
+}
+
+.link-group {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.link-group a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.link-group a:hover {
+    text-decoration: underline;
+}
+
+/* Hiện toast */
+.toast.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Màu thành công */
+.toast-success {
+    background-color: #28a745;
+    margin-top: 20px;
+}
+
+/* Màu lỗi */
+.toast-error {
+    background-color: #dc3545;
+    margin-top: 20px;
+}

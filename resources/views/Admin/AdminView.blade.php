@@ -20,6 +20,13 @@
             <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
             <a href="{{ url('/admin/insert') }}" class="button-link">➕ Thêm mới</a>
             <button onclick="syncData()">🔄 Sync Giá hiện tại</button>
+            <button onclick="syncDataRisk()">🔄 Sync Rủi ro</button>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="button-link">
+                    🚪 Đăng xuất
+                </button>
+            </form>
         </div>
 
         <div class="actions-right">
@@ -37,6 +44,7 @@
                 <th>Giá mua tốt</th>
                 <th>Giá hiện tại</th>
                 <th>Rủi ro</th>
+                <th>% Định giá</th>
                 <th>Cập nhật</th>
             </tr>
         </thead>
@@ -52,13 +60,22 @@
             <button id="confirmNo">Không</button>
         </div>
     </div>
-    <!-- Modal xác nhận xoá -->
+    <!-- Modal xác nhận sync data-->
     <div id="confirmModalSync" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
         <div style="background: white; padding: 20px; border-radius: 10px; width: 300px; text-align: center;">
-            <p>Bạn có chắc chắn muốn xoá?</p>
+            <p>Bạn có muốn đồng bộ hoá giá không?</p>
             <button id="confirmYesSync">Có</button>
             <button id="confirmNoSync">Không</button>
+        </div>
+    </div>
+     <!-- Modal xác nhận sync rui ro -->
+    <div id="confirmModalSyncRisk" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 20px; border-radius: 10px; width: 300px; text-align: center;">
+            <p>Bạn có muốn đồng bộ hoá rủi ro?</p>
+            <button id="confirmYesSyncRisk">Có</button>
+            <button id="confirmNoSyncRisk">Không</button>
         </div>
     </div>
 </body>
@@ -112,6 +129,12 @@
         document.getElementById("confirmModalSync").style.display = "flex";
     }
 
+    function syncDataRisk() {
+        // Biến dùng để xác định hành động hiện tại là gì
+        window.pendingAction = "syncRisk";
+        document.getElementById("confirmModalSyncRisk").style.display = "flex";
+    }
+
     document.getElementById("confirmYesSync").onclick = function () {
         if (window.pendingAction === "sync") {
             fetch(`${baseUrl}/api/admin/collect`, {
@@ -126,6 +149,23 @@
 
     document.getElementById("confirmNoSync").onclick = function () {
         document.getElementById("confirmModalSync").style.display = "none";
+        window.pendingAction = null;
+    };
+
+    document.getElementById("confirmYesSyncRisk").onclick = function () {
+        if (window.pendingAction === "syncRisk") {
+            fetch(`${baseUrl}/api/admin/collectRisk`, {
+                method: "GET",
+            })
+        }
+
+        // Đóng modal
+        document.getElementById("confirmModalSyncRisk").style.display = "none";
+        window.pendingAction = null;
+    };
+
+    document.getElementById("confirmNoSyncRisk").onclick = function () {
+        document.getElementById("confirmModalSyncRisk").style.display = "none";
         window.pendingAction = null;
     };
 

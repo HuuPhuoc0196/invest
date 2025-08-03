@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Stock;
+use App\Models\UserFollow;
 use App\Models\UserPortfolio;
 use App\Models\UserPortfolioSell;
 use Illuminate\Database\QueryException;
@@ -13,13 +14,15 @@ class User extends Controller
 {
     public function show()
     {
+        $userId = auth()->id();
+        $userPortfolios = UserPortfolio::getProfileUser($userId);
         $stocks = Stock::getAllStocks();
-        return view('User.UserView', compact('stocks'));
+        return view('User.UserView', compact('stocks', 'userPortfolios'));
     }
 
     public function investmentPerformance()
     {
-        $user_id = 1;
+        $user_id = auth()->id();
         $userPortfolios = UserPortfolio::getPortfolioWithStockInfo($user_id);
         $userPortfoliosSell = UserPortfolioSell::getPortfolioSellWithStockInfo($user_id);
         $stocks = $userPortfolios->merge($userPortfoliosSell);
@@ -28,10 +31,24 @@ class User extends Controller
 
     public function profile()
     {
-        $userId = 1;
+        $userId = auth()->id();
         $userPortfolios = UserPortfolio::getProfileUser($userId);
 
         return view('User.UserProfile', compact('userPortfolios'));
+    }
+
+    public function follow()
+    {
+        $userId = auth()->id();
+        $userFollow = UserFollow::getUserFollow($userId);
+        $stocks = Stock::getAllStocks();
+        return view('User.userFollow', compact('stocks', 'userFollow'));
+    }
+
+    public function deleteFollow($code)
+    {
+        UserFollow::deleteByCodeAndUser(strtoupper($code), auth()->id());
+        return $this->follow();
     }
 
     public function buy(Request $request)
@@ -58,7 +75,7 @@ class User extends Controller
                     ]);
                 }
                 // Mapping data vào model
-                $userPortfolio->user_id = 1;
+                $userPortfolio->user_id = auth()->id();
                 $userPortfolio->stock_id = $stock->id;
                 $userPortfolio->buy_price = $validated['buy_price'];
                 $userPortfolio->quantity = $validated['quantity'];
@@ -96,7 +113,7 @@ class User extends Controller
                     'quantity' => 'required|numeric',
                     'sell_date' => 'required|date|before_or_equal:today',
                 ]);
-                $user_id = 1;
+                $user_id = auth()->id();
 
                 // Kiểm tra code đã tồn tại chưa
                 $stock = Stock::getByCode(strtoupper($validated['code']));
@@ -129,7 +146,7 @@ class User extends Controller
                 $userPortfolio_sell = new UserPortfolioSell();
 
                 // Mapping data vào model
-                $userPortfolio_sell->user_id = 1;
+                $userPortfolio_sell->user_id = auth()->id();
                 $userPortfolio_sell->stock_id = $stock->id;
                 $userPortfolio_sell->sell_price = $validated['sell_price'];
                 $userPortfolio_sell->quantity = $validated['quantity'];
@@ -151,7 +168,63 @@ class User extends Controller
                 ], 500);
             }
         } else {
-            return view('User.UserSell');
+            $userId = auth()->id();
+            $userPortfolios = UserPortfolio::getProfileUser($userId);
+            return view('User.UserSell', compact('userPortfolios'));
+        }
+    }
+
+    public function insertFollow(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            // Có dữ liệu
+            try {
+                // Validation dữ liệu
+                $validated = $request->validate([
+                    'code' => 'required|string|max:10',
+                ]);
+
+                // Kiểm tra code đã tồn tại chưa
+                $userFollow = new UserFollow();
+                $stock = Stock::getByCode(strtoupper($validated['code']));
+
+                if (!$stock) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Vui lòng liên hệ Admin insert Mã cổ phiếu ' . $validated['code'] . '.'
+                    ]);
+                }
+
+                $userFollowExit = UserFollow::getUserFollowFirst($stock->id, auth()->id());
+
+                if ($userFollowExit) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Mã cổ phiếu ' . $validated['code'] . ' đã được theo dõi.'
+                    ]);
+                }
+
+                // Mapping data vào model
+                $userFollow->user_id = auth()->id();
+                $userFollow->stock_id = $stock->id;
+
+                // Lưu vào database (ví dụ bảng stocks)
+                $userFollow->save();
+
+                // Trả kết quả JSON
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Mua thành công.',
+                    'data' => $userFollow
+                ]);
+            } catch (QueryException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+        } else {
+            return view('User.userInsertFollow');
         }
     }
 }

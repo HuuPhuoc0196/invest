@@ -21,3 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::get('/admin/collect', [Admin::class, 'getNewPrice'])->name('admin.getNewPrice');
+Route::get('/admin/collectRisk', [Admin::class, 'getNewRisk'])->name('admin.getNewRisk');

@@ -18,14 +18,7 @@
     <div class="actions">
         <div class="actions-left">
             <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
-            <a href="{{ url('/user/profile') }}" class="button-link">👤 Thông tin cá nhân</a>
-            <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="button-link">
-                    🚪 Đăng xuất
-                </button>
-            </form>
+            <a href="{{ url('/user/insertFollow') }}" class="button-link">➕ Thêm mới</a>
         </div>
         <div class="actions-right">
             <input type="text" id="searchInput" placeholder="Nhập mã CK...">
@@ -48,22 +41,37 @@
         <tbody id="stockTableBody">
         </tbody>
     </table>
+    <!-- Modal xác nhận xoá -->
+    <div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 20px; border-radius: 10px; width: 300px; text-align: center;">
+        <p>Bạn có chắc chắn muốn xoá?</p>
+        <button id="confirmYes">Có</button>
+        <button id="confirmNo">Không</button>
+    </div>
+</div>
 </body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     const baseUrl = "{{ url('') }}";
     const stocks = @json($stocks);
-    const userPortfolios = @json($userPortfolios);
+    const userFollow = @json($userFollow);
     var user = null;
+    let deleteUrl = "";
 
     document.addEventListener("DOMContentLoaded", function() {
         user = new User();
-        user.renderTable(stocks, userPortfolios);
+        user.renderTable(stocks, userFollow);
         sortInit(stocks);
     });
 
+    function confirmDelete(code) {
+        deleteUrl = `${baseUrl}/user/deleteFollow/${code}`;
+        document.getElementById("confirmModal").style.display = "flex";
+    }
+
     function searchStock() {
-        user.searchStock(stocks, userPortfolios);
+        user.searchStock(stocks, userFollow);
     }
 
     function sortInit(stocks){
@@ -85,8 +93,17 @@
         });
 
         // Gọi hàm render lại bảng
-        user.renderTable(stocks, userPortfolios);
+        user.renderTable(stocks, userFollow);
     }
+
+    document.getElementById("confirmYes").onclick = function () {
+        window.location.href = deleteUrl;
+    };
+
+    document.getElementById("confirmNo").onclick = function () {
+        document.getElementById("confirmModal").style.display = "none";
+        deleteUrl = "";
+    };
 </script>
 
 </html>

@@ -3,7 +3,11 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
 puppeteer.use(StealthPlugin());
 
-const symbol = process.argv[2] || 'VIC';
+const symbol = process.argv[2];
+if (!symbol) {
+    console.log("Không xác định được mã cổ phiếu");
+    process.exit(1);
+}
 const url = `https://s.cafef.vn/Lich-su-giao-dich-${symbol}-1.chn`;
 
 (async () => {
@@ -25,13 +29,27 @@ const url = `https://s.cafef.vn/Lich-su-giao-dich-${symbol}-1.chn`;
 
     await page.goto(url, { waitUntil: 'networkidle2' });
 
-    // ✅ Chờ chính xác phần tử có bảng dữ liệu hiện ra
-    try {
-        await page.waitForSelector('.oddOwner', { timeout: 10000 });
-    } catch (error) {
-        console.log("❌ Không tìm thấy bảng dữ liệu sau khi load. Có thể bị chặn.");
+    await new Promise(res => setTimeout(res, 2000)); // Đợi 2s trước cho chắc
+
+    const maxWait = 60000; // 60s
+    const checkInterval = 1000; // 1s
+    let waited = 0;
+    let found = false;
+
+    while (waited < maxWait) {
+        const hasElement = await page.$('.oddOwner');
+        if (hasElement) {
+            found = true;
+            break;
+        }
+        await new Promise(res => setTimeout(res, checkInterval));
+        waited += checkInterval;
+    }
+
+    if (!found) {
+        console.error("Không tìm thấy bảng dữ liệu sau 60s. Có thể bị chặn.");
         await browser.close();
-        return;
+        process.exit(2); // trả về lỗi rõ ràng cho PHP
     }
 
     // ✅ Lấy HTML phần bảng

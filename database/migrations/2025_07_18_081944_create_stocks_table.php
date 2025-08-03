@@ -16,9 +16,9 @@ return new class extends Migration
         Schema::create('stocks', function (Blueprint $table) {
             $table->id();
             $table->string('code');
-            $table->decimal('buy_price', 15, 2);
+            $table->decimal('recommended_buy_price', 15, 2);
             $table->decimal('current_price', 15, 2);
-            $table->tinyInteger('risk');
+            $table->tinyInteger('risk_level');
             $table->timestamps();
         });
     }
