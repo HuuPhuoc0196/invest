@@ -96,7 +96,7 @@ export default class User{
             }
 
             row.innerHTML = `
-                <td><a href="https://fireant.vn/dashboard/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
+                <td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
                 <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
                 <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
                 <td style="color: ${this.getRisk(stock.risk_level).color}">
@@ -151,7 +151,7 @@ export default class User{
             let percentSign = profitPercent > 0 ? '+' : profitPercent < 0 ? '-' : '+';
 
             row.innerHTML = `
-                <td><a href="https://fireant.vn/dashboard/${userPortfolio.code}" target="_blank" style="color: inherit; text-decoration: none;">${userPortfolio.code}</a></td>
+                <td><a href="https://fireant.vn/dashboard/content/symbols/${profitColor.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
                 <td>${total_quantity.toLocaleString('vi-VN')}</td>
                 <td>${avg_price.toLocaleString('vi-VN')}</td>
                 <td>${current_price.toLocaleString('vi-VN')}</td>
@@ -209,6 +209,7 @@ export default class User{
             const price = stock.buy_price !== undefined && stock.buy_price !== null ? stock.buy_price : stock.sell_price;
             const date = stock.buy_date !== undefined && stock.buy_date !== null ? stock.buy_date : stock.sell_date;
             const type =  stock.buy_price !== undefined && stock.buy_price !== null ? "Buy" : "Sell";
+
             const quantity = parseInt(stock.quantity);
             const currentPrice = parseFloat(stock.current_price);
             const row = document.createElement('tr');
@@ -240,8 +241,9 @@ export default class User{
 
             row.className = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
             row.innerHTML = `
-                <td><a href="https://fireant.vn/dashboard/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
+                <td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
                 <td>${Number(stock.quantity).toLocaleString('vi-VN')}</td>
+                <td>${Number(price).toLocaleString('vi-VN')}</td>
                 <td>${Number(stock.quantity * price).toLocaleString('vi-VN')}</td>
                 <td>${date}</td>
                 <td><div class="${type}">${type}</div></td>
@@ -265,8 +267,9 @@ export default class User{
         totalRow.innerHTML = `
             <td><strong>Tổng :</strong></td>
             <td><strong>${totalQuantity.toLocaleString('vi-VN')}</strong></td>
-            <td><strong>${totalValue.toLocaleString('vi-VN')}</strong></td>
             <td><strong>${capitalIn.toLocaleString('vi-VN')}</strong></td>
+            <td><strong>${totalValue.toLocaleString('vi-VN')}</strong></td>
+            <td></td>
             <td><strong style="color:${profitColor}">Tiền lãi: ${profitSign}${Math.abs(totalProfit).toLocaleString('vi-VN')}</strong></td>
         `;
         tbody.appendChild(totalRow);

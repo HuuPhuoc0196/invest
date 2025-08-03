@@ -43,6 +43,7 @@
             <tr>
                 <th>Mã cổ phiếu</th>
                 <th>Khối lượng đặt</th>
+                <th>Giá</th>
                 <th>Giá trị giao dịch</th>
                 <th>Ngày giao dịch</th>
                 <th>Loại giao dịch</th>

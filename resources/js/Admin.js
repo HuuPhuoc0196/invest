@@ -64,7 +64,7 @@ export default class Admin{
             const row = document.createElement('tr');
             row.className = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
             row.innerHTML = `
-                <td><a href="https://fireant.vn/dashboard/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
+                <td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
                 <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
                 <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
                 <td style="color: ${this.getRisk(stock.risk_level).color}">
