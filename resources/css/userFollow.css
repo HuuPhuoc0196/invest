@@ -80,7 +80,24 @@ tr.red {
 }
 
 .highlighted-row {
-    background-color: #fff5cc; /* màu vàng nhạt */
+    background-color: #e7f5e9;
     font-weight: bold;
     border-left: 5px solid #ffcc00;
+}
+
+.action-cell {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+.profit {
+    font-weight: bold;
+}
+
+th:nth-child(5),
+td:nth-child(5) {
+    width: 170px;
 }

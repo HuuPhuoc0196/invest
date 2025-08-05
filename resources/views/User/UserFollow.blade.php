@@ -8,7 +8,7 @@
     <title>Invest</title>
     @vite('resources/js/app.js')
     @vite('resources/css/app.css')
-    @vite('resources/css/adminView.css')
+    @vite('resources/css/userFollow.css')
     <!-- Fonts -->
     <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -61,7 +61,7 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         user = new User();
-        user.renderTable(stocks, userFollow);
+        user.renderTableUserFollow(stocks, userFollow);
         sortInit(stocks);
     });
 
@@ -71,7 +71,7 @@
     }
 
     function searchStock() {
-        user.searchStock(stocks, userFollow);
+        user.searchStockUserFollow(stocks, userFollow);
     }
 
     function sortInit(stocks){
@@ -93,7 +93,7 @@
         });
 
         // Gọi hàm render lại bảng
-        user.renderTable(stocks, userFollow);
+        user.renderTableUserFollow(stocks, userFollow);
     }
 
     document.getElementById("confirmYes").onclick = function () {

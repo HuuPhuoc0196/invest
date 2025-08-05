@@ -36,7 +36,12 @@ export default class User{
         this.renderTableInvest(filtered);
     }
 
-    
+    searchStockUserFollow(stocks, userFollow) {
+        const keyword = document.getElementById('searchInput').value.trim().toUpperCase();
+        const filtered = stocks.filter(stock => stock.code.includes(keyword));
+        this.renderTable(filtered, userFollow);
+    }
+
     getRowClass(goodPrice, currentPrice) {
         if (currentPrice > goodPrice) {
             const percentDiff = ((currentPrice - goodPrice) / goodPrice) * 100;
@@ -89,6 +94,7 @@ export default class User{
             // Gộp class màu định giá và class nổi bật
             const isInPortfolio = userProfile.some(port => port.code === stock.code);
             const valuationClass = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
+            row.className = valuationClass;
             if (isInPortfolio) {
                 row.className = `${valuationClass} highlighted-row`;
             } else {
@@ -105,7 +111,6 @@ export default class User{
                 <td style="color: ${valuationColor}">
                 <div class="action-cell">
                     <span class="profit">${sign}${valuation}%</span>
-                    ${isInPortfolio ? `<button class="btn-delete" onclick="confirmDelete('${stock.code}')">Delete</button>` : ''}
                 </div>
                 </td>
             `;
@@ -151,7 +156,7 @@ export default class User{
             let percentSign = profitPercent > 0 ? '+' : profitPercent < 0 ? '-' : '+';
 
             row.innerHTML = `
-                <td><a href="https://fireant.vn/dashboard/content/symbols/${profitColor.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
+                <td><a href="https://fireant.vn/dashboard/content/symbols/${userPortfolio.code}" target="_blank" style="color: inherit; text-decoration: none;">${userPortfolio.code}</a></td>
                 <td>${total_quantity.toLocaleString('vi-VN')}</td>
                 <td>${avg_price.toLocaleString('vi-VN')}</td>
                 <td>${current_price.toLocaleString('vi-VN')}</td>
@@ -273,6 +278,62 @@ export default class User{
             <td><strong style="color:${profitColor}">Tiền lãi: ${profitSign}${Math.abs(totalProfit).toLocaleString('vi-VN')}</strong></td>
         `;
         tbody.appendChild(totalRow);
+    }
+
+    renderTableUserFollow(data, userFollow) {
+         // 1. Tạo danh sách mã CK trong danh mục đầu tư
+        const portfolioCodes = userFollow.map(p => p.code);
+
+        // 2. Tách dữ liệu thành 2 nhóm: ưu tiên và còn lại
+        const prioritizedStocks = data.filter(stock => portfolioCodes.includes(stock.code));
+        const remainingStocks = data.filter(stock => !portfolioCodes.includes(stock.code));
+
+        // 3. Gộp lại: mã trong danh mục đầu tư sẽ hiển thị trước
+        const sortedData = [...prioritizedStocks, ...remainingStocks];
+
+        const tbody = document.getElementById('stockTableBody');
+        tbody.innerHTML = '';
+        sortedData.forEach(stock => {
+            const goodPrice = parseFloat(stock.recommended_buy_price);
+            const currentPrice = parseFloat(stock.current_price);
+            const valuation = currentPrice !== 0 ? ((currentPrice / goodPrice) * 100 - 100).toFixed(2) : 0;
+            
+            let valuationColor = 'yellow';
+            let sign = '';
+            if (valuation > 0) {
+                valuationColor = 'green';
+                sign = '+';
+            } else if (valuation < 0) {
+                valuationColor = 'red';
+                sign = '';
+            }
+
+            const row = document.createElement('tr');
+            // Gộp class màu định giá và class nổi bật
+            const isInPortfolio = userFollow.some(port => port.code === stock.code);
+            const valuationClass = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
+            if (isInPortfolio) {
+                row.className = `${valuationClass} highlighted-row`;
+            } else {
+                row.className = valuationClass;
+            }
+
+            row.innerHTML = `
+                <td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
+                <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
+                <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
+                <td style="color: ${this.getRisk(stock.risk_level).color}">
+                    ${this.getRisk(stock.risk_level).label}
+                </td>
+                <td style="color: ${valuationColor}">
+                <div class="action-cell">
+                    <span class="profit">${sign}${valuation}%</span>
+                    ${isInPortfolio ? `<button class="btn-delete" onclick="confirmDelete('${stock.code}')">Delete</button>` : ''}
+                </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
     }
     
 }
