@@ -7,6 +7,7 @@ use App\Models\Stock;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\LOG;
 use App\Services\EmailService;
+use Illuminate\Support\Facades\Http;
 
 class Sync extends Controller
 {
@@ -72,46 +73,45 @@ class Sync extends Controller
 
     public function colectRisk($symbol)
     {
-        $symbol = strtoupper($symbol);
-        $scriptPath = base_path('node-scripts/cafef-risk.js');
 
-        $data = null;
+        $newRisk = null;
         $maxAttempts = 10; // giới hạn số lần thử để tránh vòng lặp vô hạn
         $attempt = 0;
 
-        while (!is_numeric($data) && $attempt < $maxAttempts) {
-            $output = shell_exec("node {$scriptPath} {$symbol}");
+        while (!is_numeric($newRisk) && $attempt < $maxAttempts) {
+            $response = Http::timeout(60)->get("http://163.61.182.174:5000/getRiskFromHTML", [
+                'symbol' => $symbol,
+            ]);
             $attempt++;
-            if (!$output) {
-                continue; // nếu lệnh node không chạy được thì thoát luôn
+            if (!$response->successful()) {
+                continue;
             }
-
-            $data = json_decode($output, true);
+            $data = $response->json();
+            $newRisk = floatval($data['risk_level']);
         }
-
-        return $data;
+        return $newRisk;
     }
 
     public function colectPrice($symbol)
     {
-        $symbol = strtoupper($symbol);
-        $scriptPath = base_path('node-scripts/cafef-scraper.js');
-
         $finalPrice = null;
         $maxAttempts = 10; // tránh lặp vô hạn
         $attempt = 0;
 
         while (!is_numeric($finalPrice) && $attempt < $maxAttempts) {
-            $output = shell_exec("node {$scriptPath} {$symbol}");
+            $response = Http::timeout(60)->get("http://163.61.182.174:5000/getPriceFromHTML", [
+                'symbol' => $symbol,
+            ]);
             $attempt++;
-            if (!$output) {
+            if (!$response->successful()) {
                 continue;
             }
 
-            $data = json_decode($output, true);
-            if (is_array($data)) {
-                $price1 = $data['owner_priceClose_1'] ?? null;
-                $price2 = $data['owner_priceClose_2'] ?? null;
+            $data = $response->json();
+            $inner = $data['data'];
+            if (isset($inner)) {
+                $price1 = $inner['owner_priceClose_1'] ?? null;
+                $price2 = $inner['owner_priceClose_2'] ?? null;
 
                 if ($price1 !== null && $price1 !== '0' && $price1 !== 0) {
                     $finalPrice = $price1;
