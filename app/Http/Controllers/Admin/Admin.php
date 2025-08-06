@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Stock;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\LOG;
+use App\Services\EmailService;
 
 class Admin extends Controller
 {
@@ -154,6 +155,8 @@ class Admin extends Controller
                     continue;
                 }
                 if ($stock->risk_level != $newRisk) {
+                    $result = EmailService::sendRiskChangeNotification($stock->code, $stock->risk_level, $newRisk);
+                    LOG::error("Send mail: " . $result);
                     $stock->risk_level = $newRisk;
                     $stock->save();
                 }
