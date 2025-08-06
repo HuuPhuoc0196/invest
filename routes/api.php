@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\Admin;
+use App\Http\Controllers\Sync\Sync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,5 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::get('/admin/collect', [Admin::class, 'getNewPrice'])->name('admin.getNewPrice');
-Route::get('/admin/collectRisk', [Admin::class, 'getNewRisk'])->name('admin.getNewRisk');
+Route::get('/admin/collect', [Sync::class, 'getNewPrice'])->name('Sync.getNewPrice');
+Route::get('/admin/collectRisk', [Sync::class, 'getNewRisk'])->name('Sync.getNewRisk');

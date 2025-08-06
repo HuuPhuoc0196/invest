@@ -20,12 +20,12 @@
             <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
             <a href="{{ url('/user/profile') }}" class="button-link">👤 Thông tin cá nhân</a>
             <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST">
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
-                <button type="submit" class="button-link">
-                    🚪 Đăng xuất
-                </button>
             </form>
+            <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
+                🚪 Đăng xuất
+            </button>
         </div>
         <div class="actions-right">
             <input type="text" id="searchInput" placeholder="Nhập mã CK...">

@@ -21,12 +21,12 @@
             <a href="{{ url('/admin/insert') }}" class="button-link">➕ Thêm mới</a>
             <button onclick="syncData()">🔄 Sync Giá hiện tại</button>
             <button onclick="syncDataRisk()">🔄 Sync Rủi ro</button>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST">
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
-                <button type="submit" class="button-link">
-                    🚪 Đăng xuất
-                </button>
             </form>
+            <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
+                🚪 Đăng xuất
+            </button>
         </div>
 
         <div class="actions-right">

@@ -64,9 +64,3 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::match(['get', 'post'], '/user/sell', [User::class, 'sell'])->name('sell');
     Route::match(['get', 'post'], '/user/insertFollow', [User::class, 'insertFollow'])->name('insertFollow');
 });
-
-// Route::get('/clear-cache', function () {
-//     Artisan::call('optimize:clear');
-
-//     return '✅ Cleared: config, cache, route, view.';
-// });
