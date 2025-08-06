@@ -53,7 +53,7 @@ class Login extends Controller
                 ], 500);
             }
         } else {
-            return view('Login.login');
+            return view('Login.Login');
         }
     }
 
@@ -106,12 +106,12 @@ class Login extends Controller
                 ], 500);
             }
         } else {
-            return view('Login.register');
+            return view('Login.Register');
         }
     }
 
     public function forgotPassword()
     {
-        return view('Login.forgotPassword');
+        return view('Login.ForgotPassword');
     }
 }

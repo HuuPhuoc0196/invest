@@ -42,7 +42,7 @@ class User extends Controller
         $userId = auth()->id();
         $userFollow = UserFollow::getUserFollow($userId);
         $stocks = Stock::getAllStocks();
-        return view('User.userFollow', compact('stocks', 'userFollow'));
+        return view('User.UserFollow', compact('stocks', 'userFollow'));
     }
 
     public function deleteFollow($code)
@@ -224,7 +224,7 @@ class User extends Controller
                 ], 500);
             }
         } else {
-            return view('User.userInsertFollow');
+            return view('User.UserInsertFollow');
         }
     }
 }

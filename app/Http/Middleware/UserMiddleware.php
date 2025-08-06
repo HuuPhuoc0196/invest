@@ -15,7 +15,7 @@ class UserMiddleware
         }
 
         // Cho phép nếu role === 0 (user), ngược lại thì redirect về /admin
-        if (Auth::user()->role !== 0) {
+        if (Auth::user()->role != 0) {
             return redirect('/admin');
         }
         return $next($request);

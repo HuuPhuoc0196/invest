@@ -3,7 +3,7 @@ export default class User{
     }
 
     getRisk(rating) {
-        switch (rating) {
+        switch (Number(rating)) {
             case 1:
                 return { label: 'An toàn', color: 'green' };
             case 2:
@@ -16,6 +16,7 @@ export default class User{
                 return { label: 'Không xác định', color: 'gray' };
         }
     }
+
 
 
     searchStock(stocks, userPortfolios) {

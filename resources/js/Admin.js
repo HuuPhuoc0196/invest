@@ -3,7 +3,7 @@ export default class Admin{
     }
 
     getRisk(rating) {
-        switch (rating) {
+        switch (Number(rating)) {
             case 1:
                 return { label: 'An toàn', color: 'green' };
             case 2:

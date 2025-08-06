@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\Admin;
 use App\Http\Controllers\Login\Login;
 use App\Http\Controllers\User\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +23,15 @@ Route::middleware('guest')->group(function () {
     Route::get('/forgot-password', [Login::class, 'forgotPassword'])->name('forgotPassword');
     Route::match(['get', 'post'], '/login', [Login::class, 'login'])->name('login');
     Route::match(['get', 'post'], '/register', [Login::class, 'register'])->name('register');
+});
+
+Route::get('/', function () {
+    $user = auth()->user();
+    if (!$user) {
+        return redirect('/login');
+    }
+
+    return $user->role == 1 ? redirect('/admin') : redirect('/home');
 });
 
 Route::post('/logout', function () {
@@ -43,7 +53,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::middleware(['auth', 'user'])->group(function () {
     // User
     Route::get('/home', [User::class, 'show']);
-    Route::get('/', [User::class, 'show']);
     Route::get('/user', [User::class, 'show']);
     Route::get('/user/profile', [User::class, 'profile']);
     Route::get('/user/follow', [User::class, 'follow']);
@@ -55,3 +64,9 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::match(['get', 'post'], '/user/sell', [User::class, 'sell'])->name('sell');
     Route::match(['get', 'post'], '/user/insertFollow', [User::class, 'insertFollow'])->name('insertFollow');
 });
+
+// Route::get('/clear-cache', function () {
+//     Artisan::call('optimize:clear');
+
+//     return '✅ Cleared: config, cache, route, view.';
+// });

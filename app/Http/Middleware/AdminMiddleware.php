@@ -16,7 +16,7 @@ class AdminMiddleware
         }
 
         // Cho phép nếu role === 1 (admin), ngược lại thì về /
-        if (Auth::user()->role !== 1) {
+        if (Auth::user()->role != 1) {
             return redirect('/');
         }
 
