@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Sync;
 
 use App\Http\Controllers\Controller;
 use App\Models\Stock;
+use App\Models\StatusSync;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\LOG;
+use Illuminate\Support\Facades\Log;
 use App\Services\EmailService;
 use Illuminate\Support\Facades\Http;
 
@@ -16,15 +17,22 @@ class Sync extends Controller
         $stocks = Stock::getAllStocks();
         try {
             set_time_limit(0);
+            $statusSync = StatusSync::getStatusSync();
+            $statusSync->status_sync_price = 1;
+            $statusSync->save();
             foreach ($stocks as $stock) {
                 $newPrice = $this->colectPrice($stock->code);
                 if (!is_numeric($newPrice)) {
-                    LOG::error("Không thể lấy giá mới sau khi run getNewPrice với {$stock->code}");
+                    Log::error("Không thể lấy giá mới sau khi run getNewPrice với {$stock->code}");
                     continue;
                 }
-                $stock->current_price = $newPrice;
-                $stock->save();
+                if ($stock->current_price != $newPrice) {
+                    $stock->current_price = $newPrice;
+                    $stock->save();
+                }
             }
+            $statusSync->status_sync_price = 0;
+            $statusSync->save();
             // Trả kết quả JSON
             return response()->json([
                 'status' => 'success',
@@ -44,19 +52,25 @@ class Sync extends Controller
         $stocks = Stock::getAllStocks();
         try {
             set_time_limit(0);
+            $statusSync = StatusSync::getStatusSync();
+            $statusSync->status_sync_risk = 1;
+            $statusSync->save();
             foreach ($stocks as $stock) {
                 $newRisk = $this->colectRisk($stock->code);
                 if (!is_numeric($newRisk)) {
-                    LOG::error("Không thể lấy risk mới sau khi run getNewRisk với {$stock->code}");
+                    Log::error("Không thể lấy risk mới sau khi run getNewRisk với {$stock->code}");
                     continue;
                 }
                 if ($stock->risk_level != $newRisk) {
                     $result = EmailService::sendRiskChangeNotification($stock->code, $stock->risk_level, $newRisk);
-                    LOG::error("Send mail: " . $result);
+                    Log::info("Send mail: " . $result);
+                    Log::info("cập nhật mức độ rủi ro của mã chứng khoán {$stock->code} từ {$stock->risk_level} thành {$newRisk}");
                     $stock->risk_level = $newRisk;
                     $stock->save();
                 }
             }
+            $statusSync->status_sync_risk = 0;
+            $statusSync->save();
             // Trả kết quả JSON
             return response()->json([
                 'status' => 'success',
@@ -75,19 +89,25 @@ class Sync extends Controller
     {
 
         $newRisk = null;
-        $maxAttempts = 10; // giới hạn số lần thử để tránh vòng lặp vô hạn
+        $maxAttempts = 5; // giới hạn số lần thử để tránh vòng lặp vô hạn
         $attempt = 0;
 
         while (!is_numeric($newRisk) && $attempt < $maxAttempts) {
-            $response = Http::timeout(60)->get("http://163.61.182.174:5000/getRiskFromHTML", [
-                'symbol' => $symbol,
-            ]);
-            $attempt++;
-            if (!$response->successful()) {
+            try {
+                $attempt++;
+                // $response = Http::timeout(120)->get("http://127.0.0.1:5000/getRiskFromHTML", [
+                //     'symbol' => $symbol,
+                // ]);
+                $response = Http::timeout(120)->get("http://163.61.182.174/getRiskFromHTML", [
+                    'symbol' => $symbol,
+                ]);
+                sleep(1);
+            } catch (\Exception $e) {
+                Log::error("Request error colectRisk for symbol $symbol: " . $e->getMessage());
                 continue;
             }
             $data = $response->json();
-            $newRisk = floatval($data['risk_level']);
+            $newRisk = floatval($data);
         }
         return $newRisk;
     }
@@ -95,25 +115,30 @@ class Sync extends Controller
     public function colectPrice($symbol)
     {
         $finalPrice = null;
-        $maxAttempts = 10; // tránh lặp vô hạn
+        $maxAttempts = 5; // tránh lặp vô hạn
         $attempt = 0;
 
         while (!is_numeric($finalPrice) && $attempt < $maxAttempts) {
-            $response = Http::timeout(60)->get("http://163.61.182.174:5000/getPriceFromHTML", [
-                'symbol' => $symbol,
-            ]);
-            $attempt++;
-            if (!$response->successful()) {
+            try {
+                $attempt++;
+                // $response = Http::timeout(120)->get("http://127.0.0.1:5000/getPriceFromHTML", [
+                //     'symbol' => $symbol,
+                // ]);
+                $response = Http::timeout(120)->get("http://163.61.182.174/getPriceFromHTML", [
+                    'symbol' => $symbol,
+                ]);
+                sleep(1);
+            } catch (\Exception $e) {
+                Log::error("Request error colectPrice for symbol {$symbol}: " . $e->getMessage());
                 continue;
             }
 
             $data = $response->json();
-            $inner = $data['data'];
-            if (isset($inner)) {
-                $price1 = $inner['owner_priceClose_1'] ?? null;
-                $price2 = $inner['owner_priceClose_2'] ?? null;
+            if (isset($data)) {
+                $price1 = $data['owner_priceClose_1'] ?? null;
+                $price2 = $data['owner_priceClose_2'] ?? null;
 
-                if ($price1 !== null && $price1 !== '0' && $price1 !== 0) {
+                if ($price1 != null && $price1 != '0' && $price1 != 0 && $price1 != '--') {
                     $finalPrice = $price1;
                 } else {
                     $finalPrice = $price2;
@@ -128,7 +153,6 @@ class Sync extends Controller
                 }
             }
         }
-
         return $finalPrice;
     }
 }

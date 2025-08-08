@@ -8,7 +8,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\LOG;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 class Login extends Controller
@@ -40,7 +40,7 @@ class Login extends Controller
                     'data' => $existingUser
                 ]);
             } catch (ValidationException $e) {
-                LOG::error($e->errors());
+                Log::error($e->errors());
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Dữ liệu không hợp lệ.',

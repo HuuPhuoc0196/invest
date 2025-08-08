@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\StatusSync;
 use Illuminate\Http\Request;
 use App\Models\Stock;
 use Illuminate\Database\QueryException;
@@ -12,7 +13,8 @@ class Admin extends Controller
     public function show()
     {
         $stocks = Stock::getAllStocks();
-        return view('Admin.AdminView', compact('stocks'));
+        $statusSync = StatusSync::getStatusSync();
+        return view('Admin.AdminView', compact('stocks', 'statusSync'));
     }
 
     public function insert(Request $request)

@@ -19,8 +19,18 @@
         <div class="actions-left">
             <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
             <a href="{{ url('/admin/insert') }}" class="button-link">➕ Thêm mới</a>
-            <button onclick="syncData()">🔄 Sync Giá hiện tại</button>
-            <button onclick="syncDataRisk()">🔄 Sync Rủi ro</button>
+            @if ($statusSync->status_sync_price == 0)
+                <button onclick="syncData()">🔄 Sync Giá hiện tại</button>
+            @else
+                <button onclick="syncData()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Giá hiện tại</button>
+            @endif
+
+            @if ($statusSync->status_sync_risk == 0)
+                <button onclick="syncDataRisk()">🔄 Sync Rủi ro</button>
+            @else
+                <button onclick="syncDataRisk()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Rủi ro</button>
+            @endif
+
             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
             </form>
