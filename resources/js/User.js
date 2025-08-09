@@ -268,6 +268,13 @@ export default class User{
             profitSign = '-';
         }
 
+        // Tính tổng phần trăm lãi
+        const totalProfitPercent = (capitalIn > 0) ? (totalProfit / capitalIn) * 100 : 0;
+
+        // Màu và dấu tổng % lãi
+        const totalPercentColor = totalProfitPercent > 0 ? 'green' : totalProfitPercent < 0 ? 'red' : 'orange';
+        const totalPercentSign = totalProfitPercent > 0 ? '+' : totalProfitPercent < 0 ? '-' : '+';
+
         // Tạo dòng tổng cộng
         const totalRow = document.createElement('tr');
         totalRow.innerHTML = `
@@ -275,7 +282,7 @@ export default class User{
             <td><strong>${totalQuantity.toLocaleString('vi-VN')}</strong></td>
             <td><strong>${capitalIn.toLocaleString('vi-VN')}</strong></td>
             <td><strong>${totalValue.toLocaleString('vi-VN')}</strong></td>
-            <td></td>
+            <td style="color:${totalPercentColor}"><strong>${totalPercentSign}${Math.abs(totalProfitPercent).toFixed(2)}%</strong></td>
             <td><strong style="color:${profitColor}">Tiền lãi: ${profitSign}${Math.abs(totalProfit).toLocaleString('vi-VN')}</strong></td>
         `;
         tbody.appendChild(totalRow);

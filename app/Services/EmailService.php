@@ -39,4 +39,41 @@ class EmailService
                 return 'Không xác định';
         }
     }
+
+    public static function sendSuggestInvestment($code, $current_price, $recommended_buy_price)
+    {
+        $content = self::getMessgaeSuggest($current_price, $recommended_buy_price);
+        if (!$content) return $content;
+        $to = 'lehuuphuoc0196@gmail.com';
+        $subject = 'Investment suggest cổ phiếu <span style="color:red;"> ' . $code . '</span>';
+        $message = 'Hệ thống ghi nhận cổ phiếu <span style="color:red;">' . $code . '</span> có giá hấp dẫn.';
+        $message .= '<br/>Giá hiện tại là: ' . number_format($current_price, 0, ',', '.');
+        $message .= '<br/>Giá khuyến nghị mua vào là:  <span style="color:red;">' . number_format($recommended_buy_price, 0, ',', '.') . '</span>';
+        $message .= $content;
+
+        Mail::to($to)->send(new NotifyUserMail($subject, $message));
+
+        return "Email đã được gửi!";
+    }
+
+    protected static function getMessgaeSuggest($current_price, $recommended_buy_price)
+    {
+        if ($current_price > $recommended_buy_price) {
+            $percentDiff = (($current_price - $recommended_buy_price) / $recommended_buy_price) * 100;
+            if ($percentDiff <= 10) {
+                return '<br/> % chênh lệch là: <span style="color:yellow;"> > ' . round($percentDiff, 2) . '% </span>';
+            } else {
+                return false;
+            }
+        } else {
+            $percentDiff = (($recommended_buy_price - $current_price) / $recommended_buy_price) * 100;
+            if ($percentDiff > 20) {
+                return '<br/> % chênh lệch là: <span style="color:red;"> < ' . round($percentDiff, 2) . '% </span>';
+            } else if ($percentDiff > 10) {
+                return '<br/> % chênh lệch là: <span style="color:purple;"> < ' . round($percentDiff, 2) . '% </span>';
+            } else {
+                return '<br/> % chênh lệch là: <span style="color:green;"> < ' . round($percentDiff, 2) . '% </span>';
+            }
+        }
+    }
 }

@@ -22,6 +22,7 @@ class Sync extends Controller
             $statusSync->save();
             foreach ($stocks as $stock) {
                 $newPrice = $this->colectPrice($stock->code);
+                Log::info("Call lấy giá của mã chứng khoán {$stock->code} từ {$stock->current_price} thành " . round($newPrice, 2));
                 if (!is_numeric($newPrice)) {
                     Log::error("Không thể lấy giá mới sau khi run getNewPrice với {$stock->code}");
                     continue;
@@ -57,6 +58,7 @@ class Sync extends Controller
             $statusSync->save();
             foreach ($stocks as $stock) {
                 $newRisk = $this->colectRisk($stock->code);
+                Log::info("Call mức độ rủi ro của mã chứng khoán {$stock->code} từ {$stock->risk_level} thành {$newRisk}");
                 if (!is_numeric($newRisk)) {
                     Log::error("Không thể lấy risk mới sau khi run getNewRisk với {$stock->code}");
                     continue;
@@ -85,6 +87,34 @@ class Sync extends Controller
         }
     }
 
+    public function suggestInvestment()
+    {
+        $stocks = Stock::getAllStocks();
+        try {
+            foreach ($stocks as $stock) {
+                $recommended_buy_price = $stock->recommended_buy_price;
+                $current_price = $stock->current_price;
+                $result = EmailService::sendSuggestInvestment($stock->code, $current_price, $recommended_buy_price);
+                if ($result) {
+                    sleep(1);
+                    Log::info("Send mail Suggest cổ phiếu: " . $stock->code);
+                    Log::info("Có giá hiện tại là: {$current_price} và Giá đề xuất là {$recommended_buy_price}");
+                }
+            }
+            // Trả kết quả JSON
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Suggest Price Code Success.',
+                // 'data' => $stock
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function colectRisk($symbol)
     {
 
@@ -103,7 +133,7 @@ class Sync extends Controller
                 ]);
                 sleep(1);
             } catch (\Exception $e) {
-                Log::error("Request error colectRisk for symbol $symbol: " . $e->getMessage());
+                Log::error("Request error colectRisk for symbol {$symbol}: " . $e->getMessage());
                 continue;
             }
             $data = $response->json();

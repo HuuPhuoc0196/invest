@@ -22,3 +22,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/admin/collect', [Sync::class, 'getNewPrice'])->name('Sync.getNewPrice');
 Route::get('/admin/collectRisk', [Sync::class, 'getNewRisk'])->name('Sync.getNewRisk');
+Route::get('/admin/getSuggestInvestment', [Sync::class, 'suggestInvestment'])->name('Sync.suggestInvestment');

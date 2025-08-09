@@ -3,10 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\Admin;
 use App\Http\Controllers\Login\Login;
-use App\Http\Controllers\Sync\Sync;
 use App\Http\Controllers\User\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
