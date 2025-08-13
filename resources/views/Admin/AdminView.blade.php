@@ -16,27 +16,35 @@
 
 <body class="antialiased">
     <div class="actions">
-        <div class="actions-left">
-            <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
-            <a href="{{ url('/admin/insert') }}" class="button-link">➕ Thêm mới</a>
-            @if ($statusSync->status_sync_price == 0)
-                <button onclick="syncData()">🔄 Sync Giá hiện tại</button>
-            @else
-                <button onclick="syncData()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Giá hiện tại</button>
-            @endif
+        <div class="actions-left" style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="display: flex; gap: 5px;">
+                <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
+                <a href="{{ url('/admin/insert') }}" class="button-link">➕ Thêm mới</a>
+                <a href="{{ url('/admin/updateRiskForCode') }}" class="button-link">🔃 Cập nhật rủi ro</a>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                @if ($statusSync->status_sync_price == 0)
+                    <button onclick="syncData()">🔄 Sync Giá hiện tại</button>
+                @else
+                    <button onclick="syncData()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Giá hiện tại</button>
+                @endif
 
-            @if ($statusSync->status_sync_risk == 0)
-                <button onclick="syncDataRisk()">🔄 Sync Rủi ro</button>
-            @else
-                <button onclick="syncDataRisk()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Rủi ro</button>
-            @endif
-
+                @if ($statusSync->status_sync_risk == 0)
+                    <button onclick="syncDataRisk()">🔄 Sync Rủi ro</button>
+                @else
+                    <button onclick="syncDataRisk()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Rủi ro</button>
+                @endif
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <a href="{{ url('/admin/logs') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs Hosting</a>
+                <a href="{{ url('/admin/logsVPS') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs VPS</a>
+                <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
+                    🚪 Đăng xuất
+                </button>
+            </div>
             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
             </form>
-            <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
-                🚪 Đăng xuất
-            </button>
         </div>
 
         <div class="actions-right">

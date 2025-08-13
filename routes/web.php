@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\Admin;
 use App\Http\Controllers\Login\Login;
 use App\Http\Controllers\User\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use App\Http\Controllers\Sync\Sync;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +48,18 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/delete/{code}', [Admin::class, 'delete'])->name('admin.delete');
     Route::match(['get', 'post'], '/admin/insert', [Admin::class, 'insert'])->name('insert');
     Route::match(['get', 'put'], '/admin/update/{code}', [Admin::class, 'update'])->name('admin.update');
+    Route::match(['get', 'post'], '/admin/updateRiskForCode', [Sync::class, 'updateRiskForCode'])->name('updateRiskForCode');
+    Route::get('/admin/logs', function () {
+        $logFile = storage_path('logs/laravel.log');
+
+        if (!File::exists($logFile)) {
+            return "Không tìm thấy file log!";
+        }
+
+        $logs = File::get($logFile);
+        return "<pre>" . htmlspecialchars($logs) . "</pre>";
+    });
+    Route::get('/admin/logsVPS', [Sync::class, 'getLogsVPS']);
 });
 
 // User routes
