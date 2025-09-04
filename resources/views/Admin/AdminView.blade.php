@@ -1,58 +1,53 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('Layout.LayoutAdmin')
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+@section('title', 'Danh sách mã cổ phiếu')
 
-    <title>Invest</title>
-    @vite('resources/js/app.js')
+@section('header-css')
     @vite('resources/css/app.css')
     @vite('resources/css/adminView.css')
-    <!-- Fonts -->
-    <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+@endsection
 
-</head>
+@section('header-js')
+    @vite('resources/js/app.js')
+@endsection
 
-<body class="antialiased">
-    <div class="actions">
-        <div class="actions-left" style="display: flex; flex-direction: column; gap: 5px;">
-            <div style="display: flex; gap: 5px;">
-                <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
-                <a href="{{ url('/admin/insert') }}" class="button-link">➕ Thêm mới</a>
-                <a href="{{ url('/admin/updateRiskForCode') }}" class="button-link">🔃 Cập nhật rủi ro</a>
-            </div>
-            <div style="display: flex; gap: 5px;">
-                @if ($statusSync->status_sync_price == 0)
-                    <button onclick="syncData()">🔄 Sync Giá hiện tại</button>
-                @else
-                    <button onclick="syncData()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Giá hiện tại</button>
-                @endif
-
-                @if ($statusSync->status_sync_risk == 0)
-                    <button onclick="syncDataRisk()">🔄 Sync Rủi ro</button>
-                @else
-                    <button onclick="syncDataRisk()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Rủi ro</button>
-                @endif
-            </div>
-            <div style="display: flex; gap: 5px;">
-                <a href="{{ url('/admin/logs') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs Hosting</a>
-                <a href="{{ url('/admin/logsVPS') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs VPS</a>
-                <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
-                    🚪 Đăng xuất
-                </button>
-            </div>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-            </form>
-        </div>
-
-        <div class="actions-right">
-            <input type="text" id="searchInput" placeholder="Nhập mã CK...">
-            <button onclick="searchStock()">🔍 Tìm kiếm</button>
-        </div>
+@section('actions-left')
+    <div style="display: flex; gap: 5px;">
+        <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
+        <a href="{{ url('/admin/insert') }}" class="button-link">➕ Thêm mới</a>
+        <a href="{{ url('/admin/updateRiskForCode') }}" class="button-link">🔃 Cập nhật rủi ro</a>
     </div>
+    <div style="display: flex; gap: 5px;">
+        @if ($statusSync->status_sync_price == 0)
+            <button onclick="syncData()">🔄 Sync Giá hiện tại</button>
+        @else
+            <button onclick="syncData()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Giá hiện tại</button>
+        @endif
 
+        @if ($statusSync->status_sync_risk == 0)
+            <button onclick="syncDataRisk()">🔄 Sync Rủi ro</button>
+        @else
+            <button onclick="syncDataRisk()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Rủi ro</button>
+        @endif
+    </div>
+    <div style="display: flex; gap: 5px;">
+        <a href="{{ url('/admin/logs') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs Hosting</a>
+        <a href="{{ url('/admin/logsVPS') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs VPS</a>
+        <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
+            🚪 Đăng xuất
+        </button>
+    </div>
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+        @csrf
+    </form>
+@endsection
+
+@section('actions-right')
+    <input type="text" id="searchInput" placeholder="Nhập mã CK...">
+    <button onclick="searchStock()">🔍 Tìm kiếm</button>
+@endsection
+
+@section('admin-body-content')
     <h1>Danh sách mã cổ phiếu</h1>
 
     <table id="stock-table">
@@ -96,106 +91,107 @@
             <button id="confirmNoSyncRisk">Không</button>
         </div>
     </div>
-</body>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    const baseUrl = "{{ url('') }}";
-    const stocks = @json($stocks);
-    var admin = null;
-    let deleteUrl = "";
+@endsection
 
-    document.addEventListener("DOMContentLoaded", function() {
-        admin = new Admin();
-        admin.renderTable(stocks);
-        sortInit(stocks);
-    });
+@section('admin-script')
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const baseUrl = "{{ url('') }}";
+        const stocks = @json($stocks);
+        var admin = null;
+        let deleteUrl = "";
 
-    function searchStock() {
-        admin.searchStock(stocks);
-    }
-
-    function confirmDelete(code) {
-        deleteUrl = `${baseUrl}/admin/delete/${code}`;
-        document.getElementById("confirmModal").style.display = "flex";
-    }
-
-    function sortInit(stocks){
-        let sortDiffAsc = true;
-        // Đảo chiều sort
-        sortDiffAsc = !sortDiffAsc;
-
-        // Sắp xếp theo chênh lệch giữa currentPrice và buyPrice
-        stocks.sort((a, b) => {
-            const buyA = parseFloat(a.recommended_buy_price);
-            const currentA = parseFloat(a.current_price);
-            const buyB = parseFloat(b.recommended_buy_price);
-            const currentB = parseFloat(b.current_price);
-
-            const percentA = buyA !== 0 ? ((currentA - buyA) / buyA) * 100 : 0;
-            const percentB = buyB !== 0 ? ((currentB - buyB) / buyB) * 100 : 0;
-
-            return sortDiffAsc ? percentB - percentA : percentA - percentB;
+        document.addEventListener("DOMContentLoaded", function() {
+            admin = new Admin();
+            admin.renderTable(stocks);
+            sortInit(stocks);
         });
 
-        // Gọi hàm render lại bảng
-        admin.renderTable(stocks);
-    }
-
-    function syncData() {
-        // Biến dùng để xác định hành động hiện tại là gì
-        window.pendingAction = "sync";
-        document.getElementById("confirmModalSync").style.display = "flex";
-    }
-
-    function syncDataRisk() {
-        // Biến dùng để xác định hành động hiện tại là gì
-        window.pendingAction = "syncRisk";
-        document.getElementById("confirmModalSyncRisk").style.display = "flex";
-    }
-
-    document.getElementById("confirmYesSync").onclick = function () {
-        if (window.pendingAction === "sync") {
-            fetch(`${baseUrl}/api/admin/collect`, {
-                method: "GET",
-            })
+        function searchStock() {
+            admin.searchStock(stocks);
         }
 
-        // Đóng modal
-        document.getElementById("confirmModalSync").style.display = "none";
-        window.pendingAction = null;
-    };
-
-    document.getElementById("confirmNoSync").onclick = function () {
-        document.getElementById("confirmModalSync").style.display = "none";
-        window.pendingAction = null;
-    };
-
-    document.getElementById("confirmYesSyncRisk").onclick = function () {
-        if (window.pendingAction === "syncRisk") {
-            fetch(`${baseUrl}/api/admin/collectRisk`, {
-                method: "GET",
-            })
+        function confirmDelete(code) {
+            deleteUrl = `${baseUrl}/admin/delete/${code}`;
+            document.getElementById("confirmModal").style.display = "flex";
         }
 
-        // Đóng modal
-        document.getElementById("confirmModalSyncRisk").style.display = "none";
-        window.pendingAction = null;
-    };
+        function sortInit(stocks){
+            let sortDiffAsc = true;
+            // Đảo chiều sort
+            sortDiffAsc = !sortDiffAsc;
 
-    document.getElementById("confirmNoSyncRisk").onclick = function () {
-        document.getElementById("confirmModalSyncRisk").style.display = "none";
-        window.pendingAction = null;
-    };
+            // Sắp xếp theo chênh lệch giữa currentPrice và buyPrice
+            stocks.sort((a, b) => {
+                const buyA = parseFloat(a.recommended_buy_price);
+                const currentA = parseFloat(a.current_price);
+                const buyB = parseFloat(b.recommended_buy_price);
+                const currentB = parseFloat(b.current_price);
 
-    document.getElementById("confirmYes").onclick = function () {
-        window.location.href = deleteUrl;
-    };
+                const percentA = buyA !== 0 ? ((currentA - buyA) / buyA) * 100 : 0;
+                const percentB = buyB !== 0 ? ((currentB - buyB) / buyB) * 100 : 0;
 
-    document.getElementById("confirmNo").onclick = function () {
-        document.getElementById("confirmModal").style.display = "none";
-        deleteUrl = "";
-    };
+                return sortDiffAsc ? percentB - percentA : percentA - percentB;
+            });
 
-</script>
+            // Gọi hàm render lại bảng
+            admin.renderTable(stocks);
+        }
 
-</html>
+        function syncData() {
+            // Biến dùng để xác định hành động hiện tại là gì
+            window.pendingAction = "sync";
+            document.getElementById("confirmModalSync").style.display = "flex";
+        }
+
+        function syncDataRisk() {
+            // Biến dùng để xác định hành động hiện tại là gì
+            window.pendingAction = "syncRisk";
+            document.getElementById("confirmModalSyncRisk").style.display = "flex";
+        }
+
+        document.getElementById("confirmYesSync").onclick = function () {
+            if (window.pendingAction === "sync") {
+                fetch(`${baseUrl}/api/admin/collect`, {
+                    method: "GET",
+                })
+            }
+
+            // Đóng modal
+            document.getElementById("confirmModalSync").style.display = "none";
+            window.pendingAction = null;
+        };
+
+        document.getElementById("confirmNoSync").onclick = function () {
+            document.getElementById("confirmModalSync").style.display = "none";
+            window.pendingAction = null;
+        };
+
+        document.getElementById("confirmYesSyncRisk").onclick = function () {
+            if (window.pendingAction === "syncRisk") {
+                fetch(`${baseUrl}/api/admin/collectRisk`, {
+                    method: "GET",
+                })
+            }
+
+            // Đóng modal
+            document.getElementById("confirmModalSyncRisk").style.display = "none";
+            window.pendingAction = null;
+        };
+
+        document.getElementById("confirmNoSyncRisk").onclick = function () {
+            document.getElementById("confirmModalSyncRisk").style.display = "none";
+            window.pendingAction = null;
+        };
+
+        document.getElementById("confirmYes").onclick = function () {
+            window.location.href = deleteUrl;
+        };
+
+        document.getElementById("confirmNo").onclick = function () {
+            document.getElementById("confirmModal").style.display = "none";
+            deleteUrl = "";
+        };
+
+    </script>
+@endsection

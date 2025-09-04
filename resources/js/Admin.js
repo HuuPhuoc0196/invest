@@ -7,9 +7,9 @@ export default class Admin{
             case 1:
                 return { label: 'An toàn', color: 'green' };
             case 2:
-                return { label: 'Tốt', color: 'goldenrod' };
+                return { label: 'Tốt', color: 'orange' };
             case 3:
-                return { label: 'Nguy hiểm', color: 'orange' };
+                return { label: 'Nguy hiểm', color: 'OrangeRed' };
             case 4:
                 return { label: 'Cực kỳ xấu', color: 'red' };
             default:

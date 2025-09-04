@@ -17,8 +17,7 @@ class EmailService
         $message = 'Hệ thống ghi nhận cổ phiếu <span style="color:red;">' . $code . '</span> có thay đổi mức độ rủi ro.';
         $message .= '<br/>Chuyển từ ' . $oldRiskText;
         $message .= '<br/> Thành ' . $newRiskText;
-
-
+        $message .= "<br/>url: https://finance.vietstock.vn/lich-su-kien.htm?page=1&tab=2&code=" . $code;
         Mail::to($to)->send(new NotifyUserMail($subject, $message));
 
         return "Email đã được gửi!";
@@ -30,9 +29,9 @@ class EmailService
             case 1:
                 return '<span style="color:green;">1: An toàn</span>';
             case 2:
-                return '<span style="color:goldenrod;">2: Tốt</span>';
+                return '<span style="color:orange;">2: Tốt</span>';
             case 3:
-                return '<span style="color:orange;">3: Nguy hiểm</span>';
+                return '<span style="color:OrangeRed;">3: Nguy hiểm</span>';
             case 4:
                 return '<span style="color:red;">4: Cực kỳ xấu</span>';
             default:

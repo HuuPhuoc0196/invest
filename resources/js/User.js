@@ -7,9 +7,9 @@ export default class User{
             case 1:
                 return { label: 'An toàn', color: 'green' };
             case 2:
-                return { label: 'Tốt', color: 'goldenrod' };
+                return { label: 'Tốt', color: 'orange' };
             case 3:
-                return { label: 'Nguy hiểm', color: 'orange' };
+                return { label: 'Nguy hiểm', color: 'OrangeRed' };
             case 4:
                 return { label: 'Cực kỳ xấu', color: 'red' };
             default:
@@ -162,6 +162,7 @@ export default class User{
                 <td>${avg_price.toLocaleString('vi-VN')}</td>
                 <td>${current_price.toLocaleString('vi-VN')}</td>
                 <td>${(avg_price * total_quantity).toLocaleString('vi-VN')}</td>
+                <td>${(current_price * total_quantity).toLocaleString('vi-VN')}</td>
                 <td style="color:${profitColor}">${profitSign}${Math.abs(profit).toLocaleString('vi-VN')}</td>
                 <td style="color:${percentColor}">${percentSign}${Math.abs(profitPercent).toFixed(2)}%</td>
             `;
@@ -184,9 +185,10 @@ export default class User{
         totalRow.innerHTML = `
             <td><strong>Tổng:</strong></td>
             <td><strong>${totalQuantity.toLocaleString('vi-VN')}</strong></td>
-            <td><strong>${totalCost.toLocaleString('vi-VN')}</strong></td>
-            <td><strong>${totalCurrentValue.toLocaleString('vi-VN')}</strong></td>
+            <td></td>
+            <td></td>
             <td><strong>${totalInvested.toLocaleString('vi-VN')}</strong></td>
+            <td><strong>${totalCurrentValue.toLocaleString('vi-VN')}</strong</td>
             <td style="color:${totalProfitColor}"><strong>${totalProfitSign}${Math.abs(totalProfit).toLocaleString('vi-VN')}</strong></td>
             <td style="color:${totalPercentColor}"><strong>${totalPercentSign}${Math.abs(totalProfitPercent).toFixed(2)}%</strong></td>
         `;
@@ -280,7 +282,7 @@ export default class User{
         totalRow.innerHTML = `
             <td><strong>Tổng :</strong></td>
             <td><strong>${totalQuantity.toLocaleString('vi-VN')}</strong></td>
-            <td><strong>${capitalIn.toLocaleString('vi-VN')}</strong></td>
+            <td></td>
             <td><strong>${totalValue.toLocaleString('vi-VN')}</strong></td>
             <td style="color:${totalPercentColor}"><strong>${totalPercentSign}${Math.abs(totalProfitPercent).toFixed(2)}%</strong></td>
             <td><strong style="color:${profitColor}">Tiền lãi: ${profitSign}${Math.abs(totalProfit).toLocaleString('vi-VN')}</strong></td>

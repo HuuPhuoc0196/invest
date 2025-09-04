@@ -1,27 +1,24 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('Layout.LayoutAdmin')
+@section('csrf-token')
     <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
 
-    <title>Invest</title>
-    @vite('resources/js/app.js')
+@section('title', 'Cập Nhật Mã Cổ Phiếu')
+
+@section('header-css')
     @vite('resources/css/app.css')
     @vite('resources/css/adminInsert.css')
-    <!-- Fonts -->
-    <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+@endsection
 
-</head>
+@section('header-js')
+   @vite('resources/js/app.js')
+@endsection
 
-<body class="antialiased">
-    <div class="actions">
-        <div class="actions-left">
-            <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
-        </div>
-    </div>
+@section('actions-left')
+    <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
+@endsection
 
+@section('admin-body-content')
     <h2>Cập Nhật Mã Cổ Phiếu</h2>
 
     <div class="form-container">
@@ -58,149 +55,150 @@
 
         <button onclick="submitForm()">Cập nhật</button>
     </div>
-</body>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const stock = @json($stock);
-        document.getElementById("code").value = stock.code|| "";
-        document.getElementById("buyPrice").value = Number(stock.recommended_buy_price).toLocaleString('vi-VN') || 0;
-        document.getElementById("currentPrice").value = Number(stock.current_price).toLocaleString('vi-VN') || 0;
-        document.getElementById("risk").value = stock.risk_level || 1;
-    });
-    const baseUrl = "{{ url('') }}";
-    const formatter = new Intl.NumberFormat('vi-VN');
-    const buyPriceInput = document.getElementById("buyPrice");
-    const currentPriceInput = document.getElementById("currentPrice");
+@endsection
 
-    function isNumber(value) {
-        return !isNaN(value) && value.trim() !== '';
-    }
+@section('admin-script')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const stock = @json($stock);
+            document.getElementById("code").value = stock.code|| "";
+            document.getElementById("buyPrice").value = Number(stock.recommended_buy_price).toLocaleString('vi-VN') || 0;
+            document.getElementById("currentPrice").value = Number(stock.current_price).toLocaleString('vi-VN') || 0;
+            document.getElementById("risk").value = stock.risk_level || 1;
+        });
+        const baseUrl = "{{ url('') }}";
+        const formatter = new Intl.NumberFormat('vi-VN');
+        const buyPriceInput = document.getElementById("buyPrice");
+        const currentPriceInput = document.getElementById("currentPrice");
 
-    function parseNumber(str) {
-        return str.replace(/[^\d]/g, "");
-    }
-
-    function formatToVND(input) {
-        let raw = parseNumber(input.value);
-        if (raw === "") return input.value = "";
-
-        let formatted = formatter.format(raw);
-        input.value = formatted;
-    }
-
-    buyPriceInput.addEventListener("input", () => {
-        formatToVND(buyPriceInput);
-    });
-
-    currentPriceInput.addEventListener("input", () => {
-        formatToVND(currentPriceInput);
-    });
-
-    function isNumber(value) {
-        return !isNaN(parseInt(parseNumber(value)));
-    }
-
-    function toastSuccess() {
-        // Xóa class cũ trước khi thêm class mới
-        toast.classList.remove("toast-success", "toast-error");
-        toast.classList.add("toast-success");
-        toast.classList.add("toast", "show");
-    }
-
-    function toastError() {
-        // Xóa class cũ trước khi thêm class mới
-        toast.classList.remove("toast-success", "toast-error");
-        toast.classList.add("toast-error");
-        toast.classList.add("toast", "show");
-    }
-
-
-    function submitForm() {
-        const code = document.getElementById("code").value.trim().toUpperCase();
-        const buy = parseNumber(buyPriceInput.value);
-        const current = parseNumber(currentPriceInput.value);
-        const risk = document.getElementById("risk").value;
-        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        let isValid = true;
-
-        document.querySelectorAll(".error").forEach(el => el.style.display = "none");
-
-        // Validate mã CK
-        if (!code) {
-            document.getElementById("errorCode").style.display = "block";
-            isValid = false;
+        function isNumber(value) {
+            return !isNaN(value) && value.trim() !== '';
         }
 
-        // Validate Giá mua
-        if (!buy) {
-            document.getElementById("errorBuy").style.display = "block";
-            isValid = false;
-        } else if (!isNumber(buy)) {
-            document.getElementById("errorBuyType").style.display = "block";
-            isValid = false;
+        function parseNumber(str) {
+            return str.replace(/[^\d]/g, "");
         }
 
-        // Validate Giá hiện tại
-        if (!current) {
-            document.getElementById("errorCurrent").style.display = "block";
-            isValid = false;
-        } else if (!isNumber(current)) {
-            document.getElementById("errorCurrentType").style.display = "block";
-            isValid = false;
+        function formatToVND(input) {
+            let raw = parseNumber(input.value);
+            if (raw === "") return input.value = "";
+
+            let formatted = formatter.format(raw);
+            input.value = formatted;
         }
-        // Nếu hợp lệ
-        if (isValid) {
-            // Gửi AJAX đến server hoặc lưu vào DB ở đây nếu cần
-            const data = {
-                code: code,
-                buyPrice: buy,
-                currentPrice: current,
-                risk: risk
-            };
-            $.ajax({
-                url: baseUrl + '/admin/update/' + code,
-                type: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
-                data: JSON.stringify(data),
-                success: function(response) {
-                    if (response.status == "success") {
+
+        buyPriceInput.addEventListener("input", () => {
+            formatToVND(buyPriceInput);
+        });
+
+        currentPriceInput.addEventListener("input", () => {
+            formatToVND(currentPriceInput);
+        });
+
+        function isNumber(value) {
+            return !isNaN(parseInt(parseNumber(value)));
+        }
+
+        function toastSuccess() {
+            // Xóa class cũ trước khi thêm class mới
+            toast.classList.remove("toast-success", "toast-error");
+            toast.classList.add("toast-success");
+            toast.classList.add("toast", "show");
+        }
+
+        function toastError() {
+            // Xóa class cũ trước khi thêm class mới
+            toast.classList.remove("toast-success", "toast-error");
+            toast.classList.add("toast-error");
+            toast.classList.add("toast", "show");
+        }
+
+
+        function submitForm() {
+            const code = document.getElementById("code").value.trim().toUpperCase();
+            const buy = parseNumber(buyPriceInput.value);
+            const current = parseNumber(currentPriceInput.value);
+            const risk = document.getElementById("risk").value;
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            let isValid = true;
+
+            document.querySelectorAll(".error").forEach(el => el.style.display = "none");
+
+            // Validate mã CK
+            if (!code) {
+                document.getElementById("errorCode").style.display = "block";
+                isValid = false;
+            }
+
+            // Validate Giá mua
+            if (!buy) {
+                document.getElementById("errorBuy").style.display = "block";
+                isValid = false;
+            } else if (!isNumber(buy)) {
+                document.getElementById("errorBuyType").style.display = "block";
+                isValid = false;
+            }
+
+            // Validate Giá hiện tại
+            if (!current) {
+                document.getElementById("errorCurrent").style.display = "block";
+                isValid = false;
+            } else if (!isNumber(current)) {
+                document.getElementById("errorCurrentType").style.display = "block";
+                isValid = false;
+            }
+            // Nếu hợp lệ
+            if (isValid) {
+                // Gửi AJAX đến server hoặc lưu vào DB ở đây nếu cần
+                const data = {
+                    code: code,
+                    buyPrice: buy,
+                    currentPrice: current,
+                    risk: risk
+                };
+                $.ajax({
+                    url: baseUrl + '/admin/update/' + code,
+                    type: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token
+                    },
+                    data: JSON.stringify(data),
+                    success: function(response) {
+                        if (response.status == "success") {
+                            const toast = document.getElementById("toast");
+                            toast.innerHTML = `✅ Đã update mã <b>${code}</b><br>`;
+                            toast.className = "toast show";
+                            toastSuccess();
+                            setTimeout(() => {
+                                toast.className = toast.className.replace("show", "");
+                            }, 3000);
+                        } else {
+                            const toast = document.getElementById("toast");
+                            toast.innerHTML = `❌` + response.message;
+                            toast.className = "toast show";
+                            toastError();
+                            setTimeout(() => {
+                                toast.className = toast.className.replace("show", "");
+                            }, 5000);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log(xhr);
                         const toast = document.getElementById("toast");
-                        toast.innerHTML = `✅ Đã update mã <b>${code}</b><br>`;
-                        toast.className = "toast show";
-                        toastSuccess();
-                        setTimeout(() => {
-                            toast.className = toast.className.replace("show", "");
-                        }, 3000);
-                    } else {
-                        const toast = document.getElementById("toast");
-                        toast.innerHTML = `❌` + response.message;
+                        toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;
                         toast.className = "toast show";
                         toastError();
                         setTimeout(() => {
                             toast.className = toast.className.replace("show", "");
                         }, 5000);
                     }
-                },
-                error: function(xhr) {
-                    console.log(xhr);
-                    const toast = document.getElementById("toast");
-                    toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;
-                    toast.className = "toast show";
-                    toastError();
-                    setTimeout(() => {
-                        toast.className = toast.className.replace("show", "");
-                    }, 5000);
-                }
-            });
+                });
+            }
         }
-    }
-</script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-</html>
+    </script>
+@endsection

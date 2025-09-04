@@ -1,27 +1,26 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('Layout.Layout')
+
+@section('csrf-token')
     <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
 
-    <title>Invest</title>
-    @vite('resources/js/app.js')
+@section('title', 'Mua Cổ Phiếu')
+
+@section('header-css')
     @vite('resources/css/app.css')
     @vite('resources/css/adminInsert.css')
-    <!-- Fonts -->
-    <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+@endsection
 
-</head>
+@section('header-js')
+    @vite('resources/js/app.js')
+@endsection
 
-<body class="antialiased">
-    <div class="actions">
-        <div class="actions-left">
-            <a href="{{ url('/user/profile') }}" class="button-link">👤 Thông tin cá nhân</a>
-        </div>
-    </div>
+@section('actions-left')
+    <a href="{{ url('/user/profile') }}" class="button-link">👤 Tài sản</a>
+@endsection
 
+@section('user-body-content')
     <h2>Mua Cổ Phiếu</h2>
 
     <div class="form-container">
@@ -58,185 +57,186 @@
 
         <button onclick="submitForm()">Mua</button>
     </div>
-</body>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    const baseUrl = "{{ url('') }}";
-    const formatter = new Intl.NumberFormat('vi-VN');
-    const buyPriceInput = document.getElementById("buyPrice");
-    const quantityInput = document.getElementById("quantity");
-    const buyDateInput = document.getElementById('buyDate');
+@endsection
 
-    function isNumber(value) {
-        return !isNaN(value) && value.trim() !== '';
-    }
+@section('user-script')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const baseUrl = "{{ url('') }}";
+        const formatter = new Intl.NumberFormat('vi-VN');
+        const buyPriceInput = document.getElementById("buyPrice");
+        const quantityInput = document.getElementById("quantity");
+        const buyDateInput = document.getElementById('buyDate');
 
-    function parseNumber(str) {
-        return str.replace(/[^\d]/g, "");
-    }
-
-    function formatToVND(input) {
-        let raw = parseNumber(input.value);
-        if (raw === "") return input.value = "";
-
-        let formatted = formatter.format(raw);
-        input.value = formatted;
-    }
-
-    buyPriceInput.addEventListener("input", () => {
-        formatToVND(buyPriceInput);
-    });
-
-    quantityInput.addEventListener("input", () => {
-        formatToVND(quantityInput);
-    });
-
-    function updateTotalAmount() {
-        const buy = parseInt(parseNumber(buyPriceInput.value));
-        const quantity = parseInt(parseNumber(quantityInput.value));
-        const total = isNaN(buy) || isNaN(quantity) ? 0 : buy * quantity;
-
-        document.getElementById("totalAmount").textContent = total > 0
-            ? `Tổng tiền: ${formatter.format(total)} VND`
-            : '';
-    }
-
-    // Gọi hàm khi nhập
-    buyPriceInput.addEventListener("input", () => {
-        formatToVND(buyPriceInput);
-        updateTotalAmount();
-    });
-
-    quantityInput.addEventListener("input", () => {
-        formatToVND(quantityInput);
-        updateTotalAmount();
-    });
-
-    function resetForm() {
-        document.getElementById("code").value = "";
-        buyPriceInput.value = "";
-        quantityInput.value = "";
-        buyDateInput.value = "";
-    }
-
-    function toastSuccess() {
-        // Xóa class cũ trước khi thêm class mới
-        toast.classList.remove("toast-success", "toast-error");
-        toast.classList.add("toast-success");
-        toast.classList.add("toast", "show");
-    }
-
-    function toastError() {
-        // Xóa class cũ trước khi thêm class mới
-        toast.classList.remove("toast-success", "toast-error");
-        toast.classList.add("toast-error");
-        toast.classList.add("toast", "show");
-    }
-
-    function submitForm() {
-        const code = document.getElementById("code").value.trim().toUpperCase();
-        const buy = parseNumber(buyPriceInput.value);
-        const quantity = parseNumber(quantityInput.value);
-        const buyDate = buyDateInput.value.trim();
-        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        // Kiểm tra định dạng ngày (DD-MM-YYYY)
-        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-
-        let isValid = true;
-
-        document.querySelectorAll(".error").forEach(el => el.style.display = "none");
-
-        // Validate mã CK
-        if (!code) {
-            document.getElementById("errorCode").style.display = "block";
-            isValid = false;
+        function isNumber(value) {
+            return !isNaN(value) && value.trim() !== '';
         }
 
-        // Validate Giá mua
-        if (!buy) {
-            document.getElementById("errorBuy").style.display = "block";
-            isValid = false;
-        } else if (!isNumber(buy)) {
-            document.getElementById("errorBuyType").style.display = "block";
-            isValid = false;
+        function parseNumber(str) {
+            return str.replace(/[^\d]/g, "");
         }
 
-        // Validate khối lượng giao dịch
-        if (!quantity) {
-            document.getElementById("errorQuantity").style.display = "block";
-            isValid = false;
-        } else if (!isNumber(quantity)) {
-            document.getElementById("errorQuantityType").style.display = "block";
-            isValid = false;
+        function formatToVND(input) {
+            let raw = parseNumber(input.value);
+            if (raw === "") return input.value = "";
+
+            let formatted = formatter.format(raw);
+            input.value = formatted;
         }
 
-        // validation date buy
-        if (buyDate === '') {
-            document.getElementById('errorBuyDate').style.display = 'block';
-            isValid = false;
-        }else if(!dateRegex.test(buyDate)) {
-            document.getElementById('errorBuyDateType').style.display = 'block';
-            isValid = false;
-        }else if (isValid && isNaN(new Date(buyDate).getTime())) {
-            document.getElementById('errorBuyDateType').style.display = 'block';
-            isValid = false;
+        buyPriceInput.addEventListener("input", () => {
+            formatToVND(buyPriceInput);
+        });
+
+        quantityInput.addEventListener("input", () => {
+            formatToVND(quantityInput);
+        });
+
+        function updateTotalAmount() {
+            const buy = parseInt(parseNumber(buyPriceInput.value));
+            const quantity = parseInt(parseNumber(quantityInput.value));
+            const total = isNaN(buy) || isNaN(quantity) ? 0 : buy * quantity;
+
+            document.getElementById("totalAmount").textContent = total > 0
+                ? `Tổng tiền: ${formatter.format(total)} VND`
+                : '';
         }
 
-        // Nếu hợp lệ
-        if (isValid) {
-            // Gửi AJAX đến server hoặc lưu vào DB ở đây nếu cần
-            const data = {
-                code: code,
-                buy_price: buy,
-                quantity: quantity,
-                buy_date : buyDate
-            };
-            $.ajax({
-                url: baseUrl + '/user/buy',
-                type: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
-                data: JSON.stringify(data),
-                success: function(response) {
-                    if (response.status == "success") {
+        // Gọi hàm khi nhập
+        buyPriceInput.addEventListener("input", () => {
+            formatToVND(buyPriceInput);
+            updateTotalAmount();
+        });
+
+        quantityInput.addEventListener("input", () => {
+            formatToVND(quantityInput);
+            updateTotalAmount();
+        });
+
+        function resetForm() {
+            document.getElementById("code").value = "";
+            buyPriceInput.value = "";
+            quantityInput.value = "";
+            buyDateInput.value = "";
+        }
+
+        function toastSuccess() {
+            // Xóa class cũ trước khi thêm class mới
+            toast.classList.remove("toast-success", "toast-error");
+            toast.classList.add("toast-success");
+            toast.classList.add("toast", "show");
+        }
+
+        function toastError() {
+            // Xóa class cũ trước khi thêm class mới
+            toast.classList.remove("toast-success", "toast-error");
+            toast.classList.add("toast-error");
+            toast.classList.add("toast", "show");
+        }
+
+        function submitForm() {
+            const code = document.getElementById("code").value.trim().toUpperCase();
+            const buy = parseNumber(buyPriceInput.value);
+            const quantity = parseNumber(quantityInput.value);
+            const buyDate = buyDateInput.value.trim();
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Kiểm tra định dạng ngày (DD-MM-YYYY)
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+            let isValid = true;
+
+            document.querySelectorAll(".error").forEach(el => el.style.display = "none");
+
+            // Validate mã CK
+            if (!code) {
+                document.getElementById("errorCode").style.display = "block";
+                isValid = false;
+            }
+
+            // Validate Giá mua
+            if (!buy) {
+                document.getElementById("errorBuy").style.display = "block";
+                isValid = false;
+            } else if (!isNumber(buy)) {
+                document.getElementById("errorBuyType").style.display = "block";
+                isValid = false;
+            }
+
+            // Validate khối lượng giao dịch
+            if (!quantity) {
+                document.getElementById("errorQuantity").style.display = "block";
+                isValid = false;
+            } else if (!isNumber(quantity)) {
+                document.getElementById("errorQuantityType").style.display = "block";
+                isValid = false;
+            }
+
+            // validation date buy
+            if (buyDate === '') {
+                document.getElementById('errorBuyDate').style.display = 'block';
+                isValid = false;
+            }else if(!dateRegex.test(buyDate)) {
+                document.getElementById('errorBuyDateType').style.display = 'block';
+                isValid = false;
+            }else if (isValid && isNaN(new Date(buyDate).getTime())) {
+                document.getElementById('errorBuyDateType').style.display = 'block';
+                isValid = false;
+            }
+
+            // Nếu hợp lệ
+            if (isValid) {
+                // Gửi AJAX đến server hoặc lưu vào DB ở đây nếu cần
+                const data = {
+                    code: code,
+                    buy_price: buy,
+                    quantity: quantity,
+                    buy_date : buyDate
+                };
+                $.ajax({
+                    url: baseUrl + '/user/buy',
+                    type: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token
+                    },
+                    data: JSON.stringify(data),
+                    success: function(response) {
+                        if (response.status == "success") {
+                            const toast = document.getElementById("toast");
+                            toast.innerHTML = `✅ Đã mua thành công mã <b>${code}</b><br>`;
+                            toast.className = "toast show";
+                            toastSuccess();
+                            document.getElementById("totalAmount").textContent = "";
+                            setTimeout(() => {
+                                toast.className = toast.className.replace("show", "");
+                            }, 3000);
+
+                            // Reset form
+                            resetForm();
+                        } else {
+                            const toast = document.getElementById("toast");
+                            toast.innerHTML = `❌` + response.message;
+                            toast.className = "toast show";
+                            toastError();
+                            setTimeout(() => {
+                                toast.className = toast.className.replace("show", "");
+                            }, 5000);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log(xhr);
                         const toast = document.getElementById("toast");
-                        toast.innerHTML = `✅ Đã mua thành công mã <b>${code}</b><br>`;
-                        toast.className = "toast show";
-                        toastSuccess();
-                        document.getElementById("totalAmount").textContent = "";
-                        setTimeout(() => {
-                            toast.className = toast.className.replace("show", "");
-                        }, 3000);
-
-                        // Reset form
-                        resetForm();
-                    } else {
-                        const toast = document.getElementById("toast");
-                        toast.innerHTML = `❌` + response.message;
+                        toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;
                         toast.className = "toast show";
                         toastError();
                         setTimeout(() => {
                             toast.className = toast.className.replace("show", "");
                         }, 5000);
                     }
-                },
-                error: function(xhr) {
-                    console.log(xhr);
-                    const toast = document.getElementById("toast");
-                    toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;
-                    toast.className = "toast show";
-                    toastError();
-                    setTimeout(() => {
-                        toast.className = toast.className.replace("show", "");
-                    }, 5000);
-                }
-            });
+                });
+            }
         }
-    }
-</script>
-
-</html>
+    </script>
+@endsection

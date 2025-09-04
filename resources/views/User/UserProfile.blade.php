@@ -1,34 +1,29 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('Layout.Layout')
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+@section('title', 'Danh sách mã cổ phiếu đang giữ')
 
-    <title>Invest</title>
-    @vite('resources/js/app.js')
+@section('header-css')
     @vite('resources/css/app.css')
     @vite('resources/css/adminView.css')
-    <!-- Fonts -->
-    <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+@endsection
 
-</head>
+@section('header-js')
+    @vite('resources/js/app.js')
+@endsection
 
-<body class="antialiased">
-    <div class="actions">
-        <div class="actions-left">
-            <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
-            <a href="{{ url('/user/buy') }}" class="button-link">➕ Mua cổ phiếu</a>
-            <a href="{{ url('/user/sell') }}" class="button-link">❌ Bán cổ phiếu</a>
-            <a href="{{ url('/user/investment-performance') }}" class="button-link">📈 Hiệu quả đầu tư</a>
-        </div>
+@section('actions-left')
+    <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
+    <a href="{{ url('/user/buy') }}" class="button-link">➕ Mua cổ phiếu</a>
+    <a href="{{ url('/user/sell') }}" class="button-link">❌ Bán cổ phiếu</a>
+    <a href="{{ url('/user/investment-performance') }}" class="button-link">📈 Hiệu quả đầu tư</a>
+@endsection
 
-        <div class="actions-right">
-            <input type="text" id="searchInput" placeholder="Nhập mã CK...">
-            <button onclick="searchStock()">🔍 Tìm kiếm</button>
-        </div>
-    </div>
+@section('actions-right')
+    <input type="text" id="searchInput" placeholder="Nhập mã CK...">
+    <button onclick="searchStock()">🔍 Tìm kiếm</button>
+@endsection
 
+@section('user-body-content')
     <h1>Danh sách mã cổ phiếu đang giữ</h1>
 
     <table id="stock-table">
@@ -38,7 +33,8 @@
                 <th>Khối lượng nắm giữ</th>
                 <th>Giá vốn</th>
                 <th>Giá hiện tại</th>
-                <th>Giá trị giao dịch</th>
+                <th>Giá trị vốn</th>
+                <th>Giá trị thị trường</th>
                 <th>Tiền lãi</th>
                 <th>% lãi</th>
             </tr>
@@ -46,22 +42,22 @@
         <tbody id="stockTableBody">
         </tbody>
     </table>
-    </div>
-</body>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    const baseUrl = "{{ url('') }}";
-    const userPortfolios = @json($userPortfolios);
-    var user = null;
+@endsection
 
-    document.addEventListener("DOMContentLoaded", function() {
-        user = new User();
-        user.renderTableProfile(userPortfolios);
-    });
+@section('user-script')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const baseUrl = "{{ url('') }}";
+        const userPortfolios = @json($userPortfolios);
+        var user = null;
 
-    function searchStock() {
-        user.searchStockProfile(userPortfolios);
-    }
-</script>
+        document.addEventListener("DOMContentLoaded", function() {
+            user = new User();
+            user.renderTableProfile(userPortfolios);
+        });
 
-</html>
+        function searchStock() {
+            user.searchStockProfile(userPortfolios);
+        }
+    </script>
+@endsection
