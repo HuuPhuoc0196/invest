@@ -11,6 +11,16 @@
     @vite('resources/js/app.js')
 @endsection
 
+@section('user-info')
+    <div class="user-info">
+        {{-- <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar"> --}}
+        <div class="user-details">
+            <p class="user-name">👤 {{ Auth::user()->name }}</p>
+            <p class="user-email">📧 {{ Auth::user()->email }}</p>
+        </div>
+    </div>
+@endsection  
+
 @section('actions-left')
     <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
     <a href="{{ url('/user/profile') }}" class="button-link">👤 Tài sản</a>
@@ -30,18 +40,20 @@
 
 @section('user-body-content')
     <h1>Danh sách mã cổ phiếu</h1>
-    <table id="stock-table">
-        <thead>
-            <tr>
-                <th>Mã cổ phiếu</th>
-                <th>Giá mua tốt</th>
-                <th>Giá hiện tại</th>
-                <th>Rủi ro</th>
-                <th>% Định giá</th>
-            </tr>
-        </thead>
-        <tbody id="stockTableBody"></tbody>
-    </table>
+    <div class="table-container">
+        <table id="stock-table">
+            <thead>
+                <tr>
+                    <th>Mã cổ phiếu</th>
+                    <th>Giá mua tốt</th>
+                    <th>Giá hiện tại</th>
+                    <th>Rủi ro</th>
+                    <th>% Định giá</th>
+                </tr>
+            </thead>
+            <tbody id="stockTableBody"></tbody>
+        </table>
+    </div>
 @endsection
 
 @section('user-script')

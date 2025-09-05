@@ -35,6 +35,8 @@ Route::get('/', function () {
     return $user->role == 1 ? redirect('/admin') : redirect('/home');
 });
 
+Route::get('/user/get-risk-level/{code}', [User::class, 'getRiskLevel']);
+
 Route::post('/logout', function () {
     Auth::logout();
     request()->session()->invalidate();
@@ -76,4 +78,5 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::match(['get', 'post'], '/user/buy', [User::class, 'buy'])->name('buy');
     Route::match(['get', 'post'], '/user/sell', [User::class, 'sell'])->name('sell');
     Route::match(['get', 'post'], '/user/insertFollow', [User::class, 'insertFollow'])->name('insertFollow');
+    Route::match(['get', 'put'], '/user/updateFollow/{code}', [User::class, 'updateFollow'])->name('user.updateFollow');
 });

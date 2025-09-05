@@ -10,6 +10,7 @@
     <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
     @yield('header-css')
+    @vite('resources/css/footer.css')
     @yield('header-js')
 </head>
 
@@ -17,6 +18,13 @@
     <div class="login-container">
         @yield('body-content')
     </div>
+
+    <footer class="footer">
+        <div>
+            <p>&copy; {{ date('Y') }} Invest manager. All rights reserved.</p>
+            <p>👉 Mọi thắc mắc hoặc liên hệ vui lòng gửi về email: lehuuphuoc0196@gmail.com</p>
+        </div>
+    </footer>
 
     @yield('login-script')
 </body>

@@ -10,13 +10,19 @@ h1 {
 }
 
 table {
-    width: 100%;
+    min-width: 600px;
     border-collapse: collapse;
     margin-top: 20px;
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     overflow: hidden;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Cho phép trượt ngang */
+    -webkit-overflow-scrolling: touch; /* Giúp cuộn mượt trên iOS */
 }
 
 th,

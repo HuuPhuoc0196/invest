@@ -40,7 +40,7 @@ export default class User{
     searchStockUserFollow(stocks, userFollow) {
         const keyword = document.getElementById('searchInput').value.trim().toUpperCase();
         const filtered = stocks.filter(stock => stock.code.includes(keyword));
-        this.renderTable(filtered, userFollow);
+        this.renderTableUserFollow(filtered, userFollow);
     }
 
     getRowClass(goodPrice, currentPrice) {
@@ -292,11 +292,30 @@ export default class User{
 
     renderTableUserFollow(data, userFollow) {
          // 1. Tạo danh sách mã CK trong danh mục đầu tư
-        const portfolioCodes = userFollow.map(p => p.code);
+        // const portfolioCodes = userFollow.map(p => p.code);
+        const portfolioCodes = userFollow.reduce((acc, p) => {
+            acc[p.code] = p.follow_price;
+            return acc;
+        }, {});
 
         // 2. Tách dữ liệu thành 2 nhóm: ưu tiên và còn lại
-        const prioritizedStocks = data.filter(stock => portfolioCodes.includes(stock.code));
-        const remainingStocks = data.filter(stock => !portfolioCodes.includes(stock.code));
+        // const prioritizedStocks = data.filter(stock => portfolioCodes.includes(stock.code));
+        // const remainingStocks = data.filter(stock => !portfolioCodes.includes(stock.code));
+
+        const prioritizedStocks = data
+            .filter(stock => portfolioCodes.hasOwnProperty(stock.code))
+            .map(stock => {
+                return {
+                    ...stock,
+                    recommended_buy_price: portfolioCodes[stock.code] ?? stock.recommended_buy_price
+                };
+            });
+        
+        const remainingStocks = data
+            .filter(stock => !portfolioCodes.hasOwnProperty(stock.code))
+            .map(stock => {
+                return {...stock };
+            });
 
         // 3. Gộp lại: mã trong danh mục đầu tư sẽ hiển thị trước
         const sortedData = [...prioritizedStocks, ...remainingStocks];
@@ -321,7 +340,7 @@ export default class User{
             const row = document.createElement('tr');
             // Gộp class màu định giá và class nổi bật
             const isInPortfolio = userFollow.some(port => port.code === stock.code);
-            const valuationClass = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
+            const valuationClass = this.getRowClass(parseFloat(stock.follow_price), parseFloat(stock.current_price));
             if (isInPortfolio) {
                 row.className = `${valuationClass} highlighted-row`;
             } else {
@@ -338,7 +357,7 @@ export default class User{
                 <td style="color: ${valuationColor}">
                 <div class="action-cell">
                     <span class="profit">${sign}${valuation}%</span>
-                    ${isInPortfolio ? `<button class="btn-delete" onclick="confirmDelete('${stock.code}')">Delete</button>` : ''}
+                    ${isInPortfolio ? `<button onclick="location.href='${baseUrl}/user/updateFollow/${stock.code}'">Update</button><button class="btn-delete" onclick="confirmDelete('${stock.code}')">Delete</button>` : ''}
                 </div>
                 </td>
             `;

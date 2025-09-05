@@ -11,6 +11,16 @@
     @vite('resources/js/app.js')
 @endsection
 
+@section('user-info')
+    <div class="user-info">
+        {{-- <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar"> --}}
+        <div class="user-details">
+            <p class="user-name">👤 {{ Auth::user()->name }}</p>
+            <p class="user-email">📧 {{ Auth::user()->email }}</p>
+        </div>
+    </div>
+@endsection  
+
 @section('actions-left')
     <div style="display: flex; gap: 5px;">
         <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
@@ -49,21 +59,22 @@
 
 @section('admin-body-content')
     <h1>Danh sách mã cổ phiếu</h1>
-
-    <table id="stock-table">
-        <thead>
-            <tr>
-                <th>Mã cổ phiếu</th>
-                <th>Giá mua tốt</th>
-                <th>Giá hiện tại</th>
-                <th>Rủi ro</th>
-                <th>% Định giá</th>
-                <th>Cập nhật</th>
-            </tr>
-        </thead>
-        <tbody id="stockTableBody">
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table id="stock-table">
+            <thead>
+                <tr>
+                    <th>Mã cổ phiếu</th>
+                    <th>Giá mua tốt</th>
+                    <th>Giá hiện tại</th>
+                    <th>Rủi ro</th>
+                    <th>% Định giá</th>
+                    <th>Cập nhật</th>
+                </tr>
+            </thead>
+            <tbody id="stockTableBody">
+            </tbody>
+        </table>
+    </div>
     <!-- Modal xác nhận xoá -->
     <div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">

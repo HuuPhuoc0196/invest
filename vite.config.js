@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/css/login.css',
                 'resources/css/loginRegister.css',
                 'resources/css/userFollow.css',
+                'resources/css/footer.css',
                 'resources/js/Admin.js',
                 'resources/js/User.js',
                 'resources/js/app.js'],

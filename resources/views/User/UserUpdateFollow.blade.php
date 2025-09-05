@@ -4,7 +4,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
-@section('title', 'Thêm cổ phiếu theo dõi')
+@section('title', 'Cập nhật cổ phiếu theo dõi')
 
 @section('header-css')
     @vite('resources/css/app.css')
@@ -20,24 +20,25 @@
 @endsection
 
 @section('user-body-content')
-    <h2>Thêm cổ phiếu theo dõi</h2>
+    <h2>Cập nhật cổ phiếu theo dõi</h2>
 
     <div class="form-container">
         <div class="form-group">
             <label for="code">Mã Cổ Phiếu:</label>
-            <input type="text" id="code" placeholder="VD: FPT">
+            <input type="text" id="code" placeholder="VD: FPT" disabled>
             <div class="error" id="errorCode">Vui lòng nhập Mã cổ phiếu</div>
         </div>
 
         <div class="form-group">
             <label for="followPrice">Giá theo dõi:</label>
             <input type="text" id="followPrice" placeholder="VD: 100000">
+             <div class="error" id="errorFollowPrice">Vui lòng nhập Giá mua</div>
             <div class="error" id="errorFollowPriceType">Vui lòng nhập Số</div>
         </div>
 
         <div id="toast" class="toast"></div>
 
-        <button onclick="submitForm()">Thêm</button>
+        <button onclick="submitForm()">Cập nhật</button>
     </div>
 @endsection
 
@@ -45,6 +46,12 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const userFollow = @json($userFollow);
+            document.getElementById("code").value = userFollow.code|| "";
+            document.getElementById("followPrice").value = Number(userFollow.follow_price).toLocaleString('vi-VN') || 0;
+
+        });
         const baseUrl = "{{ url('') }}";
         const formatter = new Intl.NumberFormat('vi-VN');
         const followPriceInput = document.getElementById("followPrice");
@@ -68,11 +75,6 @@
         followPriceInput.addEventListener("input", () => {
             formatToVND(followPriceInput);
         });
-
-        function resetForm() {
-            document.getElementById("code").value = "";
-            followPriceInput.value = "";
-        }
 
         function toastSuccess() {
             // Xóa class cũ trước khi thêm class mới
@@ -104,11 +106,12 @@
             }
 
             // Validate Giá follow
-            if (followPrice) {
-                if (!isNumber(followPrice)) {
-                    document.getElementById("errorFollowPriceType").style.display = "block";
-                    isValid = false;
-                }
+            if (!followPrice) {
+                document.getElementById("errorFollowPrice").style.display = "block";
+                isValid = false;
+            } else if (!isNumber(followPrice)) {
+                document.getElementById("errorFollowPriceType").style.display = "block";
+                isValid = false;
             }
 
             // Nếu hợp lệ
@@ -119,8 +122,8 @@
                     followPrice: followPrice
                 };
                 $.ajax({
-                    url: baseUrl + '/user/insertFollow',
-                    type: 'POST',
+                    url: baseUrl + '/user/updateFollow/' + code,
+                    type: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': token
@@ -136,8 +139,6 @@
                                 toast.className = toast.className.replace("show", "");
                             }, 3000);
 
-                            // Reset form
-                            resetForm();
                         } else {
                             const toast = document.getElementById("toast");
                             toast.innerHTML = `❌` + response.message;

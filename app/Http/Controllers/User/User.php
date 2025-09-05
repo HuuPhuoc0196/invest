@@ -59,8 +59,8 @@ class User extends Controller
                 // Validation dữ liệu
                 $validated = $request->validate([
                     'code' => 'required|string|max:10',
-                    'buy_price' => 'required|numeric',
-                    'quantity' => 'required|numeric',
+                    'buy_price' => 'required|numeric|gt:0',
+                    'quantity' => 'required|numeric|gt:0',
                     'buy_date' => 'required|date|before_or_equal:today',
                 ]);
 
@@ -109,8 +109,8 @@ class User extends Controller
                 // Validation dữ liệu
                 $validated = $request->validate([
                     'code' => 'required|string|max:10',
-                    'sell_price' => 'required|numeric',
-                    'quantity' => 'required|numeric',
+                    'sell_price' => 'required|numeric|gt:0',
+                    'quantity' => 'required|numeric|gt:0',
                     'sell_date' => 'required|date|before_or_equal:today',
                 ]);
                 $user_id = auth()->id();
@@ -182,6 +182,7 @@ class User extends Controller
                 // Validation dữ liệu
                 $validated = $request->validate([
                     'code' => 'required|string|max:10',
+                    'followPrice' => 'nullable|numeric|gt:0',
                 ]);
 
                 // Kiểm tra code đã tồn tại chưa
@@ -207,6 +208,8 @@ class User extends Controller
                 // Mapping data vào model
                 $userFollow->user_id = auth()->id();
                 $userFollow->stock_id = $stock->id;
+                $followPrice = $validated['followPrice'] != 0 ? $validated['followPrice'] : $stock->recommended_buy_price;
+                $userFollow->follow_price = $followPrice;
 
                 // Lưu vào database (ví dụ bảng stocks)
                 $userFollow->save();
@@ -214,7 +217,7 @@ class User extends Controller
                 // Trả kết quả JSON
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Mua thành công.',
+                    'message' => 'Thêm theo dõi thành công.',
                     'data' => $userFollow
                 ]);
             } catch (QueryException $e) {
@@ -226,5 +229,66 @@ class User extends Controller
         } else {
             return view('User.UserInsertFollow');
         }
+    }
+
+    public function updateFollow(Request $request, $code)
+    {
+        if ($request->isMethod('PUT')) {
+            // Có dữ liệu
+            try {
+                // Validation dữ liệu
+                $validated = $request->validate([
+                    'code' => 'required|string|max:10',
+                    'followPrice' => 'required|numeric|gt:0',
+                ]);
+                // Kiểm tra code đã tồn tại chưa
+                $userFollow = new UserFollow();
+                $stock = Stock::getByCode(strtoupper($validated['code']));
+
+                if (!$stock) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Vui lòng liên hệ Admin insert Mã cổ phiếu ' . $validated['code'] . '.'
+                    ]);
+                }
+
+                $userFollowExit = UserFollow::getUserFollowFirst($stock->id, auth()->id());
+
+                if (!$userFollowExit) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Mã cổ phiếu ' . $validated['code'] . ' chưa được theo dõi.'
+                    ]);
+                }
+
+                // Mapping data vào model
+                $userFollowExit->follow_price = $validated['followPrice'];
+
+                // Lưu vào database (ví dụ bảng stocks)
+                $userFollowExit->save();
+
+                // Trả kết quả JSON
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Update theo dõi thành công.',
+                    'data' => $userFollowExit
+                ]);
+            } catch (QueryException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+        } else {
+            $stock = Stock::getByCode(strtoupper($code));
+            $userFollow = UserFollow::getCodeFromUserFollow($stock->id, auth()->id());
+            return view('User.UserUpdateFollow', compact('userFollow'));
+        }
+    }
+
+    public function getRiskLevel($code)
+    {
+        $stock = Stock::getRiskLevelFromCode($code);
+        return view('User.ShowRiskLevel', compact('stock'));
     }
 }

@@ -43,4 +43,12 @@ class Stock extends Model
 
         return false; // Không tìm thấy
     }
+
+    // Lấy stock theo mã code
+    public static function getRiskLevelFromCode(string $code): ?Stock
+    {
+        return self::where('code', $code)
+            ->select('code', 'risk_level')
+            ->first();
+    }
 }

@@ -25,8 +25,8 @@ class Admin extends Controller
                 // Validation dữ liệu
                 $validated = $request->validate([
                     'code' => 'required|string|max:10',
-                    'buyPrice' => 'required|numeric',
-                    'currentPrice' => 'required|numeric',
+                    'buyPrice' => 'required|numeric|gt:0',
+                    'currentPrice' => 'required|numeric|gt:0',
                     'risk' => 'required|integer|min:1|max:5',
                 ]);
 
@@ -71,8 +71,8 @@ class Admin extends Controller
                 // Validation dữ liệu
                 $validated = $request->validate([
                     'code' => 'required|string|max:10',
-                    'buyPrice' => 'required|numeric',
-                    'currentPrice' => 'required|numeric',
+                    'buyPrice' => 'required|numeric|gt:0',
+                    'currentPrice' => 'required|numeric|gt:0',
                     'risk' => 'required|integer|min:1|max:5',
                 ]);
                 // Kiểm tra code đã tồn tại chưa
