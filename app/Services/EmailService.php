@@ -23,6 +23,17 @@ class EmailService
         return "Email đã được gửi!";
     }
 
+    public static function sendSuggestStocksHave1tr($code)
+    {
+        $to = 'lehuuphuoc0196@gmail.com';
+        $subject = 'Investment cá nhân thông báo cổ phiếu <span style="color:red;"> ' . $code . '</span>';
+        $message = 'Hệ thống ghi nhận cổ phiếu <span style="color:red;">' . $code . '</span> đã có khối lượng giao dịch trên 1000.000 và chưa được thêm vào hệ thống.';
+        $message .= "<br/>url: https://finance.vietstock.vn/lich-su-kien.htm?page=1&tab=2&code=" . $code;
+        Mail::to($to)->send(new NotifyUserMail($subject, $message));
+
+        return "Email đã được gửi!";
+    }
+
     protected static function getRisk($rating)
     {
         switch (intval($rating)) {

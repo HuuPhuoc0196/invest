@@ -25,3 +25,4 @@ Route::get('/admin/collectRisk', [Sync::class, 'getNewRisk'])->name('Sync.getNew
 Route::get('/admin/getSuggestInvestment', [Sync::class, 'suggestInvestment'])->name('Sync.suggestInvestment');
 Route::get('/admin/deleteLogs', [Sync::class, 'deleteLogs'])->name('Sync.deleteLogs');
 Route::get('/admin/sendEmailRisk', [Sync::class, 'sendEmailRisk'])->name('Sync.sendEmailRisk');
+Route::get('/admin/sendEmailStocks', [Sync::class, 'sendEmailStocks'])->name('Sync.sendEmailStocks');

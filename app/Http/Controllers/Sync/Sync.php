@@ -216,6 +216,21 @@ class Sync extends Controller
         ]);
     }
 
+    public function sendEmailStocks(Request $request)
+    {
+        $code = $request->query('code');
+        $result = EmailService::sendSuggestStocksHave1tr($code);
+        $message = 'Hệ thống ghi nhận cổ phiếu ' . $code . ' đã có khối lượng giao dịch trên 1000.000 và chưa được thêm vào hệ thống.';
+        Log::info($message);
+        Log::info("Send mail: " . $result);
+        // Trả kết quả JSON
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Send mail thành công.',
+            // 'data' => $stock
+        ]);
+    }
+
     public function colectRisk($symbol)
     {
 
