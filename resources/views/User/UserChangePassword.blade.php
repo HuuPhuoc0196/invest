@@ -4,7 +4,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
-@section('title', 'Cập nhật cổ phiếu theo dõi')
+@section('title', 'Thay đổi mật khẩu')
 
 @section('header-css')
     @vite('resources/css/app.css')
@@ -16,24 +16,32 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
+    <a href="{{ url('/user/infoProfile') }}" class="button-link">👤 Thông tin cá nhân</a>
 @endsection
 
 @section('user-body-content')
-    <h2>Cập nhật cổ phiếu theo dõi</h2>
+    <h2>Thay đổi mật khẩu</h2>
 
     <div class="form-container">
         <div class="form-group">
-            <label for="code">Mã Cổ Phiếu:</label>
-            <input type="text" id="code" placeholder="VD: FPT" disabled>
-            <div class="error" id="errorCode">Vui lòng nhập Mã cổ phiếu</div>
+            <label for="password">Mật khẩu:</label>
+            <input type="password" id="password">
+            <div class="error" id="errorPassword">Vui lòng nhập mật khẩu</div>
+            <div class="error" id="errorPasswordLength">Mật khẩu phải có ít nhất 6 ký tự.</div>
         </div>
 
         <div class="form-group">
-            <label for="followPrice">Giá theo dõi:</label>
-            <input type="text" id="followPrice" placeholder="VD: 100000">
-             <div class="error" id="errorFollowPrice">Vui lòng nhập Giá mua</div>
-            <div class="error" id="errorFollowPriceType">Vui lòng nhập Số</div>
+            <label for="newPassword">Mật khẩu mới:</label>
+            <input type="password" id="newPassword">
+            <div class="error" id="errorNewPassword">Vui lòng nhập mật khẩu</div>
+            <div class="error" id="errorNewPasswordLength">Mật khẩu phải có ít nhất 6 ký tự.</div>
+        </div>
+
+        <div class="form-group">
+            <label for="reNewPassword">Nhập lại mật khẩu mới:</label>
+            <input type="password" id="reNewPassword">
+            <div class="error" id="errorReNewPassword">Vui lòng nhập mật khẩu</div>
+            <div class="error" id="errorReNewPasswordRe">Nhập lại mật khẩu không đúng</div>
         </div>
 
         <div id="toast" class="toast"></div>
@@ -46,36 +54,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const userFollow = @json($userFollow);
-            document.getElementById("code").value = userFollow.code|| "";
-            document.getElementById("followPrice").value = Number(userFollow.follow_price).toLocaleString('vi-VN') || 0;
-
-        });
         const baseUrl = "{{ url('') }}";
-        const formatter = new Intl.NumberFormat('vi-VN');
-        const followPriceInput = document.getElementById("followPrice");
-
-        function isNumber(value) {
-            return !isNaN(value) && value.trim() !== '';
-        }
-
-        function parseNumber(str) {
-            return str.replace(/[^\d]/g, "");
-        }
-
-        function formatToVND(input) {
-            let raw = parseNumber(input.value);
-            if (raw === "") return input.value = "";
-
-            let formatted = formatter.format(raw);
-            input.value = formatted;
-        }
-
-        followPriceInput.addEventListener("input", () => {
-            formatToVND(followPriceInput);
-        });
-
+       
         function toastSuccess() {
             // Xóa class cũ trước khi thêm class mới
             toast.classList.remove("toast-success", "toast-error");
@@ -90,39 +70,66 @@
             toast.classList.add("toast", "show");
         }
 
+        function removeError(){
+            document.getElementById("errorPassword").style.display = "none";
+            document.getElementById("errorPasswordLength").style.display = "none";
+            document.getElementById("errorNewPassword").style.display = "none";
+            document.getElementById("errorNewPasswordLength").style.display = "none";
+            document.getElementById("errorReNewPassword").style.display = "none";
+            document.getElementById("errorReNewPasswordRe").style.display = "none";
+        }
+
+        function removeValue(){
+            document.getElementById("password").value = "";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("reNewPassword").value = "";
+        }
+
         function submitForm() {
+            removeError();
+
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
            
-            const code = document.getElementById("code").value.trim().toUpperCase();
-            const followPrice = parseNumber(followPriceInput.value);
+            const password = document.getElementById("password").value.trim();
+            const newPassword = document.getElementById("newPassword").value.trim();
+            const reNewPassword = document.getElementById("reNewPassword").value.trim();
+
             let isValid = true;
 
-            document.querySelectorAll(".error").forEach(el => el.style.display = "none");
-
-            // Validate mã CK
-            if (!code) {
-                document.getElementById("errorCode").style.display = "block";
+            if (!password) {
+                document.getElementById("errorPassword").style.display = "block";
+                isValid = false;
+            } else if (password.length < 6) {
+                document.getElementById("errorPasswordLength").style.display = "block";
                 isValid = false;
             }
 
-            // Validate Giá follow
-            if (!followPrice) {
-                document.getElementById("errorFollowPrice").style.display = "block";
+            if (!newPassword) {
+                document.getElementById("errorNewPassword").style.display = "block";
                 isValid = false;
-            } else if (!isNumber(followPrice)) {
-                document.getElementById("errorFollowPriceType").style.display = "block";
+            } else if (newPassword.length < 6) {
+                document.getElementById("errorNewPasswordLength").style.display = "block";
                 isValid = false;
             }
+
+            if (!reNewPassword) {
+                document.getElementById("errorReNewPassword").style.display = "block";
+                isValid = false;
+            } else if (reNewPassword !== newPassword) {
+                document.getElementById("errorReNewPasswordRe").style.display = "block";
+                isValid = false;
+            }
+
 
             // Nếu hợp lệ
             if (isValid) {
                 // Gửi AJAX đến server hoặc lưu vào DB ở đây nếu cần
                 const data = {
-                    code: code,
-                    followPrice: followPrice
+                    password: password,
+                    newPassword: newPassword
                 };
                 $.ajax({
-                    url: baseUrl + '/user/updateFollow/' + code,
+                    url: baseUrl + '/user/changePassword/',
                     type: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -131,8 +138,9 @@
                     data: JSON.stringify(data),
                     success: function(response) {
                         if (response.status == "success") {
+                            removeValue();
                             const toast = document.getElementById("toast");
-                            toast.innerHTML = `✅ Đã cập nhật thành công mã <b>${code}</b><br>`;
+                            toast.innerHTML = `✅ Đã cập nhật thành công <br>`;
                             toast.className = "toast show";
                             toastSuccess();
                             setTimeout(() => {

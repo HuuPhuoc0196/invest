@@ -31,7 +31,7 @@
 
         <div class="extra-actions">
             <button type="button" onclick="location.href='{{ url('/register') }}'" class="secondary-btn">Đăng ký tài khoản</button>
-            <button type="button" onclick="location.href='{{ url('/forgot-password') }}'" class="secondary-btn">Quên mật khẩu?</button>
+            <button type="button" onclick="location.href='{{ url('/forgotPassword') }}'" class="secondary-btn">Quên mật khẩu?</button>
         </div>
     </form>
 @endsection

@@ -16,7 +16,7 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/user/profile') }}" class="button-link">👤 Tài sản</a>
+    <a href="{{ url('/user/profile') }}" class="button-link">💼 Tài sản</a>
 @endsection
 
 @section('user-body-content')

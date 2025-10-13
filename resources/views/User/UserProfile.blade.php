@@ -1,6 +1,6 @@
 @extends('Layout.Layout')
 
-@section('title', 'Danh sách mã cổ phiếu đang giữ')
+@section('title', 'Tài sản cá nhân')
 
 @section('header-css')
     @vite('resources/css/app.css')
@@ -11,15 +11,15 @@
     @vite('resources/js/app.js')
 @endsection
 
-@section('user-info')
+{{-- @section('user-info')
     <div class="user-info">
-        {{-- <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar"> --}}
+        <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar">
         <div class="user-details">
             <p class="user-name">👤 {{ Auth::user()->name }}</p>
             <p class="user-email">📧 {{ Auth::user()->email }}</p>
         </div>
     </div>
-@endsection  
+@endsection   --}}
 
 @section('actions-left')
     <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>

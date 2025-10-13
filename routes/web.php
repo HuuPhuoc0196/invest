@@ -21,9 +21,9 @@ use App\Http\Controllers\Sync\Sync;
 
 Route::middleware('guest')->group(function () {
     // ✅ Các route công khai, không cần login
-    Route::get('/forgot-password', [Login::class, 'forgotPassword'])->name('forgotPassword');
     Route::match(['get', 'post'], '/login', [Login::class, 'login'])->name('login');
     Route::match(['get', 'post'], '/register', [Login::class, 'register'])->name('register');
+    Route::match(['get', 'post'], '/forgotPassword', [Login::class, 'forgotPassword'])->name('forgotPassword');
 });
 
 Route::get('/', function () {
@@ -70,6 +70,7 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/home', [User::class, 'show']);
     Route::get('/user', [User::class, 'show']);
     Route::get('/user/profile', [User::class, 'profile']);
+    Route::get('/user/infoProfile', [User::class, 'infoProfile']);
     Route::get('/user/follow', [User::class, 'follow']);
     Route::get('/user/investment-performance', [User::class, 'investmentPerformance']);
     Route::get('/user/deleteFollow/{code}', [User::class, 'deleteFollow'])->name('user.deleteFollow');
@@ -79,4 +80,8 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::match(['get', 'post'], '/user/sell', [User::class, 'sell'])->name('sell');
     Route::match(['get', 'post'], '/user/insertFollow', [User::class, 'insertFollow'])->name('insertFollow');
     Route::match(['get', 'put'], '/user/updateFollow/{code}', [User::class, 'updateFollow'])->name('user.updateFollow');
+
+    // info profile
+    Route::match(['get', 'put'], '/user/updateInfoProfile', [User::class, 'updateInfoProfile'])->name('updateInfoProfile');
+    Route::match(['get', 'put'], '/user/changePassword', [User::class, 'changePassword'])->name('changePassword');
 });

@@ -45,6 +45,17 @@ class EmailService
         return "Email đã được gửi!";
     }
 
+    public static function sendForgetPassword($email, $newPassword)
+    {
+        $to = $email;
+        $subject = 'Investment cá nhân thông báo';
+        $message = 'Mật khẩu mới của bạn là : <span style="color:red;">' . $newPassword . '</span> ';
+        Mail::to($to)->send(new NotifyUserMail($subject, $message));
+
+        return "Email đã được gửi!";
+    }
+
+
     protected static function getRisk($rating)
     {
         switch (intval($rating)) {

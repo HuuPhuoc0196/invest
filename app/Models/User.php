@@ -63,4 +63,10 @@ class User extends Authenticatable
     {
         return self::where('email', $email)->first();
     }
+
+    // Lấy theo ID
+    public static function getUserById(int $id): ?User
+    {
+        return self::find($id);
+    }
 }

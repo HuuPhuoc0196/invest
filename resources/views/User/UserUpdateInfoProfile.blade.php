@@ -4,7 +4,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
-@section('title', 'Cập nhật cổ phiếu theo dõi')
+@section('title', 'Cập nhật thông tin cá nhân')
 
 @section('header-css')
     @vite('resources/css/app.css')
@@ -16,24 +16,18 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
+    <a href="{{ url('/user/infoProfile') }}" class="button-link">👤 Thông tin cá nhân</a>
 @endsection
 
 @section('user-body-content')
-    <h2>Cập nhật cổ phiếu theo dõi</h2>
+    <h2>Cập nhật thông tin cá nhân</h2>
 
     <div class="form-container">
         <div class="form-group">
-            <label for="code">Mã Cổ Phiếu:</label>
-            <input type="text" id="code" placeholder="VD: FPT" disabled>
-            <div class="error" id="errorCode">Vui lòng nhập Mã cổ phiếu</div>
-        </div>
-
-        <div class="form-group">
-            <label for="followPrice">Giá theo dõi:</label>
-            <input type="text" id="followPrice" placeholder="VD: 100000">
-             <div class="error" id="errorFollowPrice">Vui lòng nhập Giá mua</div>
-            <div class="error" id="errorFollowPriceType">Vui lòng nhập Số</div>
+            <label for="name">Tên:</label>
+            <input type="text" id="name">
+            <div class="error" id="errorName">Vui lòng nhập tên của bạn</div>
+            <div class="error" id="errorNameLength">Tên phải có ít nhất 2 ký tự.</div>
         </div>
 
         <div id="toast" class="toast"></div>
@@ -47,35 +41,11 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const userFollow = @json($userFollow);
-            document.getElementById("code").value = userFollow.code|| "";
-            document.getElementById("followPrice").value = Number(userFollow.follow_price).toLocaleString('vi-VN') || 0;
-
+            const user = @json($user);
+            document.getElementById("name").value = user.name|| "";
         });
         const baseUrl = "{{ url('') }}";
-        const formatter = new Intl.NumberFormat('vi-VN');
-        const followPriceInput = document.getElementById("followPrice");
-
-        function isNumber(value) {
-            return !isNaN(value) && value.trim() !== '';
-        }
-
-        function parseNumber(str) {
-            return str.replace(/[^\d]/g, "");
-        }
-
-        function formatToVND(input) {
-            let raw = parseNumber(input.value);
-            if (raw === "") return input.value = "";
-
-            let formatted = formatter.format(raw);
-            input.value = formatted;
-        }
-
-        followPriceInput.addEventListener("input", () => {
-            formatToVND(followPriceInput);
-        });
-
+       
         function toastSuccess() {
             // Xóa class cũ trước khi thêm class mới
             toast.classList.remove("toast-success", "toast-error");
@@ -91,38 +61,30 @@
         }
 
         function submitForm() {
+            document.getElementById("errorName").style.display = "none";
+            document.getElementById("errorNameLength").style.display = "none";
+
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
            
-            const code = document.getElementById("code").value.trim().toUpperCase();
-            const followPrice = parseNumber(followPriceInput.value);
+            const name = document.getElementById("name").value.trim();
+
             let isValid = true;
 
-            document.querySelectorAll(".error").forEach(el => el.style.display = "none");
-
-            // Validate mã CK
-            if (!code) {
-                document.getElementById("errorCode").style.display = "block";
+            if (!name) {
+                document.getElementById("errorName").style.display = "block";
+                isValid = false;
+            } else if (name.length < 2) {
+                document.getElementById("errorNameLength").style.display = "block";
                 isValid = false;
             }
-
-            // Validate Giá follow
-            if (!followPrice) {
-                document.getElementById("errorFollowPrice").style.display = "block";
-                isValid = false;
-            } else if (!isNumber(followPrice)) {
-                document.getElementById("errorFollowPriceType").style.display = "block";
-                isValid = false;
-            }
-
             // Nếu hợp lệ
             if (isValid) {
                 // Gửi AJAX đến server hoặc lưu vào DB ở đây nếu cần
                 const data = {
-                    code: code,
-                    followPrice: followPrice
+                    name: name
                 };
                 $.ajax({
-                    url: baseUrl + '/user/updateFollow/' + code,
+                    url: baseUrl + '/user/updateInfoProfile/',
                     type: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -132,7 +94,7 @@
                     success: function(response) {
                         if (response.status == "success") {
                             const toast = document.getElementById("toast");
-                            toast.innerHTML = `✅ Đã cập nhật thành công mã <b>${code}</b><br>`;
+                            toast.innerHTML = `✅ Đã cập nhật thành công <br>`;
                             toast.className = "toast show";
                             toastSuccess();
                             setTimeout(() => {

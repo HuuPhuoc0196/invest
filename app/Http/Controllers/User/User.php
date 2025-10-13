@@ -4,11 +4,14 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\User as UserModel;
 use App\Models\Stock;
 use App\Models\UserFollow;
 use App\Models\UserPortfolio;
 use App\Models\UserPortfolioSell;
 use Illuminate\Database\QueryException;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Controller
 {
@@ -37,12 +40,103 @@ class User extends Controller
         return view('User.UserProfile', compact('userPortfolios'));
     }
 
+    public function infoProfile()
+    {
+        return view('User.UserInfoProfile');
+    }
+
     public function follow()
     {
         $userId = auth()->id();
         $userFollow = UserFollow::getUserFollow($userId);
         $stocks = Stock::getAllStocks();
         return view('User.UserFollow', compact('stocks', 'userFollow'));
+    }
+
+    public function updateInfoProfile(Request $request)
+    {
+        if ($request->isMethod('PUT')) {
+            // Có dữ liệu
+            try {
+                // Validate dữ liệu
+                $validated = $request->validate([
+                    'name' => 'required|string|max:100',
+                ]);
+
+                $user = UserModel::getUserById(auth()->id());
+                $user->name = trim($validated['name']);
+                $user->save();
+
+                // Trả kết quả JSON
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'cập nhật thông tin thành công.',
+                    'data' => $user
+                ]);
+            } catch (ValidationException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Dữ liệu không hợp lệ.',
+                    'errors' => $e->errors()
+                ], 422);
+            } catch (QueryException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Lỗi hệ thống: ' . $e->getMessage()
+                ], 500);
+            }
+        } else {
+            $user = UserModel::getUserById(auth()->id());
+            return view('User.UserUpdateInfoProfile', compact('user'));
+        }
+    }
+
+    public function changePassword(Request $request)
+    {
+        if ($request->isMethod('PUT')) {
+            // Có dữ liệu
+            try {
+                // Validate dữ liệu
+                $validated = $request->validate([
+                    'password' => 'required|string|min:6',
+                    'newPassword' => 'required|string|min:6',
+                ]);
+
+
+                $user = UserModel::getUserById(auth()->id());
+                // Kiểm tra user đã tồn tại chưa
+                $existingUser = UserModel::getUserLogin($user->email, $validated['password']);
+                if (!$existingUser) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Mật khẩu không đúng.'
+                    ]);
+                }
+
+                $user->password = Hash::make($validated['newPassword']);
+                $user->save();
+
+                // Trả kết quả JSON
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'cập nhật thông tin thành công.',
+                    'data' => $user
+                ]);
+            } catch (ValidationException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Dữ liệu không hợp lệ.',
+                    'errors' => $e->errors()
+                ], 422);
+            } catch (QueryException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Lỗi hệ thống: ' . $e->getMessage()
+                ], 500);
+            }
+        } else {
+            return view('User.UserChangePassword');
+        }
     }
 
     public function deleteFollow($code)

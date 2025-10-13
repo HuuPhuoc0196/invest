@@ -11,20 +11,21 @@
     @vite('resources/js/app.js')
 @endsection
 
-@section('user-info')
+{{-- @section('user-info')
     <div class="user-info">
-        {{-- <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar"> --}}
         <div class="user-details">
+            <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar">
             <p class="user-name">👤 {{ Auth::user()->name }}</p>
             <p class="user-email">📧 {{ Auth::user()->email }}</p>
         </div>
     </div>
-@endsection  
+@endsection   --}}
 
 @section('actions-left')
     <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
-    <a href="{{ url('/user/profile') }}" class="button-link">👤 Tài sản</a>
+    <a href="{{ url('/user/profile') }}" class="button-link">💼 Tài sản</a>
     <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
+    <a href="{{ url('/user/infoProfile') }}" class="button-link">👤 Thông tin cá nhân</a>
     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
         @csrf
     </form>
