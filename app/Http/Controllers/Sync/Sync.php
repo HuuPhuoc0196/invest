@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Sync;
 
 use App\Http\Controllers\Controller;
 use App\Models\Stock;
+use App\Models\UserFollow;
 use App\Models\StatusSync;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
@@ -220,7 +221,44 @@ class Sync extends Controller
     {
         $code = $request->query('code');
         $result = EmailService::sendSuggestStocksHave1tr($code);
-        $message = 'Hệ thống ghi nhận cổ phiếu ' . $code . ' đã có khối lượng giao dịch trên 1000.000 và chưa được thêm vào hệ thống.';
+        $message = 'Hệ thống ghi nhận cổ phiếu ' . $code . ' đã có khối lượng giao dịch trên 1.000.000 và chưa được thêm vào hệ thống.';
+        Log::info($message);
+        Log::info("Send mail: " . $result);
+        // Trả kết quả JSON
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Send mail thành công.',
+            // 'data' => $stock
+        ]);
+    }
+
+    public function sendEmailStocksFollow(Request $request)
+    {
+        $code = $request->query('code');
+        // Kiểm tra code đã tồn tại chưa
+        $stock = Stock::getByCode($code);
+        if (!$stock) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Mã ' . $code . ' không tồn tại.'
+            ]);
+        }
+        $userFollow = new UserFollow();
+        $userFollowExit = UserFollow::getUserFollowFirst($stock->id, 1);
+
+        if ($userFollowExit) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Mã cổ phiếu ' . $code . ' đã được theo dõi.'
+            ]);
+        }
+        $userFollow->user_id = 1;
+        $userFollow->stock_id = $stock->id;
+        $userFollow->follow_price = $stock->recommended_buy_price;
+        // Lưu vào database (ví dụ bảng stocks)
+        $userFollow->save();
+        $result = EmailService::sendSuggestStocksHave10tr($code);
+        $message = 'Hệ thống ghi nhận cổ phiếu ' . $code . ' đã có khối lượng giao dịch trên 10.000.000 và thêm vào table user_follow.';
         Log::info($message);
         Log::info("Send mail: " . $result);
         // Trả kết quả JSON
