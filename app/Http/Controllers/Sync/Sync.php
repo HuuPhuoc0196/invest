@@ -103,7 +103,7 @@ class Sync extends Controller
             foreach ($stocks as $stock) {
                 $recommended_buy_price = $stock->recommended_buy_price;
                 $current_price = $stock->current_price;
-                $result = EmailService::sendSuggestInvestment($stock->code, $current_price, $recommended_buy_price);
+                $result = EmailService::sendSuggestInvestment($stock->code, $current_price, $recommended_buy_price, $stock->risk_level);
                 if ($result) {
                     Log::info("Send mail Suggest cổ phiếu: " . $stock->code);
                     Log::info("Có giá hiện tại là: {$current_price} và Giá đề xuất là {$recommended_buy_price}");

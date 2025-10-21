@@ -72,15 +72,17 @@ class EmailService
         }
     }
 
-    public static function sendSuggestInvestment($code, $current_price, $recommended_buy_price)
+    public static function sendSuggestInvestment($code, $current_price, $recommended_buy_price, $risk)
     {
         $content = self::getMessgaeSuggest($current_price, $recommended_buy_price);
         if (!$content) return $content;
+        $riskText = self::getRisk($risk);
         $to = 'lehuuphuoc0196@gmail.com';
         $subject = 'Investment suggest cổ phiếu <span style="color:red;"> ' . $code . '</span>';
         $message = 'Hệ thống ghi nhận cổ phiếu <span style="color:red;">' . $code . '</span> có giá hấp dẫn.';
         $message .= '<br/>Giá hiện tại là: ' . number_format($current_price, 0, ',', '.');
         $message .= '<br/>Giá khuyến nghị mua vào là:  <span style="color:red;">' . number_format($recommended_buy_price, 0, ',', '.') . '</span>';
+        $message .= '<br/>Mức độ rủi ro hiện tại là: ' . $riskText;
         $message .= $content;
 
         Mail::to($to)->send(new NotifyUserMail($subject, $message));
