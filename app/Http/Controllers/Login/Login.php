@@ -162,6 +162,11 @@ class Login extends Controller
         }
     }
 
+    public function profile()
+    {
+        return view('Login.Profile');
+    }
+
     /**
      * Tạo mật khẩu ngẫu nhiên an toàn.
      *

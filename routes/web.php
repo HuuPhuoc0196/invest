@@ -24,6 +24,7 @@ Route::middleware('guest')->group(function () {
     Route::match(['get', 'post'], '/login', [Login::class, 'login'])->name('login');
     Route::match(['get', 'post'], '/register', [Login::class, 'register'])->name('register');
     Route::match(['get', 'post'], '/forgotPassword', [Login::class, 'forgotPassword'])->name('forgotPassword');
+    Route::match(['get'], '/profile', [Login::class, 'profile'])->name('profile');
 });
 
 Route::get('/', function () {
