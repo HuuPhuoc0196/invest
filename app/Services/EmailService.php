@@ -76,6 +76,7 @@ class EmailService
     {
         $content = self::getMessgaeSuggest($current_price, $recommended_buy_price);
         if (!$content) return $content;
+        if ($risk > 2) return false;
         $riskText = self::getRisk($risk);
         $to = 'lehuuphuoc0196@gmail.com';
         $subject = 'Investment suggest cổ phiếu <span style="color:red;"> ' . $code . '</span>';
