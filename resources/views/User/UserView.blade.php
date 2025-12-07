@@ -12,20 +12,22 @@
 @endsection
 
 {{-- @section('user-info')
-    <div class="user-info">
-        <div class="user-details">
-            <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar">
-            <p class="user-name">👤 {{ Auth::user()->name }}</p>
-            <p class="user-email">📧 {{ Auth::user()->email }}</p>
-        </div>
+<div class="user-info">
+    <div class="user-details">
+        <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar">
+        <p class="user-name">👤 {{ Auth::user()->name }}</p>
+        <p class="user-email">📧 {{ Auth::user()->email }}</p>
     </div>
-@endsection   --}}
+</div>
+@endsection --}}
 
 @section('actions-left')
     <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
     <a href="{{ url('/user/profile') }}" class="button-link">💼 Tài sản</a>
     <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
     <a href="{{ url('/user/infoProfile') }}" class="button-link">👤 Thông tin cá nhân</a>
+    <a href="{{ url('/user/cashIn') }}" class="button-link">💰 Nạp tiền</a>
+    <a href="{{ url('/user/cashOut') }}" class="button-link">💵 Rút tiền</a>
     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
         @csrf
     </form>
@@ -65,7 +67,7 @@
         const userPortfolios = @json($userPortfolios);
         var user = null;
 
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             user = new User();
             user.renderTable(stocks, userPortfolios);
             sortInit(stocks);
@@ -75,7 +77,7 @@
             user.searchStock(stocks, userPortfolios);
         }
 
-        function sortInit(stocks){
+        function sortInit(stocks) {
             let sortDiffAsc = true;
             sortDiffAsc = !sortDiffAsc;
             stocks.sort((a, b) => {

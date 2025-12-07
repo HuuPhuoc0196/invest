@@ -45,6 +45,24 @@ class EmailService
         return "Email đã được gửi!";
     }
 
+    public static function sendFollowStocksEveryDay($stock, $avg_buy_price)
+    {
+        $to = 'lehuuphuoc0196@gmail.com';
+        $subject = 'Investment cá nhân thông báo cổ phiếu <span style="color:red;"> ' . $stock->code . '</span>';
+        $message = 'Hệ thông theo dõi cổ phiếu cuối ngày thông báo.';
+        $message .= '<br/>Ngày: ' . date('d-m-Y H:i:s');
+        $message .= '<br/>Cổ phiếu: <span style="color:red;">' . $stock->code . '</span>';
+        $message .= '<br/>Giá giao dịch cuối ngày: '. number_format((float)$stock->current_price, 0, ',', '.');
+        $message .= '<br/>Mức độ tăng trưởng: '. self::getPercentStock($stock->percent_stock);
+        $message .= '<br/>Mức độ rủi ro: '. self::getRisk($stock->risk_level);
+        $message .= '<br/>Giá mua vào: '. number_format((float)$avg_buy_price, 0, ',', '.');
+        $message .= '<br/>Lợi nhuận: '. self::getProfit($avg_buy_price,$stock->current_price);
+        Mail::to($to)->send(new NotifyUserMail($subject, $message));
+
+        return "Đã send email theo dõi cổ phiếu cuối ngày với cổ phiếu: <span style='color:red;'>".$stock->code;
+    }
+
+
     public static function sendForgetPassword($email, $newPassword)
     {
         $to = $email;
@@ -53,6 +71,38 @@ class EmailService
         Mail::to($to)->send(new NotifyUserMail($subject, $message));
 
         return "Email đã được gửi!";
+    }
+
+    protected static function getProfit($avg_buy_price, $current_price){
+        $avg = (float) $avg_buy_price;
+        $current = (float) $current_price;
+
+        // Tính lãi/lỗ
+        $profit = $current - $avg;
+
+        // Tính %
+        $percent = 0;
+        if ($avg > 0) {
+            $percent = ($profit / $avg) * 100;
+        }
+
+        // Format dấu +/-
+        $percent_sign = ($percent >= 0 ? '+ ' : '') . number_format($percent, 2) . '%';
+
+        $color = "green";
+        if($profit < 0) $color = "red";
+
+        return "<span style='color:{$color};'>{$percent_sign}</span>";
+    }
+
+    protected static function getPercentStock($percentStock){
+        $percentStock = (float) $percentStock;
+
+        $color = "green";
+        if($percentStock < 0) $color = "red";
+        $percentStock = ($percentStock >= 0 ? '+ ' : '') . $percentStock;
+
+        return "<span style='color:{$color};'>{$percentStock}%</span>";
     }
 
 

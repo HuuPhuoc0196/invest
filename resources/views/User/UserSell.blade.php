@@ -24,6 +24,10 @@
 
     <div class="form-container">
         <div class="form-group">
+            <label class="cash-title">Số dư: <span class="cash"></span></label>
+        </div>
+
+        <div class="form-group">
             <label for="code">Mã Cổ Phiếu:</label>
             <select id="code">
                 <option value="">-- Chọn mã cổ phiếu --</option>
@@ -68,6 +72,9 @@
         const sellPriceInput = document.getElementById("sellPrice");
         const quantityInput = document.getElementById("quantity");
         const sellDateInput = document.getElementById('sellDate');
+        var cash = @json($cash);
+        let cashMony = formatter.format(cash);
+        $(".cash").text(cashMony);
 
         document.addEventListener("DOMContentLoaded", function () {
             const select = document.getElementById("code");
@@ -190,14 +197,16 @@
                 isValid = false;
             }
 
+            let cashSell = Number(sell) * Number(quantity);
+
             // validation date sell
             if (sellDate === '') {
                 document.getElementById('errorSellDate').style.display = 'block';
                 isValid = false;
-            }else if(!dateRegex.test(sellDate)) {
+            } else if (!dateRegex.test(sellDate)) {
                 document.getElementById('errorSellDateType').style.display = 'block';
                 isValid = false;
-            }else if (isValid && isNaN(new Date(sellDate).getTime())) {
+            } else if (isValid && isNaN(new Date(sellDate).getTime())) {
                 document.getElementById('errorSellDateType').style.display = 'block';
                 isValid = false;
             }
@@ -209,7 +218,7 @@
                     code: code,
                     sell_price: sell,
                     quantity: quantity,
-                    sell_date : sellDate
+                    sell_date: sellDate
                 };
                 $.ajax({
                     url: baseUrl + '/user/sell',
@@ -219,11 +228,15 @@
                         'X-CSRF-TOKEN': token
                     },
                     data: JSON.stringify(data),
-                    success: function(response) {
+                    success: function (response) {
                         if (response.status == "success") {
                             const toast = document.getElementById("toast");
                             toast.innerHTML = `✅ Đã bán thành công mã <b>${code}</b><br>`;
                             toast.className = "toast show";
+                            let num1 = parseFloat(cash);
+                            cash = num1 + cashSell;
+                            cashMony = formatter.format(cash);
+                            $(".cash").text(cashMony);
                             toastSuccess();
                             setTimeout(() => {
                                 toast.className = toast.className.replace("show", "");
@@ -231,7 +244,7 @@
 
                             // Reset form
                             resetForm();
-                            
+
                             sellStocksOnForm(code, quantity);
                         } else {
                             const toast = document.getElementById("toast");
@@ -243,7 +256,7 @@
                             }, 5000);
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         console.log(xhr);
                         const toast = document.getElementById("toast");
                         toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;

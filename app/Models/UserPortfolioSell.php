@@ -26,4 +26,22 @@ class UserPortfolioSell extends Model
             )
             ->get();
     }
+
+    public static function deleteUserInfo(int $stock_id, int $userId): bool
+    {
+        return self::where('stock_id', $stock_id)
+            ->where('user_id', $userId)
+            ->delete() > 0;
+    }
+
+    public static function getAllPortfolioSellByUserId($userId)
+    {
+        return self::where('user_id', $userId)
+            ->select(
+                'stock_id',
+                'sell_price',
+                'quantity'
+            )
+            ->get();
+    }
 }

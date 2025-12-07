@@ -74,6 +74,7 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/user/infoProfile', [User::class, 'infoProfile']);
     Route::get('/user/follow', [User::class, 'follow']);
     Route::get('/user/investment-performance', [User::class, 'investmentPerformance']);
+    // Route::get('/user/deleteUserProfileCode/{code}', [User::class, 'deleteUserProfileCode']);
     Route::get('/user/deleteFollow/{code}', [User::class, 'deleteFollow'])->name('user.deleteFollow');
 
     // Giao dịch
@@ -81,6 +82,8 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::match(['get', 'post'], '/user/sell', [User::class, 'sell'])->name('sell');
     Route::match(['get', 'post'], '/user/insertFollow', [User::class, 'insertFollow'])->name('insertFollow');
     Route::match(['get', 'put'], '/user/updateFollow/{code}', [User::class, 'updateFollow'])->name('user.updateFollow');
+    Route::match(['get', 'post'],'/user/cashIn', [User::class, 'cashIn'])->name('user.cashIn');
+    Route::match(['get', 'post'],'/user/cashOut', [User::class, 'cashOut'])->name('user.cashOut');
 
     // info profile
     Route::match(['get', 'put'], '/user/updateInfoProfile', [User::class, 'updateInfoProfile'])->name('updateInfoProfile');

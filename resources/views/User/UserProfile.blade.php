@@ -12,14 +12,14 @@
 @endsection
 
 {{-- @section('user-info')
-    <div class="user-info">
-        <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar">
-        <div class="user-details">
-            <p class="user-name">👤 {{ Auth::user()->name }}</p>
-            <p class="user-email">📧 {{ Auth::user()->email }}</p>
-        </div>
+<div class="user-info">
+    <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar">
+    <div class="user-details">
+        <p class="user-name">👤 {{ Auth::user()->name }}</p>
+        <p class="user-email">📧 {{ Auth::user()->email }}</p>
     </div>
-@endsection   --}}
+</div>
+@endsection --}}
 
 @section('actions-left')
     <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
@@ -53,6 +53,19 @@
             <tbody id="stockTableBody">
             </tbody>
         </table>
+        <table id="invest-table">
+            <thead>
+                <tr>
+                    <th>Danh mục</th>
+                    <th>Vốn đầu tư</th>
+                    <th>Giá trị hiện tại</th>
+                    <th>Tiền lãi</th>
+                    <th>% lãi</th>
+                </tr>
+            </thead>
+            <tbody id="investTableBody">
+            </tbody>
+        </table>
     </div>
 @endsection
 
@@ -61,11 +74,13 @@
     <script>
         const baseUrl = "{{ url('') }}";
         const userPortfolios = @json($userPortfolios);
+        const userInvestCash = @json($userInvestCash);
         var user = null;
 
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             user = new User();
             user.renderTableProfile(userPortfolios);
+            user.renderInvestTableProfile(userInvestCash);
         });
 
         function searchStock() {

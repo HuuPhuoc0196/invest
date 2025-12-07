@@ -194,6 +194,34 @@ export default class User{
         `;
         tbody.appendChild(totalRow);
     }
+
+    renderInvestTableProfile(data) {
+        const tbody = document.getElementById('investTableBody');
+
+        const totalProfit = data.cash - data.cash_in;
+
+        // Tính tổng phần trăm lãi
+        const totalProfitPercent = (totalProfit / data.cash_in) * 100 ;
+
+        // Màu và dấu tổng tiền lãi
+        const totalProfitColor = totalProfit > 0 ? 'green' : totalProfit < 0 ? 'red' : 'orange';
+        const totalProfitSign = totalProfit > 0 ? '+' : totalProfit < 0 ? '-' : '+';
+
+        // Màu và dấu tổng % lãi
+        const totalPercentColor = totalProfitPercent > 0 ? 'green' : totalProfitPercent < 0 ? 'red' : 'orange';
+        const totalPercentSign = totalProfitPercent > 0 ? '+' : totalProfitPercent < 0 ? '-' : '+';
+
+        // Dòng tổng cộng
+        const totalRow = document.createElement('tr');
+        totalRow.innerHTML = `
+            <td><strong>Tổng:</strong></td>
+            <td><strong>${Number(data.cash_in).toLocaleString('vi-VN')}</strong></td>
+            <td><strong>${Number(data.cash).toLocaleString('vi-VN')}</strong</td>
+            <td style="color:${totalProfitColor}"><strong>${totalProfitSign}${Math.abs(totalProfit).toLocaleString('vi-VN')}</strong></td>
+            <td style="color:${totalPercentColor}"><strong>${totalPercentSign}${Math.abs(totalProfitPercent).toFixed(2)}%</strong></td>
+        `;
+        tbody.appendChild(totalRow);
+    }
     
     renderTableInvest(data) {
         const tbody = document.getElementById('stockTableBody');
@@ -364,5 +392,23 @@ export default class User{
             tbody.appendChild(row);
         });
     }
-    
+
+    renderTableUserInfoProfile(data) {
+        const tbody = document.getElementById('userInfoTableBody');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.code}</td>
+                <td>${Number(item.total_quantity).toLocaleString('vi-VN')}</td>
+                <td>${Number(item.avg_buy_price).toLocaleString('vi-VN')}</td>
+                <td>
+                <div class="action-cell">
+                    <button class="btn-delete" onclick="confirmDelete('${item.code}')">Delete</button>
+                </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
 }

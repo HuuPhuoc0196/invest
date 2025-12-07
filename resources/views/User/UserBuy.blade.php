@@ -1,4 +1,3 @@
-
 @extends('Layout.Layout')
 
 @section('csrf-token')
@@ -25,6 +24,10 @@
 
     <div class="form-container">
         <div class="form-group">
+            <label class="cash-title">Số dư: <span class="cash"></span></label>
+        </div>
+
+        <div class="form-group">
             <label for="code">Mã Cổ Phiếu:</label>
             <input type="text" id="code" placeholder="VD: FPT">
             <div class="error" id="errorCode">Vui lòng nhập Mã cổ phiếu</div>
@@ -44,6 +47,8 @@
             <div class="error" id="errorQuantityType">Vui lòng nhập Số</div>
 
             <div id="totalAmount" style="color: red; font-weight: bold; margin-top: 5px;"></div>
+            <div class="error" id="errorCashBuyType" style="color: red; font-weight: bold; margin-top: 5px;">Số dư
+                không đủ</div>
         </div>
 
         <div class="form-group">
@@ -68,6 +73,9 @@
         const buyPriceInput = document.getElementById("buyPrice");
         const quantityInput = document.getElementById("quantity");
         const buyDateInput = document.getElementById('buyDate');
+        var cash = @json($cash);
+        let cashMony = formatter.format(cash);
+        $(".cash").text(cashMony);
 
         function isNumber(value) {
             return !isNaN(value) && value.trim() !== '';
@@ -173,14 +181,20 @@
                 isValid = false;
             }
 
+            let cashBuy = Number(buy) * Number(quantity);
+            if (cashBuy > Number(cash)) {
+                document.getElementById("errorCashBuyType").style.display = "block";
+                isValid = false;
+            }
+
             // validation date buy
             if (buyDate === '') {
                 document.getElementById('errorBuyDate').style.display = 'block';
                 isValid = false;
-            }else if(!dateRegex.test(buyDate)) {
+            } else if (!dateRegex.test(buyDate)) {
                 document.getElementById('errorBuyDateType').style.display = 'block';
                 isValid = false;
-            }else if (isValid && isNaN(new Date(buyDate).getTime())) {
+            } else if (isValid && isNaN(new Date(buyDate).getTime())) {
                 document.getElementById('errorBuyDateType').style.display = 'block';
                 isValid = false;
             }
@@ -192,7 +206,7 @@
                     code: code,
                     buy_price: buy,
                     quantity: quantity,
-                    buy_date : buyDate
+                    buy_date: buyDate
                 };
                 $.ajax({
                     url: baseUrl + '/user/buy',
@@ -202,11 +216,15 @@
                         'X-CSRF-TOKEN': token
                     },
                     data: JSON.stringify(data),
-                    success: function(response) {
+                    success: function (response) {
                         if (response.status == "success") {
                             const toast = document.getElementById("toast");
                             toast.innerHTML = `✅ Đã mua thành công mã <b>${code}</b><br>`;
                             toast.className = "toast show";
+                            let num1 = parseFloat(cash);
+                            cash = num1 - cashBuy;
+                            cashMony = formatter.format(cash);
+                            $(".cash").text(cashMony);
                             toastSuccess();
                             document.getElementById("totalAmount").textContent = "";
                             setTimeout(() => {
@@ -225,7 +243,7 @@
                             }, 5000);
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         console.log(xhr);
                         const toast = document.getElementById("toast");
                         toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;

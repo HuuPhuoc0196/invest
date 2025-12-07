@@ -12,6 +12,7 @@ use App\Services\EmailService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
+use App\Models\UserPortfolio;
 
 class Sync extends Controller
 {
@@ -265,6 +266,23 @@ class Sync extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Send mail thành công.',
+            // 'data' => $stock
+        ]);
+    }
+
+    public function followStocksEveryDay(Request $request)
+    {
+
+        $listUserProfile = UserPortfolio::getProfileUser(1);
+        foreach ($listUserProfile as $item) {
+            $stocks = Stock::getByCode($item["code"]);
+            $result = EmailService::sendFollowStocksEveryDay($stocks, $item["avg_buy_price"]);
+            Log::info("Send mail: " . $result);
+        }
+        // Trả kết quả JSON
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Send mail follow every day thành công.',
             // 'data' => $stock
         ]);
     }

@@ -12,39 +12,77 @@ class UserPortfolio extends Model
 
     public static function getProfileUser($userId)
     {
-        return self::select(
-            'stocks.code',
-            'stocks.current_price',
-            'user_portfolios.stock_id',
-            DB::raw('SUM(user_portfolios.quantity) as total_bought'),
-            DB::raw('SUM(user_portfolios.quantity * user_portfolios.buy_price) / SUM(user_portfolios.quantity) as avg_buy_price')
-        )
-            ->join('stocks', 'user_portfolios.stock_id', '=', 'stocks.id')
-            ->where('user_portfolios.user_id', $userId)
-            ->groupBy('user_portfolios.stock_id', 'stocks.code', 'stocks.current_price')
-            ->get()
-            ->map(function ($row) use ($userId) {
-                // Tính tổng đã bán cho từng stock
-                $soldQty = DB::table('user_portfolios_sell')
-                    ->where('user_id', $userId)
-                    ->where('stock_id', $row->stock_id)
-                    ->sum('quantity');
+        // 1. Lấy danh sách các mã cổ phiếu mà user đã từng mua
+        /** @var \Illuminate\Support\Collection<int, \stdClass> $stocks */
+        $stocks = DB::table('user_portfolios')
+            ->where('user_id', $userId)
+            ->select('stock_id')
+            ->groupBy('stock_id')
+            ->get();
 
-                $remaining = $row->total_bought - $soldQty;
+        $result = [];
 
-                if ($remaining <= 0) {
-                    return null; // Đã bán hết
+        /** @var \stdClass $s */
+        foreach ($stocks as $s) {
+            $stockId = $s->stock_id;
+
+            // 2. Lấy các lô mua theo FIFO
+            $buys = DB::table('user_portfolios')
+                ->where('user_id', $userId)
+                ->where('stock_id', $stockId)
+                ->orderBy('buy_date', 'asc')
+                ->get();
+
+            // 3. Lấy tổng số lượng đã bán
+            $sellQty = DB::table('user_portfolios_sell')
+                ->where('user_id', $userId)
+                ->where('stock_id', $stockId)
+                ->orderBy('sell_date', 'asc')
+                ->sum('quantity');
+
+            // 4. FIFO – trừ bán từ các lô mua
+            /** @var \App\Models\Portfolio $buy */
+            foreach ($buys as &$buy) {
+                if ($sellQty <= 0) break;
+
+                if ($sellQty >= $buy->quantity) {
+                    // Bán hết lô này
+                    $sellQty -= $buy->quantity;
+                    $buy->quantity = 0;
+                } else {
+                    // Bán 1 phần lô này
+                    $buy->quantity -= $sellQty;
+                    $sellQty = 0;
                 }
+            }
 
-                return [
-                    'code' => $row->code,
-                    'total_quantity' => $remaining,
-                    'avg_buy_price' => round($row->avg_buy_price, 2),
-                    'current_price' => $row->current_price,
-                ];
-            })
-            ->filter() // loại bỏ null
-            ->values(); // reset index
+            // 5. Tính giá trung bình còn lại
+            $totalQty = 0;
+            $totalCost = 0;
+            /** @var \App\Models\Portfolio $buy */
+            foreach ($buys as $buy) {
+                if ($buy->quantity > 0) {
+                    $totalQty += $buy->quantity;
+                    $totalCost += $buy->quantity * $buy->buy_price;
+                }
+            }
+
+            // Nếu đã bán hết == bỏ qua
+            if ($totalQty == 0) continue;
+
+            // 6. Lấy thông tin mã cổ phiếu
+            $stockInfo = DB::table('stocks')->where('id', $stockId)->first();
+
+            $result[] = [
+                'code' => $stockInfo->code,
+                'total_quantity' => $totalQty,
+                'avg_buy_price' => round($totalCost / $totalQty, 2),
+                'current_price' => $stockInfo->current_price,
+                'risk_level' => $stockInfo->risk_level,
+            ];
+        }
+
+        return $result;
     }
 
     public static function getStockHolding($userId, $stockId)
@@ -94,5 +132,77 @@ class UserPortfolio extends Model
                 'up.buy_date'
             )
             ->get();
+    }
+
+    public static function getPortfolioWithUserBuy($userId)
+    {
+        // 1. Lấy tất cả stock user đã mua
+        /** @var \Illuminate\Support\Collection<int, \stdClass> $stocks */
+        $stocks = DB::table('user_portfolios')
+            ->where('user_id', $userId)
+            ->select('stock_id')
+            ->groupBy('stock_id')
+            ->get();
+
+        $result = [];
+
+        /** @var \stdClass $s */
+        foreach ($stocks as $s) {
+            $stockId = $s->stock_id;
+
+            // 2. Lấy danh sách các lô mua theo FIFO
+            $buys = DB::table('user_portfolios')
+                ->where('user_id', $userId)
+                ->where('stock_id', $stockId)
+                ->orderBy('buy_date', 'asc')
+                ->get();
+
+            // 3. Lấy tổng số lượng đã bán
+            $sellQty = DB::table('user_portfolios_sell')
+                ->where('user_id', $userId)
+                ->where('stock_id', $stockId)
+                ->sum('quantity');
+
+            // 4. Áp dụng FIFO
+            /** @var \App\Models\Portfolio $buy */
+            foreach ($buys as &$buy) {
+                if ($sellQty <= 0) break;
+
+                if ($sellQty >= $buy->quantity) {
+                    $sellQty -= $buy->quantity;
+                    $buy->quantity = 0;
+                } else {
+                    $buy->quantity -= $sellQty;
+                    $sellQty = 0;
+                }
+            }
+
+            // 5. Tính tổng và giá trung bình FIFO
+            $totalQty = 0;
+            $totalCost = 0;
+            /** @var \App\Models\Portfolio $buy */
+            foreach ($buys as $buy) {
+                if ($buy->quantity > 0) {
+                    $totalQty += $buy->quantity;
+                    $totalCost += $buy->quantity * $buy->buy_price;
+                }
+            }
+
+            if ($totalQty == 0) continue;
+
+            // 6. Lấy thông tin cổ phiếu
+            $stock = DB::table('stocks')->where('id', $stockId)->first();
+
+            // 7. Trả về format giống method dưới
+            $result[] = (object)[
+                'code'          => $stock->code,
+                'stock_id'      => $stockId,
+                'user_id'       => $userId,
+                'total_quantity'=> $totalQty,
+                'avg_buy_price' => round($totalCost / $totalQty, 2),
+            ];
+        }
+
+        return collect($result);
     }
 }

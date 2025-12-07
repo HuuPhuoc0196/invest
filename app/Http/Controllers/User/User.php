@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User as UserModel;
 use App\Models\Stock;
+use App\Models\UserCashIn;
+use App\Models\UserCashOut;
+use App\Models\UserCashFollow;
 use App\Models\UserFollow;
 use App\Models\UserPortfolio;
 use App\Models\UserPortfolioSell;
@@ -36,13 +39,32 @@ class User extends Controller
     {
         $userId = auth()->id();
         $userPortfolios = UserPortfolio::getProfileUser($userId);
+        $cashFollow = UserCashFollow::getCashFollow($userId);
+        $cashIn = UserCashIn::getCashIn($userId);
+        $cashOut = UserCashOut::getCashOut($userId);
 
-        return view('User.UserProfile', compact('userPortfolios'));
+        $cashInFinal = floatval($cashIn) - floatval($cashOut);
+        $cash = $cashFollow->cash ?? 0;
+
+        foreach ($userPortfolios as $item) {
+            $quantity = (int) $item['total_quantity'];
+            $price = (float) $item['current_price']; // ép về số
+            $cash += $quantity * $price;
+        }
+
+        $userInvestCash = [
+            'cash' => $cash,
+            'cash_in' => $cashInFinal
+        ];
+
+        return view('User.UserProfile', compact('userPortfolios', 'userInvestCash'));
     }
 
     public function infoProfile()
     {
-        return view('User.UserInfoProfile');
+        $userId = auth()->id();
+        $userPortfolios = UserPortfolio::getPortfolioWithUserBuy($userId);
+        return view('User.UserInfoProfile', compact('userPortfolios'));
     }
 
     public function follow()
@@ -145,8 +167,36 @@ class User extends Controller
         return $this->follow();
     }
 
+    // public function deleteUserProfileCode($code)
+    // {
+    //     $stock = Stock::where('code', $code)->first();
+    //     if(!empty($stock)){
+    //         $user_id = auth()->id();
+    //         $listUserProfile = UserPortfolio::getProfileUser($user_id);
+    //         $cashFollow = UserCashFollow::getCashFollow($user_id);
+    //         foreach ($listUserProfile as $item) {
+    //             $cashBuy = floatval($item["total_quantity"]) * floatval($item["avg_buy_price"]);
+    //             $cashFollow->cash += $cashBuy;
+    //         }
+    //         $cashFollow->save();
+    //         $deleteUserProfile = UserPortfolio::deleteUserInfo($stock->id, $user_id);
+    //         if ($deleteUserProfile) {
+    //             $listUserProfileSell = UserPortfolioSell::getAllPortfolioSellByUserId($user_id);
+    //             foreach ($listUserProfileSell as $item) {
+    //                 $cashBuy = floatval($item->sell_price) * floatval($item->quantity);
+    //                 $cashFollow->cash -= $cashBuy;
+    //             }
+    //             $cashFollow->save();
+    //             UserPortfolioSell::deleteUserInfo($stock->id,$user_id);
+    //         }
+    //     }
+    //     return $this->infoProfile();
+    // }
+
     public function buy(Request $request)
     {
+        $user_id = auth()->id();
+        $cashFollow = UserCashFollow::getCashFollow($user_id);
         if ($request->isMethod('post')) {
             // Có dữ liệu
             try {
@@ -157,6 +207,14 @@ class User extends Controller
                     'quantity' => 'required|numeric|gt:0',
                     'buy_date' => 'required|date|before_or_equal:today',
                 ]);
+
+                $cashBuy = floatval($validated['buy_price']) * floatval($validated['quantity']);
+                if($cashFollow->cash < $cashBuy){
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Số dư không đủ',
+                    ], 400);
+                }
 
                 // Kiểm tra code đã tồn tại chưa
                 $userPortfolio = new UserPortfolio();
@@ -178,6 +236,9 @@ class User extends Controller
                 // Lưu vào database (ví dụ bảng stocks)
                 $userPortfolio->save();
 
+                $cashFollow->cash -= $cashBuy;
+                $cashFollow->save();
+
                 // Trả kết quả JSON
                 return response()->json([
                     'status' => 'success',
@@ -191,12 +252,15 @@ class User extends Controller
                 ], 500);
             }
         } else {
-            return view('User.UserBuy');
+            $cash = $cashFollow->cash ?? 0;
+            return view('User.UserBuy',compact('cash'));
         }
     }
 
     public function sell(Request $request)
     {
+        $user_id = auth()->id();
+        $cashFollow = UserCashFollow::getCashFollow($user_id);
         if ($request->isMethod('post')) {
             // Có dữ liệu
             try {
@@ -207,7 +271,9 @@ class User extends Controller
                     'quantity' => 'required|numeric|gt:0',
                     'sell_date' => 'required|date|before_or_equal:today',
                 ]);
-                $user_id = auth()->id();
+                $cashSell = floatval($validated['sell_price']) * floatval($validated['quantity']);
+                $cashFollow->cash += $cashSell;
+                $cashFollow->save();
 
                 // Kiểm tra code đã tồn tại chưa
                 $stock = Stock::getByCode(strtoupper($validated['code']));
@@ -262,9 +328,10 @@ class User extends Controller
                 ], 500);
             }
         } else {
+            $cash = $cashFollow->cash ?? 0;
             $userId = auth()->id();
             $userPortfolios = UserPortfolio::getProfileUser($userId);
-            return view('User.UserSell', compact('userPortfolios'));
+            return view('User.UserSell', compact('userPortfolios', 'cash'));
         }
     }
 
@@ -384,5 +451,113 @@ class User extends Controller
     {
         $stock = Stock::getRiskLevelFromCode($code);
         return view('User.ShowRiskLevel', compact('stock'));
+    }
+
+    public function cashIn(Request $request)
+    {
+        $user_id = auth()->id();
+        $cashFollow = UserCashFollow::getCashFollow($user_id);
+        if ($request->isMethod('post')) {
+            // Có dữ liệu
+            try {
+                // Validation dữ liệu
+                $validated = $request->validate([
+                    'cashIn' => 'required|numeric|gt:0',
+                    'cashDate' => 'required|date|before_or_equal:today',
+                ]);
+                $user_id = auth()->id();
+                $cashFollow = UserCashFollow::getCashFollow($user_id);
+                $cashin = $validated['cashIn'];
+                if ($cashFollow) {
+                    // Nếu tồn tại → cộng thêm cash_in
+                    $cashFollow->cash += $cashin;
+                    $cashFollow->save();
+                } else {
+                    $userCashFollow = new UserCashFollow();
+                    $userCashFollow->user_id = $user_id;
+                    $userCashFollow->cash = $cashin;
+                    $userCashFollow->save();
+                }
+                // Mapping data vào model
+                $userCashIn = new UserCashIn();
+                $userCashIn->user_id = $user_id;
+                $userCashIn->cash_in = $cashin;
+                $userCashIn->cash_date = $validated['cashDate'];
+
+                // Lưu vào database 
+                $userCashIn->save();
+
+                // Trả kết quả JSON
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Nap tiền thành công.',
+                    'data' => $userCashIn
+                ]);
+            } catch (QueryException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+        } else {
+            $cash = $cashFollow->cash ?? 0;
+            return view('User.UserCashIn',compact('cash'));
+        }
+    }
+
+    public function cashOut(Request $request)
+    {
+        $user_id = auth()->id();
+        $cashFollow = UserCashFollow::getCashFollow($user_id);
+        if ($request->isMethod('post')) {
+            // Có dữ liệu
+            try {
+                // Validation dữ liệu
+                $validated = $request->validate([
+                    'cashOut' => 'required|numeric|gt:0',
+                    'cashDate' => 'required|date|before_or_equal:today',
+                ]);
+                $cashout = $validated['cashOut'];
+                if ($cashFollow) {
+                    if($cashFollow->cash < $cashout){
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Số dư không đủ',
+                        ], 400);
+                    }
+                }else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Bạn chưa nạp tiền vào tài khoản',
+                    ], 400);
+                }
+                
+                $cashFollow->cash -= $cashout;
+                $cashFollow->save();
+                // Mapping data vào model
+                $userCashout = new UserCashOut();
+                $userCashout->user_id = auth()->id();
+                $userCashout->cash_out = $cashout;
+                $userCashout->cash_date = $validated['cashDate'];
+
+                // Lưu vào database 
+                $userCashout->save();
+
+                // Trả kết quả JSON
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Rút tiền thành công.',
+                    'data' => $userCashout
+                ]);
+            } catch (QueryException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+        } else {
+            $cash = $cashFollow->cash ?? 0;
+            return view('User.UserCashOut',compact('cash'));
+        }
     }
 }
