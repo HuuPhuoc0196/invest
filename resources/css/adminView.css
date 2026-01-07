@@ -19,6 +19,10 @@ table {
     overflow: hidden;
 }
 
+.table-wide {
+    min-width: 900px;
+}
+
 .table-container {
     width: 100%;
     overflow-x: auto; /* Cho phép trượt ngang */

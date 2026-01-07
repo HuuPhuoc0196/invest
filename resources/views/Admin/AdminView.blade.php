@@ -39,6 +39,7 @@
         @else
             <button onclick="syncDataRisk()" disabled style="opacity: 0.5; cursor: not-allowed;">🔄 Sync Rủi ro</button>
         @endif
+        <a href="{{ url('/admin/uploadFile') }}" class="button-link">🔃 Upload file</a>
     </div>
     <div style="display: flex; gap: 5px;">
         <a href="{{ url('/admin/logs') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs Hosting</a>

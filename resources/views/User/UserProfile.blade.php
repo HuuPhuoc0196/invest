@@ -37,7 +37,7 @@
     <h1>Danh sách mã cổ phiếu đang giữ</h1>
 
     <div class="table-container">
-        <table id="stock-table">
+        <table id="stock-table" class="table-wide">
             <thead>
                 <tr>
                     <th>Mã cổ phiếu</th>
@@ -53,7 +53,7 @@
             <tbody id="stockTableBody">
             </tbody>
         </table>
-        <table id="invest-table">
+        <table id="invest-table" class="table-wide">
             <thead>
                 <tr>
                     <th>Danh mục</th>

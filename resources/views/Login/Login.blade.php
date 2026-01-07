@@ -30,8 +30,10 @@
         <button type="submit" class="login-btn">Đăng nhập</button>
 
         <div class="extra-actions">
-            <button type="button" onclick="location.href='{{ url('/register') }}'" class="secondary-btn">Đăng ký tài khoản</button>
-            <button type="button" onclick="location.href='{{ url('/forgotPassword') }}'" class="secondary-btn">Quên mật khẩu?</button>
+            <button type="button" onclick="location.href='{{ url('/register') }}'" class="secondary-btn">Đăng ký tài
+                khoản</button>
+            <button type="button" onclick="location.href='{{ url('/forgotPassword') }}'" class="secondary-btn">Quên mật
+                khẩu?</button>
         </div>
     </form>
 @endsection
@@ -74,9 +76,9 @@
             }
 
             if (password.length < 6) {
-            errorMessage.innerText = "Mật khẩu phải có ít nhất 6 ký tự.";
-            errorMessage.style.display = "block";
-            return;
+                errorMessage.innerText = "Mật khẩu phải có ít nhất 6 ký tự.";
+                errorMessage.style.display = "block";
+                return;
             }
 
 
@@ -95,7 +97,7 @@
                 data: JSON.stringify(data),
                 success: function (response) {
                     if (response.status === "success") {
-                        if(response.data.role === 1) window.location.href = "{{ url('/admin') }}";
+                        if (response.data.role === 1) window.location.href = "{{ url('/admin') }}";
                         window.location.href = "{{ url('/') }}";
                     } else {
                         errorMessage.innerText = response.message;

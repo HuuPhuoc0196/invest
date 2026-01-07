@@ -371,4 +371,59 @@ class Sync extends Controller
         }
         return "<pre>" . htmlspecialchars($response) . "</pre>";
     }
+
+    public function uploadFile(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            try {
+                $file = $request->file('file');
+                if (!$file) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Không có file được upload.'
+                    ]);
+                }
+
+                $content = $file->get();
+                $lines = explode("\n", $content);
+                $data = [];
+
+                foreach ($lines as $line) {
+                    $line = trim($line);
+                    if (empty($line)) continue;
+
+                    $parts = explode(':', $line);
+                    if (count($parts) == 2) {
+                        $code = trim($parts[0]);
+                        $priceInvest = (int)trim($parts[1]) * 1000;
+                        $stock = Stock::getByCode(strtoupper($code));
+                        if (!$stock) {
+                            $stock = new Stock();
+                            $stock->code = strtoupper($code);
+                            $stock->recommended_buy_price = $priceInvest;
+                            $stock->current_price = $priceInvest;
+                            $stock->risk_level = 4;
+                            // Lưu vào database (ví dụ bảng stocks)
+                            $stock->save();
+                        }else {
+                            $stock->recommended_buy_price = $priceInvest;
+                            $stock->save();
+                        }
+                    }
+                }
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Upload thành công.'
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+        } else {
+            return view('Admin.AdminUploadFile');
+        }
+    }
 }

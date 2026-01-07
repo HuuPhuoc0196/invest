@@ -63,6 +63,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         return "<pre>" . htmlspecialchars($logs) . "</pre>";
     });
     Route::get('/admin/logsVPS', [Sync::class, 'getLogsVPS']);
+     Route::match(['get', 'post'], '/admin/uploadFile', [Sync::class, 'uploadFile'])->name('uploadFile');
 });
 
 // User routes
