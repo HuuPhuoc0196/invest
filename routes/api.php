@@ -28,3 +28,4 @@ Route::get('/admin/sendEmailRisk', [Sync::class, 'sendEmailRisk'])->name('Sync.s
 Route::get('/admin/sendEmailStocks', [Sync::class, 'sendEmailStocks'])->name('Sync.sendEmailStocks');
 Route::get('/admin/sendEmailStocksFollow', [Sync::class, 'sendEmailStocksFollow'])->name('Sync.sendEmailStocksFollow');
 Route::get('/admin/followStocksEveryDay', [Sync::class, 'followStocksEveryDay'])->name('Sync.followStocksEveryDay');
+Route::get('/admin/sendEmailVnindex', [Sync::class, 'sendEmailVnindex'])->name('Sync.sendEmailVnindex');

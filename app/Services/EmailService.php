@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Mail;
 
 class EmailService
 {
-    public static function sendRiskChangeNotification($code, $oldRisk, $newRisk)
+    public static function sendRiskChangeNotification($code, $oldRisk, $newRisk, $date)
     {
         $oldRiskText = self::getRisk($oldRisk);
         $newRiskText = self::getRisk($newRisk);
@@ -18,6 +18,20 @@ class EmailService
         $message .= '<br/>Chuyển từ ' . $oldRiskText;
         $message .= '<br/> Thành ' . $newRiskText;
         $message .= "<br/>url: https://finance.vietstock.vn/lich-su-kien.htm?page=1&tab=2&code=" . $code;
+        $message .= '<br/> Ngày thực hiện: ' . $date;
+        Mail::to($to)->send(new NotifyUserMail($subject, $message));
+
+        return "Email đã được gửi!";
+    }
+
+    public static function sendVnindexChangeNotification($index_current, $index_suggest)
+    {
+
+        $to = 'lehuuphuoc0196@gmail.com';
+        $subject = 'Investment cá nhân thông báo chỉ số VN-Index hiện tại là: <span style="color:red;"> ' . $index_current . '</span>';
+        $message = 'Hệ thống ghi nhận chỉ số VN-Index hiện tại là: <span style="color:red;">' . $index_current . '</span>';
+        $message .= '<br/>Đang trong vùng mua tốt ';
+        $message .= '<br/>Vùng VN-Index suggest: <span style="color:green;">' . $index_suggest . '</span>';
         Mail::to($to)->send(new NotifyUserMail($subject, $message));
 
         return "Email đã được gửi!";

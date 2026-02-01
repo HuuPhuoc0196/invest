@@ -203,11 +203,31 @@ class Sync extends Controller
     {
         $code = $request->query('code');
         $risk_level = $request->query('risk_level');
+        $date = $request->query('date');
         $newRisk = $request->query('newRisk');
-        $result = EmailService::sendRiskChangeNotification($code, $risk_level, $newRisk);
+        $result = EmailService::sendRiskChangeNotification($code, $risk_level, $newRisk, $date);
         $message = 'Hệ thống ghi nhận cổ phiếu ' . $code . ' có thay đổi mức độ rủi ro.';
         $message .= ' Chuyển từ ' . $risk_level;
         $message .= ' Thành ' . $newRisk;
+        $message .= ' Ngày thực hiện ' . $date;
+        Log::info($message);
+        Log::info("Send mail: " . $result);
+        // Trả kết quả JSON
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Send mail thành công.',
+            // 'data' => $stock
+        ]);
+    }
+
+    public function sendEmailVnindex(Request $request)
+    {
+        $index_current = $request->query('index_current');
+        $index_suggest = $request->query('index_suggest');
+        $result = EmailService::sendVnindexChangeNotification($index_current, $index_suggest);
+        $message = 'Hệ thống ghi nhận Vnindex có mức điều chỉnh về vùng mua tốt.';
+        $message .= ' Vnindex hiện tại:  ' . $index_current;
+        $message .= ' Vindex vùng mua tốt: ' . $index_suggest;
         Log::info($message);
         Log::info("Send mail: " . $result);
         // Trả kết quả JSON
