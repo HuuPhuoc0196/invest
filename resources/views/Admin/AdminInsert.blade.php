@@ -43,12 +43,12 @@
         </div>
 
         <div class="form-group">
-            <label for="risk">Rủi ro:</label>
+            <label for="risk">Trạng thái:</label>
             <select id="risk">
-                <option value="1">Rất tốt</option>
-                <option value="2">Tốt</option>
-                <option value="3">Nguy hiểm</option>
-                <option value="4">Rất xấu</option>
+                <option value="1">An toàn</option>
+                <option value="2">Cảnh báo</option>
+                <option value="3">Hạn chế GD</option>
+                <option value="4">Đình chỉ/Huỷ</option>
             </select>
         </div>
         <div id="toast" class="toast"></div>

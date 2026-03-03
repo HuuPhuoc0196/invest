@@ -447,6 +447,42 @@ class User extends Controller
         }
     }
 
+    public function checkStockCode($code)
+    {
+        $stock = Stock::getByCode(strtoupper($code));
+        if ($stock) {
+            // Kiểm tra user đã follow mã này chưa
+            $userFollowExist = UserFollow::getUserFollowFirst($stock->id, auth()->id());
+            if ($userFollowExist) {
+                return response()->json([
+                    'status' => 'warning',
+                    'message' => 'Mã cổ phiếu ' . strtoupper($code) . ' đã được theo dõi rồi.',
+                    'data' => [
+                        'code' => $stock->code,
+                        'recommended_buy_price' => $stock->recommended_buy_price,
+                        'current_price' => $stock->current_price,
+                        'recommended_sell_price' => $stock->recommended_sell_price,
+                    ]
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Giá theo dõi ' . strtoupper($code) . ' đã được cập nhật.',
+                'data' => [
+                    'code' => $stock->code,
+                    'recommended_buy_price' => $stock->recommended_buy_price,
+                    'current_price' => $stock->current_price,
+                    'recommended_sell_price' => $stock->recommended_sell_price,
+                ]
+            ]);
+        }
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Mã cổ phiếu ' . strtoupper($code) . ' không tồn tại trong hệ thống.'
+        ]);
+    }
+
     public function getRiskLevel($code)
     {
         $stock = Stock::getRiskLevelFromCode($code);

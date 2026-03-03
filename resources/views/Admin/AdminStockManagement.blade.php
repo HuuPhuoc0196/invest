@@ -1,10 +1,9 @@
 @extends('Layout.LayoutAdmin')
 
-@section('title', 'Danh sách mã cổ phiếu')
+@section('title', 'Quản lý cổ phiếu')
 
 @section('header-css')
     @vite('resources/css/app.css')
-    @vite('resources/css/adminView.css')
     @vite('resources/css/adminStockManagement.css')
 @endsection
 
@@ -12,24 +11,17 @@
     @vite('resources/js/app.js')
 @endsection
 
+@section('csrf-token')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
 
 @section('actions-left')
     <div style="display: flex; gap: 5px;">
         <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
-        <a href="{{ url('/admin/stocks') }}" class="button-link">📊 Quản lý cổ phiếu</a>
+        <a href="{{ url('/admin/stocks/insert') }}" class="button-link">➕ Thêm cổ phiếu</a>
+        <a href="javascript:void(0)" class="button-link" onclick="confirmExportCsv()">📄 Xuất file csv</a>
+        <a href="javascript:void(0)" class="button-link" onclick="openImportModal()">📥 Nhập file csv</a>
     </div>
-    <div style="display: flex; gap: 5px;">
-    </div>
-    <div style="display: flex; gap: 5px;">
-        <a href="{{ url('/admin/logs') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs Hosting</a>
-        <a href="{{ url('/admin/logsVPS') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs VPS</a>
-        <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
-            🚪 Đăng xuất
-        </button>
-    </div>
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-        @csrf
-    </form>
 @endsection
 
 @section('actions-right')
@@ -68,7 +60,7 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label></label>Điểm:</label>
+                    <label>Điểm:</label>
                     <div class="filter-range">
                         <input type="number" id="filterRatingMin" placeholder="Từ" step="0.1">
                         <span>~</span>
@@ -76,7 +68,7 @@
                     </div>
                 </div>
                 <div class="filter-group">
-                    <label>Khối lượng:</label>
+                    <label>KL trung bình:</label>
                     <div class="filter-range">
                         <input type="number" id="filterVolumeMin" placeholder="Từ">
                         <span>~</span>
@@ -112,17 +104,43 @@
                     <th data-sort-key="percent_buy" onclick="sortByColumn('percent_buy')">Tỉ lệ mua <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="percent_sell" onclick="sortByColumn('percent_sell')">Tỉ lệ bán <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="rating_stocks" onclick="sortByColumn('rating_stocks')">Điểm <span class="sort-icon">⇅</span></th>
-                    <th data-sort-key="volume" onclick="sortByColumn('volume')">Khối lượng <span class="sort-icon">⇅</span></th>
+                    <th data-sort-key="volume_avg" onclick="sortByColumn('volume_avg')">Khối lượng trung bình <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="valuation" onclick="sortByColumn('valuation')">% Định giá <span class="sort-icon">▲</span></th>
+                    <th>Cập nhật</th>
                 </tr>
             </thead>
             <tbody id="stockTableBody">
             </tbody>
         </table>
     </div>
+
+    <!-- Modal Import CSV -->
+    <div id="importCsvModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeImportModal()">&times;</span>
+            <h2>Thêm cổ phiếu bằng file CSV</h2>
+            <div id="dropZone" class="drop-zone" onclick="document.getElementById('csvFileInput').click()">
+                <input type="file" id="csvFileInput" accept=".csv" style="display:none;">
+                <div id="dropZoneText">
+                    <span style="font-size:40px;">📁</span>
+                    <p>Click để chọn file CSV hoặc kéo thả vào đây</p>
+                </div>
+                <div id="fileInfo" style="display:none;">
+                    <span style="font-size:30px;">✅</span>
+                    <p id="fileName"></p>
+                </div>
+            </div>
+            <div id="importResult" class="import-result" style="display:none;"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeImportModal()">Huỷ</button>
+                <button class="btn-import" onclick="submitImportCsv()">Nhập dữ liệu</button>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('admin-script')
+    @vite('resources/js/AdminStockManagement.js')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         const baseUrl = "{{ url('') }}";
@@ -140,7 +158,7 @@
                 currentSortDir = 'asc';
             }
             updateSortIcons();
-            renderTable(getFilteredStocks());
+            renderStockTable(getFilteredStocks());
         }
 
         function updateSortIcons() {
@@ -156,138 +174,10 @@
             });
         }
 
-        function dynamicSort(data) {
-            data.sort((a, b) => {
-                let valA, valB;
-                if (currentSortKey === 'valuation') {
-                    const buyA = parseFloat(a.recommended_buy_price) || 1;
-                    const curA = parseFloat(a.current_price) || 0;
-                    valA = buyA !== 0 ? ((curA - buyA) / buyA) * 100 : 0;
-                    const buyB = parseFloat(b.recommended_buy_price) || 1;
-                    const curB = parseFloat(b.current_price) || 0;
-                    valB = buyB !== 0 ? ((curB - buyB) / buyB) * 100 : 0;
-                } else if (currentSortKey === 'code') {
-                    valA = (a.code || '').toString();
-                    valB = (b.code || '').toString();
-                    return currentSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                } else {
-                    valA = parseFloat(a[currentSortKey]) || 0;
-                    valB = parseFloat(b[currentSortKey]) || 0;
-                }
-                return currentSortDir === 'asc' ? valA - valB : valB - valA;
-            });
-        }
-
         document.addEventListener("DOMContentLoaded", function() {
             updateSortIcons();
-            renderTable(stocks);
-
-            // Drag-to-scroll
-            const container = document.querySelector('.table-container');
-            let isDown = false;
-            let startX, scrollLeft;
-
-            container.addEventListener('mousedown', function(e) {
-                if (e.target.closest('a, button, input, select')) return;
-                isDown = true;
-                container.style.cursor = 'grabbing';
-                startX = e.pageX - container.offsetLeft;
-                scrollLeft = container.scrollLeft;
-                e.preventDefault();
-            });
-
-            container.addEventListener('mouseleave', function() {
-                isDown = false;
-                container.style.cursor = 'grab';
-            });
-
-            container.addEventListener('mouseup', function() {
-                isDown = false;
-                container.style.cursor = 'grab';
-            });
-
-            container.addEventListener('mousemove', function(e) {
-                if (!isDown) return;
-                e.preventDefault();
-                const x = e.pageX - container.offsetLeft;
-                const walk = (x - startX) * 2;
-                container.scrollLeft = scrollLeft - walk;
-            });
-
-            container.style.cursor = 'grab';
+            renderStockTable(stocks);
         });
-
-        function getRisk(rating) {
-            switch (Number(rating)) {
-                case 1: return { label: 'An toàn', color: '#27ae60' };
-                case 2: return { label: 'Cảnh báo', color: '#f39c12' };
-                case 3: return { label: 'Hạn chế GD', color: '#e74c3c' };
-                case 4: return { label: 'Đình chỉ/Huỷ', color: '#c0392b' };
-                default: return { label: 'Chưa xác định', color: '#95a5a6' };
-            }
-        }
-
-        function getRowClass(goodPrice, currentPrice) {
-            if (currentPrice > goodPrice) {
-                const percentDiff = ((currentPrice - goodPrice) / goodPrice) * 100;
-                return percentDiff <= 10 ? 'yellow' : '';
-            } else if (currentPrice <= goodPrice) {
-                const percentDiff = ((goodPrice - currentPrice) / goodPrice) * 100;
-                if (percentDiff > 20) return 'red';
-                else if (percentDiff > 10) return 'purple';
-                else return 'green';
-            }
-        }
-
-        function getRatingBadge(rating) {
-            if (rating === null || rating === undefined) {
-                return '<span class="rating-badge" style="background-color:#eee;color:#999;">N/A</span>';
-            }
-            const val = parseFloat(rating);
-            let cls = 'rating-medium';
-            if (val >= 7) cls = 'rating-high';
-            else if (val < 5) cls = 'rating-low';
-            return '<span class="rating-badge ' + cls + '">' + val.toFixed(2) + '</span>';
-        }
-
-        function renderTable(data) {
-            const tbody = document.getElementById('stockTableBody');
-            tbody.innerHTML = '';
-
-            dynamicSort(data);
-
-            data.forEach(stock => {
-                const buyPrice = parseFloat(stock.recommended_buy_price) || 0;
-                const currentPrice = parseFloat(stock.current_price) || 0;
-                const sellPrice = stock.recommended_sell_price ? Number(stock.recommended_sell_price).toLocaleString('vi-VN') : 'N/A';
-                const volume = stock.volume ? Number(stock.volume).toLocaleString('vi-VN') : 'N/A';
-                const valuation = buyPrice !== 0 ? ((currentPrice / buyPrice) * 100 - 100).toFixed(2) : 0;
-
-                let valuationColor = 'yellow';
-                let sign = '';
-                if (valuation > 0) { valuationColor = 'green'; sign = '+'; }
-                else if (valuation < 0) { valuationColor = 'red'; sign = ''; }
-
-                const row = document.createElement('tr');
-                row.className = getRowClass(buyPrice, currentPrice);
-                row.innerHTML = `
-                    <td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
-                    <td>${[30, 100].includes(Number(stock.stocks_vn)) ? Number(stock.stocks_vn) : 'ALL'}</td>
-                    <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
-                    <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
-                    <td>${sellPrice}</td>
-                    <td style="color: ${getRisk(stock.risk_level).color}">
-                        ${getRisk(stock.risk_level).label}
-                    </td>
-                    <td>${stock.percent_buy != null ? parseFloat(stock.percent_buy) + '%' : 'N/A'}</td>
-                    <td>${stock.percent_sell != null ? parseFloat(stock.percent_sell) + '%' : 'N/A'}</td>
-                    <td>${getRatingBadge(stock.rating_stocks)}</td>
-                    <td>${volume}</td>
-                    <td style="color: ${valuationColor}; font-weight: bold;">${sign}${valuation}%</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
 
         function getFilteredStocks() {
             const keyword = document.getElementById('searchInput').value.trim().toUpperCase();
@@ -301,30 +191,41 @@
             const valuationMax = document.getElementById('filterValuationMax').value;
 
             return stocks.filter(stock => {
+                // Search by code
                 if (keyword && !stock.code.includes(keyword)) return false;
+
+                // Filter: Trạng thái
                 if (risk && Number(stock.risk_level) !== Number(risk)) return false;
 
+                // Filter: Thuộc VN
                 if (stocksVn === 'ALL') {
                     if ([30, 100].includes(Number(stock.stocks_vn))) return false;
                 } else if (stocksVn !== '' && Number(stock.stocks_vn) !== Number(stocksVn)) {
                     return false;
                 }
 
+                // Filter: Điểm
+
                 const rating = parseFloat(stock.rating_stocks);
                 if (ratingMin !== '' && (isNaN(rating) || rating < parseFloat(ratingMin))) return false;
                 if (ratingMax !== '' && (isNaN(rating) || rating > parseFloat(ratingMax))) return false;
 
-                const vol = parseFloat(stock.volume) || 0;
+                // Filter: Khối lượng trung bình (dùng volume_avg)
+                const vol = parseFloat(stock.volume_avg) || 0;
                 if (volumeMin !== '' && vol < parseFloat(volumeMin)) return false;
                 if (volumeMax !== '' && vol > parseFloat(volumeMax)) return false;
 
+                // Filter: % Định giá (lọc giữa 2 giá trị bất kể nhập x > y hay y > x)
                 const buyPrice = parseFloat(stock.recommended_buy_price) || 0;
                 const currentPrice = parseFloat(stock.current_price) || 0;
                 const valuation = buyPrice !== 0 ? ((currentPrice / buyPrice) * 100 - 100) : 0;
                 let minVal = valuationMin !== '' ? parseFloat(valuationMin) : null;
                 let maxVal = valuationMax !== '' ? parseFloat(valuationMax) : null;
                 if (minVal !== null && maxVal !== null) {
-                    if (minVal > maxVal) { const tmp = minVal; minVal = maxVal; maxVal = tmp; }
+                    // Swap if min > max
+                    if (minVal > maxVal) {
+                        const tmp = minVal; minVal = maxVal; maxVal = tmp;
+                    }
                     if (valuation < minVal || valuation > maxVal) return false;
                 } else if (minVal !== null) {
                     if (valuation < minVal) return false;
@@ -337,11 +238,11 @@
         }
 
         function searchStock() {
-            renderTable(getFilteredStocks());
+            renderStockTable(getFilteredStocks());
         }
 
         function applyFilter() {
-            renderTable(getFilteredStocks());
+            renderStockTable(getFilteredStocks());
         }
 
         function resetFilter() {
@@ -354,7 +255,7 @@
             document.getElementById('filterValuationMin').value = '';
             document.getElementById('filterValuationMax').value = '';
             document.getElementById('searchInput').value = '';
-            renderTable(stocks);
+            renderStockTable(stocks);
         }
 
         function toggleFilter() {
@@ -366,6 +267,12 @@
             } else {
                 body.style.display = 'none';
                 icon.textContent = '▼';
+            }
+        }
+
+        function confirmExportCsv() {
+            if (confirm('Bạn có muốn xuất file CSV không?')) {
+                window.location.href = baseUrl + '/admin/stocks/export-csv';
             }
         }
     </script>

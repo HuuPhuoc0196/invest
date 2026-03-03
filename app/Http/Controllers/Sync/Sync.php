@@ -253,6 +253,23 @@ class Sync extends Controller
         ]);
     }
 
+    public function sendEmailError(Request $request)
+    {
+        $file = $request->query('file');
+        $function = $request->query('function');
+        $message = $request->query('message');
+        $result = EmailService::sendErrorNotification($file, $function, $message);
+        $logMessage = 'Hệ thống ghi nhận lỗi trong file ' . $file . ' tại function ' . $function . '. Thông báo lỗi: ' . $message;
+        Log::info($logMessage);
+        Log::info("Send mail: " . $result);
+        // Trả kết quả JSON
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Send mail thành công.',
+            // 'data' => $stock
+        ]);
+    }
+
     public function sendEmailStocksFollow(Request $request)
     {
         $code = $request->query('code');
@@ -385,7 +402,7 @@ class Sync extends Controller
     {
         try {
             // $response = Http::timeout(120)->get("http://127.0.0.1:5000/getLogs");
-            $response = Http::timeout(120)->get("http://163.61.182.174/getLogs");
+            $response = Http::timeout(120)->get("http://163.61.182.174/get-logs");
         } catch (\Exception $e) {
             Log::error("Request error getLogsVPS: " . $e->getMessage());
         }

@@ -48,6 +48,18 @@ class EmailService
         return "Email đã được gửi!";
     }
 
+    public static function sendErrorNotification($file, $function, $message)
+    {
+        $to = 'lehuuphuoc0196@gmail.com';
+        $subject = 'Investment cá nhân thông báo lỗi';
+        $messageEmail = 'Hệ thống ghi nhận lỗi trong file <span style="color:red;">' . $file . '</span> tại function <span style="color:red;">' . $function . '</span>.';
+        $messageEmail .= '<br/>Thông báo lỗi: ' . $message;
+        Mail::to($to)->send(new NotifyUserMail($subject, $messageEmail));
+
+        return "Email đã được gửi!";
+    }
+
+
     public static function sendSuggestStocksHave10tr($code)
     {
         $to = 'lehuuphuoc0196@gmail.com';
@@ -124,15 +136,15 @@ class EmailService
     {
         switch (intval($rating)) {
             case 1:
-                return '<span style="color:green;">1: An toàn</span>';
+                return '<span style="color:#27ae60;">An toàn</span>';
             case 2:
-                return '<span style="color:orange;">2: Tốt</span>';
+                return '<span style="color:#f39c12;">Cảnh báo</span>';
             case 3:
-                return '<span style="color:OrangeRed;">3: Nguy hiểm</span>';
+                return '<span style="color:#e74c3c;">Hạn chế GD</span>';
             case 4:
-                return '<span style="color:red;">4: Cực kỳ xấu</span>';
+                return '<span style="color:#c0392b;">Đình chỉ/Huỷ</span>';
             default:
-                return 'Không xác định';
+                return 'Chưa xác định';
         }
     }
 

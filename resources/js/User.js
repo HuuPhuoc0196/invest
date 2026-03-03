@@ -182,6 +182,7 @@ export default class User{
 
         // Dòng tổng cộng
         const totalRow = document.createElement('tr');
+        totalRow.classList.add('total-row');
         totalRow.innerHTML = `
             <td><strong>Tổng:</strong></td>
             <td><strong>${totalQuantity.toLocaleString('vi-VN')}</strong></td>
@@ -307,6 +308,7 @@ export default class User{
 
         // Tạo dòng tổng cộng
         const totalRow = document.createElement('tr');
+        totalRow.classList.add('total-row');
         totalRow.innerHTML = `
             <td><strong>Tổng :</strong></td>
             <td><strong>${totalQuantity.toLocaleString('vi-VN')}</strong></td>

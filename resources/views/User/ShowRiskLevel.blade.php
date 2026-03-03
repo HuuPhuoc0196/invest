@@ -20,10 +20,10 @@
     <div class="legend">
     <h3>Chú thích tình trang của cổ phiếu</h3>
     <ul>
-        <li><span style="color: green; font-weight: bold;">An toàn:</span> Cổ phiếu đang giao dịch bình thường, ra khỏi diện Cảnh báo và bị kiểm soát hoặc không vi phạm quy định.</li>
-        <li><span style="color: orange; font-weight: bold;">Tốt:</span> Cổ phiếu ra khỏi diện hạn chế giao dịch, vào diện cảnh báo, vào diện kiểm soát.</li>
-        <li><span style="color: orangered; font-weight: bold;">Nguy hiểm:</span> Cổ phiếu vào diện Cảnh báo và bị kiểm soát, vào diện Cảnh báo và hạn chế giao dịch, ra khỏi diện Đình chỉ giao dịch.</li>
-        <li><span style="color: red; font-weight: bold;">Cực kỳ xấu:</span> Cổ phiếu vào diện Đình chỉ giao dịch, Hủy niêm yết cổ phiếu.</li>
+        <li><span style="color: #27ae60; font-weight: bold;">✅ An toàn:</span> Đang giao dịch bình thường, không vi phạm quy định.</li>
+        <li><span style="color: #f39c12; font-weight: bold;">⚠️ Cảnh báo:</span> Vào diện Cảnh báo hoặc Kiểm soát.</li>
+        <li><span style="color: #e74c3c; font-weight: bold;">🔒 Hạn chế GD:</span> Hạn chế giao dịch, Cảnh báo + Kiểm soát.</li>
+        <li><span style="color: #c0392b; font-weight: bold;">⛔ Đình chỉ/Huỷ:</span> Đình chỉ giao dịch hoặc Hủy niêm yết.</li>
     </ul>
     <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
 </div>
@@ -35,15 +35,15 @@
         function getRisk(rating) {
             switch (Number(rating)) {
                 case 1:
-                    return { label: 'An toàn', color: 'green' };
+                    return { label: 'An toàn', color: '#27ae60' };
                 case 2:
-                    return { label: 'Tốt', color: 'orange' };
+                    return { label: 'Cảnh báo', color: '#f39c12' };
                 case 3:
-                    return { label: 'Nguy hiểm', color: 'OrangeRed' };
+                    return { label: 'Hạn chế GD', color: '#e74c3c' };
                 case 4:
-                    return { label: 'Cực kỳ xấu', color: 'red' };
+                    return { label: 'Đình chỉ/Huỷ', color: '#c0392b' };
                 default:
-                    return { label: 'Không xác định', color: 'gray' };
+                    return { label: 'Chưa xác định', color: '#95a5a6' };
             }
         }
 

@@ -52,6 +52,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::match(['get', 'post'], '/admin/insert', [Admin::class, 'insert'])->name('insert');
     Route::match(['get', 'put'], '/admin/update/{code}', [Admin::class, 'update'])->name('admin.update');
     Route::match(['get', 'post'], '/admin/updateRiskForCode', [Sync::class, 'updateRiskForCode'])->name('updateRiskForCode');
+
+    // Quản lý cổ phiếu
+    Route::get('/admin/stocks', [Admin::class, 'stockManagement'])->name('admin.stocks');
+    Route::get('/admin/stocks/export-csv', [Admin::class, 'exportStocksCsv'])->name('admin.stocks.exportCsv');
+    Route::post('/admin/stocks/import-csv', [Admin::class, 'importStocksCsv'])->name('admin.stocks.importCsv');
+    Route::match(['get', 'post'], '/admin/stocks/insert', [Admin::class, 'stockInsert'])->name('admin.stocks.insert');
+
     Route::get('/admin/logs', function () {
         $logFile = storage_path('logs/laravel.log');
 
@@ -82,6 +89,7 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::match(['get', 'post'], '/user/buy', [User::class, 'buy'])->name('buy');
     Route::match(['get', 'post'], '/user/sell', [User::class, 'sell'])->name('sell');
     Route::match(['get', 'post'], '/user/insertFollow', [User::class, 'insertFollow'])->name('insertFollow');
+    Route::get('/user/checkStockCode/{code}', [User::class, 'checkStockCode'])->name('user.checkStockCode');
     Route::match(['get', 'put'], '/user/updateFollow/{code}', [User::class, 'updateFollow'])->name('user.updateFollow');
     Route::match(['get', 'post'],'/user/cashIn', [User::class, 'cashIn'])->name('user.cashIn');
     Route::match(['get', 'post'],'/user/cashOut', [User::class, 'cashOut'])->name('user.cashOut');

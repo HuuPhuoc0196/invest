@@ -11,12 +11,12 @@ h1 {
 
 table {
     min-width: 600px;
-    border-collapse: collapse;
+    border-collapse: separate; /* dùng separate thay collapse vì collapse phá sticky */
+    border-spacing: 0;
     margin-top: 20px;
     background-color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    overflow: hidden;
 }
 
 .table-wide {
@@ -25,8 +25,6 @@ table {
 
 .table-container {
     width: 100%;
-    overflow-x: auto; /* Cho phép trượt ngang */
-    -webkit-overflow-scrolling: touch; /* Giúp cuộn mượt trên iOS */
 }
 
 th,
@@ -56,7 +54,7 @@ tr.purple {
     color: #aa00aa;
 }
 tr.red {
-    background-color: #eee4e4ff; /* tím nhạt */
+    background-color: #eee4e4ff; /* đỏ nhạt */
     color: #b30606ff;
 }
 
@@ -90,7 +88,21 @@ tr.red {
 }
 
 .highlighted-row {
-    background-color: #fff5cc; /* màu vàng nhạt */
+    background-color: #fff5cc; 
     font-weight: bold;
     border-left: 5px solid #ffcc00;
+}
+
+#stock-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: visible;
+}
+
+.sticky-header th {
+    position: sticky;
+    top: 0;
+    background-color: #34495e;
+    z-index: 1001;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
