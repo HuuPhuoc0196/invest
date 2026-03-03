@@ -215,6 +215,86 @@
             });
 
             container.style.cursor = 'grab';
+
+            // === JS clone-based sticky header ===
+            const stickyTable = document.getElementById('stock-table');
+            const stickyContainer = document.querySelector('.table-container');
+            if (stickyTable && stickyContainer) {
+                const thead = stickyTable.querySelector('thead');
+                let cloneWrap = null;
+                let cloneTable = null;
+
+                function createClone() {
+                    if (cloneWrap) cloneWrap.remove();
+                    cloneWrap = document.createElement('div');
+                    cloneWrap.className = 'sticky-clone';
+                    cloneTable = document.createElement('table');
+                    cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:#34495e;margin:0;table-layout:fixed;';
+                    const cloneThead = thead.cloneNode(true);
+                    // Re-bind sort click events on cloned th
+                    cloneThead.querySelectorAll('th[data-sort-key]').forEach(th => {
+                        const key = th.getAttribute('data-sort-key');
+                        th.style.cursor = 'pointer';
+                        th.style.pointerEvents = 'auto';
+                        th.addEventListener('click', () => sortByColumn(key));
+                    });
+                    cloneTable.appendChild(cloneThead);
+                    cloneWrap.appendChild(cloneTable);
+                    cloneWrap.style.pointerEvents = 'auto';
+                    document.body.appendChild(cloneWrap);
+                    syncWidths();
+                    syncScroll();
+                    cloneWrap.style.display = 'none';
+                }
+
+                function syncWidths() {
+                    if (!cloneTable) return;
+                    const origCells = thead.querySelectorAll('th');
+                    const cloneCells = cloneTable.querySelectorAll('th');
+                    const tableWidth = stickyTable.getBoundingClientRect().width;
+                    cloneTable.style.width = tableWidth + 'px';
+                    origCells.forEach((cell, i) => {
+                        if (cloneCells[i]) {
+                            const w = cell.getBoundingClientRect().width;
+                            cloneCells[i].style.boxSizing = 'border-box';
+                            cloneCells[i].style.width = w + 'px';
+                            cloneCells[i].style.minWidth = w + 'px';
+                            cloneCells[i].style.maxWidth = w + 'px';
+                        }
+                    });
+                }
+
+                function syncScroll() {
+                    if (!cloneWrap) return;
+                    const containerRect = stickyContainer.getBoundingClientRect();
+                    cloneWrap.style.left = containerRect.left + 'px';
+                    cloneWrap.style.width = containerRect.width + 'px';
+                    cloneTable.style.marginLeft = -stickyContainer.scrollLeft + 'px';
+                }
+
+                function onScroll() {
+                    if (!cloneWrap) return;
+                    const tableRect = stickyTable.getBoundingClientRect();
+                    const theadHeight = thead.offsetHeight;
+                    if (tableRect.top < 0 && tableRect.bottom > theadHeight) {
+                        cloneWrap.style.display = 'block';
+                        syncScroll();
+                    } else {
+                        cloneWrap.style.display = 'none';
+                    }
+                }
+
+                createClone();
+                window.addEventListener('scroll', onScroll);
+                window.addEventListener('resize', function() { createClone(); onScroll(); });
+                stickyContainer.addEventListener('scroll', syncScroll);
+
+                // Re-create clone when table re-renders
+                const observer = new MutationObserver(function() {
+                    setTimeout(function() { createClone(); onScroll(); }, 50);
+                });
+                observer.observe(document.getElementById('stockTableBody'), { childList: true });
+            }
         });
 
         function getRisk(rating) {
