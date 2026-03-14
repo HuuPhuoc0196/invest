@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stock extends Model
 {
-    protected $fillable = ['id', 'code', 'recommended_buy_price', 'current_price', 'recommended_sell_price', 'price_avg', 'percent_buy', 'percent_sell', 'risk_level', 'rating_stocks', 'stocks_vn', 'volume'];
+    protected $fillable = ['code', 'recommended_buy_price', 'current_price', 'recommended_sell_price', 'price_avg', 'percent_buy', 'percent_sell', 'risk_level', 'rating_stocks', 'stocks_vn', 'volume'];
     protected $table = 'stocks';
 
     // Lấy toàn bộ stocks (tuỳ chỉnh thêm điều kiện nếu muốn)

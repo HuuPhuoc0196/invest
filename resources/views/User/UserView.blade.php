@@ -1,5 +1,9 @@
 @extends('Layout.Layout')
 
+@section('csrf-token')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+
 @section('title', 'Danh sách mã cổ phiếu')
 
 @section('header-css')
@@ -13,19 +17,24 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
-    <a href="{{ url('/user/profile') }}" class="button-link">💼 Tài sản</a>
-    <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
-    <a href="{{ url('/user/infoProfile') }}" class="button-link">👤 Thông tin cá nhân</a>
-    <a href="{{ url('/user/cashIn') }}" class="button-link">💰 Nạp tiền</a>
-    <a href="{{ url('/user/cashOut') }}" class="button-link">💵 Rút tiền</a>
-    <a href="{{ url('/user/email-settings') }}" class="button-link">📧 Cài đặt thông báo</a>
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-        @csrf
-    </form>
-    <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
-        🚪 Đăng xuất
-    </button>
+    <a href="{{ url('/home') }}" class="button-link">🏠 Trang chủ</a>
+    @auth
+        <a href="{{ url('/user/profile') }}" class="button-link">💼 Tài sản</a>
+        <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
+        <a href="{{ url('/user/infoProfile') }}" class="button-link">👤 Thông tin cá nhân</a>
+        <a href="{{ url('/user/cashIn') }}" class="button-link">💰 Nạp tiền</a>
+        <a href="{{ url('/user/cashOut') }}" class="button-link">💵 Rút tiền</a>
+        <a href="{{ url('/user/email-settings') }}" class="button-link">📧 Cài đặt thông báo</a>
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+            @csrf
+        </form>
+        <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
+            🚪 Đăng xuất
+        </button>
+    @else
+        <a href="{{ url('/login') }}" class="button-link">🔑 Đăng nhập</a>
+        <a href="{{ url('/register') }}" class="button-link">📝 Đăng ký</a>
+    @endauth
 @endsection
 
 @section('actions-right')
@@ -34,6 +43,33 @@
 @endsection
 
 @section('user-body-content')
+    <style>
+        #stock-table th.col-select,
+        #stock-table td.col-select {
+            width: 3.5em;
+            min-width: 3.5em;
+            text-align: center;
+            vertical-align: middle;
+        }
+        #stock-table td.col-select .cell-label-select {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 12px 16px;
+            margin: -12px -16px;
+            min-height: 2.5em;
+        }
+        #stock-table td.col-select input.follow-checkbox {
+            margin: 0;
+            cursor: pointer;
+        }
+        #stock-table td.col-select input.follow-checkbox:disabled {
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+    </style>
+
     <h1>Danh sách mã cổ phiếu</h1>
 
     <!-- Filter Panel -->
@@ -95,10 +131,19 @@
         </div>
     </div>
 
+    @auth
+    <div class="filter-actions" style="margin-top: 8px; justify-content: flex-start;">
+        <button type="button" class="btn-filter" id="btnAddFollow" disabled onclick="submitAddFollowBatch()">➕ Thêm theo dõi</button>
+    </div>
+    @endauth
+
     <div class="table-container">
         <table id="stock-table">
             <thead class="sticky-header">
                 <tr>
+                    @auth
+                    <th class="col-select">Chọn</th>
+                    @endauth
                     <th data-sort-key="code" onclick="sortByColumn('code')">Mã cổ phiếu <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="stocks_vn" onclick="sortByColumn('stocks_vn')">Thuộc VN <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="recommended_buy_price" onclick="sortByColumn('recommended_buy_price')">Giá mua tốt <span class="sort-icon">⇅</span></th>
@@ -121,6 +166,8 @@
     <script>
         const baseUrl = "{{ url('') }}";
         const stocks = @json($stocks);
+        const userFollowedCodes = @json($userFollowedCodes ?? []);
+        const isLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
 
         // Sort state
         let currentSortKey = 'valuation';
@@ -175,6 +222,19 @@
         document.addEventListener("DOMContentLoaded", function() {
             updateSortIcons();
             renderTable(stocks);
+
+            // Click vào ô Mã cổ phiếu = toggle checkbox
+            document.getElementById('stockTableBody').addEventListener('click', function(e) {
+                const td = e.target.closest('.td-code-toggle');
+                if (!td) return;
+                e.preventDefault();
+                const row = td.closest('tr');
+                const cb = row.querySelector('.follow-checkbox');
+                if (cb) {
+                    cb.checked = !cb.checked;
+                    updateAddFollowButtonState();
+                }
+            });
 
             // Drag-to-scroll
             const container = document.querySelector('.table-container');
@@ -342,10 +402,19 @@
                 if (valuation > 0) { valuationColor = 'green'; sign = '+'; }
                 else if (valuation < 0) { valuationColor = 'red'; sign = ''; }
 
+                const isFollowed = userFollowedCodes.includes(stock.code);
                 const row = document.createElement('tr');
                 row.className = getRowClass(buyPrice, currentPrice);
+                const checkboxAttrs = isFollowed ? ' checked disabled' : '';
+                const selectCell = isLoggedIn
+                    ? `<td class="col-select"><label class="cell-label-select"><input type="checkbox" class="follow-checkbox" data-code="${stock.code}"${checkboxAttrs}></label></td>`
+                    : '';
+                const codeCell = isLoggedIn
+                    ? `<td class="td-code-toggle" style="cursor: pointer;" title="Click để chọn/bỏ chọn theo dõi"><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>`
+                    : `<td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>`;
                 row.innerHTML = `
-                    <td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
+                    ${selectCell}
+                    ${codeCell}
                     <td>${[30, 100].includes(Number(stock.stocks_vn)) ? Number(stock.stocks_vn) : 'ALL'}</td>
                     <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
                     <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
@@ -358,6 +427,54 @@
                     <td style="color: ${valuationColor}; font-weight: bold;">${sign}${valuation}%</td>
                 `;
                 tbody.appendChild(row);
+            });
+
+            if (isLoggedIn) {
+                tbody.querySelectorAll('.follow-checkbox').forEach(cb => {
+                    cb.addEventListener('change', updateAddFollowButtonState);
+                });
+                updateAddFollowButtonState();
+            }
+        }
+
+        function updateAddFollowButtonState() {
+            const btn = document.getElementById('btnAddFollow');
+            if (!btn) return;
+            const checked = document.querySelectorAll('#stockTableBody .follow-checkbox:checked:not(:disabled)');
+            btn.disabled = checked.length === 0;
+        }
+
+        function submitAddFollowBatch() {
+            const checked = document.querySelectorAll('#stockTableBody .follow-checkbox:checked:not(:disabled)');
+            const codes = Array.from(checked).map(el => el.getAttribute('data-code'));
+            if (codes.length === 0) return;
+
+            const btn = document.getElementById('btnAddFollow');
+            btn.disabled = true;
+
+            $.ajax({
+                url: baseUrl + '/user/addFollowBatch',
+                type: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'Accept': 'application/json'
+                },
+                data: JSON.stringify({ codes: codes }),
+                success: function (res) {
+                    if (res.status === 'success') {
+                        alert(res.message);
+                        location.reload();
+                    } else {
+                        alert(res.message || 'Có lỗi xảy ra.');
+                        updateAddFollowButtonState();
+                    }
+                },
+                error: function (xhr) {
+                    const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Lỗi kết nối.';
+                    alert(msg);
+                    updateAddFollowButtonState();
+                }
             });
         }
 
@@ -376,11 +493,13 @@
                 if (keyword && !stock.code.includes(keyword)) return false;
                 if (risk && Number(stock.risk_level) !== Number(risk)) return false;
 
-                if (stocksVn === 'ALL') {
-                    if ([30, 100].includes(Number(stock.stocks_vn))) return false;
-                } else if (stocksVn !== '' && Number(stock.stocks_vn) !== Number(stocksVn)) {
-                    return false;
+                // Thuộc VN: lọc bao gồm theo tầng (30 ⊆ 100 ⊆ ALL ⊆ tất cả)
+                if (stocksVn === '30') {
+                    if (Number(stock.stocks_vn) !== 30) return false;
+                } else if (stocksVn === '100') {
+                    if (![30, 100].includes(Number(stock.stocks_vn))) return false;
                 }
+                // stocksVn === '' (Tất cả) hoặc 'ALL': không lọc thêm
 
                 const rating = parseFloat(stock.rating_stocks);
                 if (ratingMin !== '' && (isNaN(rating) || rating < parseFloat(ratingMin))) return false;

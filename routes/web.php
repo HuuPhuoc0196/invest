@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\Admin;
 use App\Http\Controllers\Login\Login;
 use App\Http\Controllers\User\User;
+use App\Models\User as UserModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Controllers\Sync\Sync;
@@ -24,19 +25,41 @@ Route::middleware('guest')->group(function () {
     Route::match(['get', 'post'], '/login', [Login::class, 'login'])->name('login');
     Route::match(['get', 'post'], '/register', [Login::class, 'register'])->name('register');
     Route::match(['get', 'post'], '/forgotPassword', [Login::class, 'forgotPassword'])->name('forgotPassword');
-    Route::match(['get'], '/profile', [Login::class, 'profile'])->name('profile');
+    Route::get('/reset-password', [Login::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [Login::class, 'resetPassword'])->name('password.update');
 });
+
+// Xác thực email (user bấm link trong email, không cần đăng nhập)
+Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Http\Request $request, $id, $hash) {
+    $user = UserModel::find($id);
+    if (!$user || !hash_equals((string) $hash, (string) sha1($user->getEmailForVerification()))) {
+        return redirect()->route('login')->with('error', 'Link xác thực không hợp lệ hoặc đã hết hạn.');
+    }
+    if ($user->hasVerifiedEmail()) {
+        $user->update(['active' => 1]);
+        return redirect()->route('login')->with('message', 'Email đã được xác thực trước đó. Bạn có thể đăng nhập.');
+    }
+    $user->markEmailAsVerified();
+    $user->update(['active' => 1]);
+    return redirect()->route('login')->with('message', 'Email đã được xác thực. Bạn có thể đăng nhập.');
+})->middleware(['signed'])->name('verification.verify');
 
 Route::get('/', function () {
     $user = auth()->user();
     if (!$user) {
-        return redirect('/login');
+        return redirect()->route('home');
     }
-
-    return $user->role == 1 ? redirect('/admin') : redirect('/home');
+    return $user->role == 1 ? redirect('/admin') : redirect()->route('home');
 });
 
-Route::get('/user/get-risk-level/{code}', [User::class, 'getRiskLevel']);
+// Profile: chỉ user đã đăng nhập (nếu cần public thì chuyển vào nhóm guest)
+Route::get('/profile', [Login::class, 'profile'])->name('profile')->middleware('auth');
+
+Route::get('/user/get-risk-level/{code}', [User::class, 'getRiskLevel'])->name('user.getRiskLevel');
+
+// Trang chủ: cho phép cả guest và user (không bắt buộc login)
+Route::get('/home', [User::class, 'show'])->name('home');
+Route::get('/user', [User::class, 'show']);
 
 Route::post('/logout', function () {
     Auth::logout();
@@ -59,6 +82,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/stocks/import-csv', [Admin::class, 'importStocksCsv'])->name('admin.stocks.importCsv');
     Route::match(['get', 'post'], '/admin/stocks/insert', [Admin::class, 'stockInsert'])->name('admin.stocks.insert');
 
+    // Log có thể chứa thông tin nhạy cảm; chỉ admin mới truy cập được. Production nên cân nhắc giới hạn độ dài hoặc phân quyền chặt hơn.
     Route::get('/admin/logs', function () {
         $logFile = storage_path('logs/laravel.log');
 
@@ -73,11 +97,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
      Route::match(['get', 'post'], '/admin/uploadFile', [Sync::class, 'uploadFile'])->name('uploadFile');
 });
 
-// User routes
+// User routes (các trang cần đăng nhập, role user)
 Route::middleware(['auth', 'user'])->group(function () {
-    // User
-    Route::get('/home', [User::class, 'show']);
-    Route::get('/user', [User::class, 'show']);
     Route::get('/user/profile', [User::class, 'profile']);
     Route::get('/user/infoProfile', [User::class, 'infoProfile']);
     Route::get('/user/follow', [User::class, 'follow']);
@@ -89,6 +110,7 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::match(['get', 'post'], '/user/buy', [User::class, 'buy'])->name('buy');
     Route::match(['get', 'post'], '/user/sell', [User::class, 'sell'])->name('sell');
     Route::match(['get', 'post'], '/user/insertFollow', [User::class, 'insertFollow'])->name('insertFollow');
+    Route::post('/user/addFollowBatch', [User::class, 'addFollowBatch'])->name('user.addFollowBatch');
     Route::get('/user/checkStockCode/{code}', [User::class, 'checkStockCode'])->name('user.checkStockCode');
     Route::match(['get', 'put'], '/user/updateFollow/{code}', [User::class, 'updateFollow'])->name('user.updateFollow');
     Route::match(['get', 'post'],'/user/cashIn', [User::class, 'cashIn'])->name('user.cashIn');

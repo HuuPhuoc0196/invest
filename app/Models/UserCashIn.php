@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class UserCashIn extends Model
 {
     protected $table = 'cash_in';
-    protected $fillable = ['id', 'user_id', 'cash_in', 'cash_date'];
+    protected $fillable = ['user_id', 'cash_in', 'cash_date'];
 
     public static function getCashIn($userId)
     {

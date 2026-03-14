@@ -152,7 +152,7 @@ class Sync extends Controller
                 if (!is_numeric($newRisk)) {
                     Log::error("Không thể lấy risk mới sau khi run getNewRisk với {$stock->code}");
                     return response()->json([
-                        'status' => 'Error',
+                        'status' => 'error',
                         'message' => 'Cập nhật rủi ro ' . $stock->code . ' thất bại.',
                         // 'data' => $stock
                     ]);
@@ -193,10 +193,10 @@ class Sync extends Controller
         if (File::exists($logPath)) {
             // Xóa nội dung file (hoặc có thể dùng File::delete($logPath) để xóa hẳn file)
             file_put_contents($logPath, '');
-            return response()->json(['message' => 'Logs đã được xóa thành công!']);
+            return response()->json(['status' => 'success', 'message' => 'Logs đã được xóa thành công!']);
         }
 
-        return response()->json(['message' => 'Không tìm thấy file log!'], 404);
+        return response()->json(['status' => 'error', 'message' => 'Không tìm thấy file log!'], 404);
     }
 
     public function sendEmailRisk(Request $request)
@@ -294,7 +294,7 @@ class Sync extends Controller
         $userFollow->stock_id = $stock->id;
         $userFollow->follow_price_buy = $stock->recommended_buy_price;
         $userFollow->follow_price_sell = $stock->recommended_sell_price ?? null;
-        $userFollow->notice_flag = 0;
+        $userFollow->notice_flag = 1;
         // Lưu vào database
         $userFollow->save();
         $result = EmailService::sendSuggestStocksHave10tr($code);
@@ -340,7 +340,8 @@ class Sync extends Controller
                 // $response = Http::timeout(120)->get("http://127.0.0.1:5000/getRiskFromHTML", [
                 //     'symbol' => $symbol,
                 // ]);
-                $response = Http::timeout(120)->get("http://163.61.182.174/getRiskFromHTML", [
+                $baseUrl = config('services.sync.base_url');
+                $response = Http::timeout(120)->get($baseUrl . "/getRiskFromHTML", [
                     'symbol' => $symbol,
                 ]);
                 Log::info($response);
@@ -367,7 +368,8 @@ class Sync extends Controller
                 // $response = Http::timeout(120)->get("http://127.0.0.1:5000/getPriceFromHTML", [
                 //     'symbol' => $symbol,
                 // ]);
-                $response = Http::timeout(120)->get("http://163.61.182.174/getPriceFromHTML", [
+                $baseUrl = config('services.sync.base_url');
+                $response = Http::timeout(120)->get($baseUrl . "/getPriceFromHTML", [
                     'symbol' => $symbol,
                 ]);
                 Log::info($response);
@@ -404,7 +406,7 @@ class Sync extends Controller
     {
         try {
             // $response = Http::timeout(120)->get("http://127.0.0.1:5000/getLogs");
-            $response = Http::timeout(120)->get("http://163.61.182.174/get-logs");
+            $response = Http::timeout(120)->get(config('services.sync.base_url') . "/get-logs");
         } catch (\Exception $e) {
             Log::error("Request error getLogsVPS: " . $e->getMessage());
         }

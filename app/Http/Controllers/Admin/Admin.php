@@ -31,8 +31,7 @@ class Admin extends Controller
                 ]);
 
                 // Kiểm tra code đã tồn tại chưa
-                $stock = new Stock();
-                if ($stock->getByCode($validated['code'])) {
+                if (Stock::getByCode($validated['code'])) {
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Mã code đã tồn tại.'
@@ -116,7 +115,11 @@ class Admin extends Controller
             }
         } else {
             $stock = Stock::getByCode(strtoupper($code));
-            return view('Admin.AdminUpdate', compact('stock'));
+            if (!$stock) {
+                return redirect()->route('admin.stocks')->with('error', 'Mã cổ phiếu không tồn tại.');
+            }
+            $syncBaseUrl = config('services.sync.base_url');
+            return view('Admin.AdminUpdate', compact('stock', 'syncBaseUrl'));
         }
     }
 

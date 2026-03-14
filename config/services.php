@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+    | URL service sync (get risk, price, logs...). Cấu hình qua SYNC_SERVICE_URL trong .env
+    */
+    'sync' => [
+        'base_url' => env('SYNC_SERVICE_URL', 'http://163.61.182.174'),
+    ],
+
 ];

@@ -7,16 +7,27 @@
 
 @section('header-css')
     @vite('resources/css/loginRegister.css')
+    <style>
+        .login-btn .btn-spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: btn-spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        .login-btn .btn-spinner.is-loading { display: inline-block; }
+        @keyframes btn-spin { to { transform: rotate(360deg); } }
+    </style>
 @endsection
 
 @section('header-js')
     @vite('resources/js/app.js')
 @endsection
-<style>
-  .login-btn.hidden {
-    display: none !important;
-  }
-</style>
+
 @section('body-content')
     <h2>Quên mật khẩu</h2>
     <form id="forgotForm">
@@ -25,7 +36,10 @@
         <input type="email" id="email" required />
       </div>
       <div class="error-message" id="errorMessage" style="display: none; color: red;"></div>
-      <button type="submit" class="login-btn">Khôi phục tài khoản</button>
+      <button type="submit" class="login-btn" id="btnForgotSubmit">
+        <span class="btn-spinner" id="btnForgotSpinner" aria-hidden="true"></span>
+        <span class="btn-text" id="btnForgotText">Khôi phục tài khoản</span>
+      </button>
       <div class="error-message" id="forgotError">Email không tồn tại!</div>
     </form>
     <div id="toast" class="toast"></div>
@@ -59,39 +73,36 @@
 
       const baseUrl = "{{ url('') }}";
       const forgetForm = document.getElementById('forgotForm');
+      const errorMessage = document.getElementById('errorMessage');
+      const toast = document.getElementById('toast');
 
       forgetForm.addEventListener('submit', function (e) {
         e.preventDefault();
-        const loginBtn = document.querySelector('.login-btn');
-        loginBtn.disabled = true;
-        loginBtn.classList.add('hidden');
+        const btnSubmit = document.getElementById('btnForgotSubmit');
+        const btnSpinner = document.getElementById('btnForgotSpinner');
+        const btnText = document.getElementById('btnForgotText');
         const email = document.getElementById('email').value.trim();
-        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-        // Reset lỗi cũ
         errorMessage.style.display = "none";
         errorMessage.innerText = "";
 
-        // Validation client
         if (!email) {
           errorMessage.innerText = "Vui lòng nhập đầy đủ email";
           errorMessage.style.display = "block";
-          loginBtn.disabled = false;
-          loginBtn.classList.remove('hidden');
           return;
         }
-
         if (!isValidEmail(email)) {
           errorMessage.innerText = "Email không hợp lệ.";
           errorMessage.style.display = "block";
-          loginBtn.disabled = false;
-          loginBtn.classList.remove('hidden');
           return;
         }
 
-        const data = {
-            email: email,
-        };
+        btnSubmit.disabled = true;
+        btnSpinner.classList.add('is-loading');
+        btnText.textContent = 'Đang xử lý...';
+
+        const data = { email: email };
 
         $.ajax({
           url: baseUrl + '/forgotPassword',
@@ -102,40 +113,31 @@
           },
           data: JSON.stringify(data),
           success: function(response) {
-            loginBtn.disabled = false;
-            loginBtn.classList.remove('hidden');
+            btnSubmit.disabled = false;
+            btnSpinner.classList.remove('is-loading');
+            btnText.textContent = 'Khôi phục tài khoản';
             if (response.status == "success") {
-              const toast = document.getElementById("toast");
-              toast.innerHTML = `✅ Mật khẩu mới đã được gửi vào email của bạn<br>`;
+              toast.innerHTML = '✅ Vui lòng kiểm tra email để lấy link đặt lại mật khẩu.';
               toast.className = "toast show";
               toastSuccess();
-              setTimeout(() => {
-                  toast.className = toast.className.replace("show", "");
-              }, 3000);
-
+              setTimeout(function() { toast.className = toast.className.replace("show", ""); }, 3000);
             } else {
-              const toast = document.getElementById("toast");
-              toast.innerHTML = `❌` + response.message;
+              toast.innerHTML = '❌ ' + response.message;
               toast.className = "toast show";
               toastError();
-              setTimeout(() => {
-                  toast.className = toast.className.replace("show", "");
-              }, 5000);
+              setTimeout(function() { toast.className = toast.className.replace("show", ""); }, 5000);
             }
-        },
-        error: function(xhr) {
-          loginBtn.disabled = false;
-          loginBtn.classList.remove('hidden');
-          console.log(xhr);
-          const toast = document.getElementById("toast");
-          toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;
-          toast.className = "toast show";
-          toastError();
-          setTimeout(() => {
-              toast.className = toast.className.replace("show", "");
-          }, 5000);
-        }
+          },
+          error: function(xhr) {
+            btnSubmit.disabled = false;
+            btnSpinner.classList.remove('is-loading');
+            btnText.textContent = 'Khôi phục tài khoản';
+            toast.innerHTML = '❌ Lỗi: ' + (xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi kết nối.');
+            toast.className = "toast show";
+            toastError();
+            setTimeout(function() { toast.className = toast.className.replace("show", ""); }, 5000);
+          }
         });
-    });
+      });
   </script>
 @endsection

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserFollow extends Model
 {
-    protected $fillable = ['user_id', 'stock_id', 'follow_price_buy', 'follow_price_sell', 'notice_flag'];
+    protected $fillable = ['user_id', 'stock_id', 'follow_price_buy', 'follow_price_sell', 'notice_flag', 'auto_sync'];
 
     public static function getUserFollow($userId)
     {
@@ -53,7 +53,7 @@ class UserFollow extends Model
             ->join('stocks', 'user_follows.stock_id', '=', 'stocks.id')
             ->where('stock_id', $code_id)
             ->where('user_id', $userId)
-            ->select('stocks.code', 'user_follows.follow_price_buy', 'user_follows.follow_price_sell')
+            ->select('stocks.code', 'user_follows.follow_price_buy', 'user_follows.follow_price_sell', 'user_follows.auto_sync')
             ->first();
     }
 

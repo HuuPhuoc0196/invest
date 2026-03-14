@@ -9,6 +9,44 @@
 @section('header-css')
     @vite('resources/css/app.css')
     @vite('resources/css/adminInsert.css')
+    <style>
+        .form-group-auto-sync {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-group-auto-sync label {
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+        .auto-sync-toggle {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 60px;
+            height: 28px;
+            box-sizing: border-box;
+            line-height: 1;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .auto-sync-toggle.auto-sync-on {
+            background-color: #22c55e;
+            color: #fff;
+        }
+        .auto-sync-toggle.auto-sync-on:hover {
+            background-color: #16a34a;
+        }
+        .auto-sync-toggle.auto-sync-off {
+            background-color: #ef4444;
+            color: #fff;
+        }
+        .auto-sync-toggle.auto-sync-off:hover {
+            background-color: #dc2626;
+        }
+    </style>
 @endsection
 
 @section('header-js')
@@ -42,6 +80,12 @@
             <div class="error" id="errorFollowPriceSellType">Vui lòng nhập Số</div>
         </div>
 
+        <div class="form-group form-group-auto-sync">
+            <label>Tự động đồng bộ:</label>
+            <input type="hidden" id="autoSync" name="autoSync" value="{{ (int) data_get($userFollow, 'auto_sync', 1) }}">
+            <button type="button" id="autoSyncToggle" class="auto-sync-toggle auto-sync-on" aria-pressed="true">Bật</button>
+        </div>
+
         <div id="toast" class="toast"></div>
 
         <button onclick="submitForm()">Cập nhật</button>
@@ -54,10 +98,41 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const userFollow = @json($userFollow);
-            document.getElementById("code").value = userFollow.code|| "";
+            document.getElementById("code").value = userFollow.code || "";
             document.getElementById("followPriceBuy").value = userFollow.follow_price_buy ? Number(userFollow.follow_price_buy).toLocaleString('vi-VN') : '';
             document.getElementById("followPriceSell").value = userFollow.follow_price_sell ? Number(userFollow.follow_price_sell).toLocaleString('vi-VN') : '';
 
+            const autoSync = userFollow.auto_sync !== undefined ? parseInt(userFollow.auto_sync, 10) : 1;
+            const autoSyncInput = document.getElementById("autoSync");
+            const autoSyncToggle = document.getElementById("autoSyncToggle");
+            autoSyncInput.value = autoSync;
+            if (autoSync === 1) {
+                autoSyncToggle.textContent = "Bật";
+                autoSyncToggle.classList.remove("auto-sync-off");
+                autoSyncToggle.classList.add("auto-sync-on");
+                autoSyncToggle.setAttribute("aria-pressed", "true");
+            } else {
+                autoSyncToggle.textContent = "Tắt";
+                autoSyncToggle.classList.remove("auto-sync-on");
+                autoSyncToggle.classList.add("auto-sync-off");
+                autoSyncToggle.setAttribute("aria-pressed", "false");
+            }
+            autoSyncToggle.addEventListener("click", function () {
+                const current = parseInt(autoSyncInput.value, 10);
+                const next = current === 1 ? 0 : 1;
+                autoSyncInput.value = next;
+                if (next === 1) {
+                    autoSyncToggle.textContent = "Bật";
+                    autoSyncToggle.classList.remove("auto-sync-off");
+                    autoSyncToggle.classList.add("auto-sync-on");
+                    autoSyncToggle.setAttribute("aria-pressed", "true");
+                } else {
+                    autoSyncToggle.textContent = "Tắt";
+                    autoSyncToggle.classList.remove("auto-sync-on");
+                    autoSyncToggle.classList.add("auto-sync-off");
+                    autoSyncToggle.setAttribute("aria-pressed", "false");
+                }
+            });
         });
         const baseUrl = "{{ url('') }}";
         const formatter = new Intl.NumberFormat('vi-VN');
@@ -139,7 +214,8 @@
                 const data = {
                     code: code,
                     followPriceBuy: followPriceBuy,
-                    followPriceSell: followPriceSell || null
+                    followPriceSell: followPriceSell || null,
+                    autoSync: parseInt(document.getElementById("autoSync").value, 10)
                 };
                 $.ajax({
                     url: baseUrl + '/user/updateFollow/' + code,
@@ -156,9 +232,8 @@
                             toast.className = "toast show";
                             toastSuccess();
                             setTimeout(() => {
-                                toast.className = toast.className.replace("show", "");
-                            }, 3000);
-
+                                window.location.href = baseUrl + '/user/follow';
+                            }, 800);
                         } else {
                             const toast = document.getElementById("toast");
                             toast.innerHTML = `❌` + response.message;

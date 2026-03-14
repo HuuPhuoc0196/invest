@@ -20,10 +20,17 @@ class User extends Controller
 {
     public function show()
     {
-        $userId = auth()->id();
-        $userPortfolios = UserPortfolio::getProfileUser($userId);
         $stocks = Stock::getAllStocks();
-        return view('User.UserView', compact('stocks', 'userPortfolios'));
+        if (auth()->check()) {
+            $userId = auth()->id();
+            $userPortfolios = UserPortfolio::getProfileUser($userId);
+            $userFollowList = UserFollow::getUserFollow($userId);
+            $userFollowedCodes = $userFollowList->pluck('code')->map(fn ($c) => strtoupper((string) $c))->values()->toArray();
+        } else {
+            $userPortfolios = [];
+            $userFollowedCodes = [];
+        }
+        return view('User.UserView', compact('stocks', 'userPortfolios', 'userFollowedCodes'));
     }
 
     public function investmentPerformance()
@@ -86,13 +93,16 @@ class User extends Controller
                 ]);
 
                 $user = UserModel::getUserById(auth()->id());
+                if (!$user) {
+                    return response()->json(['status' => 'error', 'message' => 'Tài khoản không tồn tại.'], 404);
+                }
                 $user->name = trim($validated['name']);
                 $user->save();
 
                 // Trả kết quả JSON
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'cập nhật thông tin thành công.',
+                    'message' => 'Cập nhật thông tin thành công.',
                     'data' => $user
                 ]);
             } catch (ValidationException $e) {
@@ -109,6 +119,9 @@ class User extends Controller
             }
         } else {
             $user = UserModel::getUserById(auth()->id());
+            if (!$user) {
+                return redirect()->route('login')->with('error', 'Tài khoản không tồn tại.');
+            }
             return view('User.UserUpdateInfoProfile', compact('user'));
         }
     }
@@ -126,6 +139,9 @@ class User extends Controller
 
 
                 $user = UserModel::getUserById(auth()->id());
+                if (!$user) {
+                    return response()->json(['status' => 'error', 'message' => 'Tài khoản không tồn tại.'], 404);
+                }
                 // Kiểm tra user đã tồn tại chưa
                 $existingUser = UserModel::getUserLogin($user->email, $validated['password']);
                 if (!$existingUser) {
@@ -141,7 +157,7 @@ class User extends Controller
                 // Trả kết quả JSON
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'cập nhật thông tin thành công.',
+                    'message' => 'Đổi mật khẩu thành công.',
                     'data' => $user
                 ]);
             } catch (ValidationException $e) {
@@ -232,6 +248,7 @@ class User extends Controller
                 $userPortfolio->buy_price = $validated['buy_price'];
                 $userPortfolio->quantity = $validated['quantity'];
                 $userPortfolio->buy_date = $validated['buy_date'];
+                $userPortfolio->session_closed_flag = 1;
 
                 // Lưu vào database (ví dụ bảng stocks)
                 $userPortfolio->save();
@@ -374,7 +391,8 @@ class User extends Controller
                 $followPriceSell = !empty($validated['followPriceSell']) ? $validated['followPriceSell'] : ($stock->recommended_sell_price ?? null);
                 $userFollow->follow_price_buy = $followPriceBuy;
                 $userFollow->follow_price_sell = $followPriceSell;
-                $userFollow->notice_flag = 0;
+                $userFollow->notice_flag = 1;
+                $userFollow->auto_sync = 1;
 
                 // Lưu vào database
                 $userFollow->save();
@@ -396,6 +414,84 @@ class User extends Controller
         }
     }
 
+    public function addFollowBatch(Request $request)
+    {
+        if (!$request->isMethod('post')) {
+            return response()->json(['status' => 'error', 'message' => 'Method not allowed.'], 405);
+        }
+
+        try {
+            $validated = $request->validate([
+                'codes' => 'required|array',
+                'codes.*' => 'required|string|max:10',
+            ]);
+
+            $userId = auth()->id();
+            $added = [];
+            $skipped = [];
+            $invalid = [];
+
+            foreach ($validated['codes'] as $code) {
+                $code = strtoupper(trim($code));
+                if ($code === '') {
+                    continue;
+                }
+
+                $stock = Stock::getByCode($code);
+                if (!$stock) {
+                    $invalid[] = $code;
+                    continue;
+                }
+
+                $existing = UserFollow::getUserFollowFirst($stock->id, $userId);
+                if ($existing) {
+                    $skipped[] = $code;
+                    continue;
+                }
+
+                $userFollow = new UserFollow();
+                $userFollow->user_id = $userId;
+                $userFollow->stock_id = $stock->id;
+                $userFollow->follow_price_buy = $stock->recommended_buy_price ?? 0;
+                $userFollow->follow_price_sell = $stock->recommended_sell_price ?? null;
+                $userFollow->notice_flag = 1;
+                $userFollow->auto_sync = 1;
+                $userFollow->save();
+                $added[] = $code;
+            }
+
+            $message = count($added) > 0
+                ? 'Đã thêm theo dõi ' . count($added) . ' mã: ' . implode(', ', $added) . '.'
+                : 'Không có mã nào được thêm.';
+
+            if (count($skipped) > 0) {
+                $message .= ' Đã theo dõi trước đó: ' . implode(', ', $skipped) . '.';
+            }
+            if (count($invalid) > 0) {
+                $message .= ' Mã không tồn tại: ' . implode(', ', $invalid) . '.';
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => $message,
+                'added' => $added,
+                'skipped' => $skipped,
+                'invalid' => $invalid,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Dữ liệu không hợp lệ.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (QueryException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Lỗi hệ thống: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function updateFollow(Request $request, $code)
     {
         if ($request->isMethod('PUT')) {
@@ -406,6 +502,7 @@ class User extends Controller
                     'code' => 'required|string|max:10',
                     'followPriceBuy' => 'required|numeric|gt:0',
                     'followPriceSell' => 'nullable|numeric|gt:0',
+                    'autoSync' => 'required|in:0,1',
                 ]);
                 // Kiểm tra code đã tồn tại chưa
                 $stock = Stock::getByCode(strtoupper($validated['code']));
@@ -429,6 +526,7 @@ class User extends Controller
                 // Mapping data vào model
                 $userFollowExit->follow_price_buy = $validated['followPriceBuy'];
                 $userFollowExit->follow_price_sell = $validated['followPriceSell'] ?? null;
+                $userFollowExit->auto_sync = (int) $validated['autoSync'];
 
                 // Lưu vào database
                 $userFollowExit->save();
@@ -439,6 +537,12 @@ class User extends Controller
                     'message' => 'Update theo dõi thành công.',
                     'data' => $userFollowExit
                 ]);
+            } catch (ValidationException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Dữ liệu không hợp lệ.',
+                    'errors' => $e->errors()
+                ], 422);
             } catch (QueryException $e) {
                 return response()->json([
                     'status' => 'error',
@@ -447,6 +551,9 @@ class User extends Controller
             }
         } else {
             $stock = Stock::getByCode(strtoupper($code));
+            if (!$stock) {
+                return redirect()->route('user.follow')->with('error', 'Mã cổ phiếu không tồn tại.');
+            }
             $userFollow = UserFollow::getCodeFromUserFollow($stock->id, auth()->id());
             return view('User.UserUpdateFollow', compact('userFollow'));
         }

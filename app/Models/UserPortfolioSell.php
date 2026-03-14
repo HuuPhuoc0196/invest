@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class UserPortfolioSell extends Model
 {
     protected $table = 'user_portfolios_sell';
-    protected $fillable = ['id', 'user_id', 'stock_id', 'sell_price', 'sell_date', 'quantity'];
+    protected $fillable = ['user_id', 'stock_id', 'sell_price', 'sell_date', 'quantity'];
 
     public static function getPortfolioSellWithStockInfo($userId)
     {

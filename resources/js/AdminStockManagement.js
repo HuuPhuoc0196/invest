@@ -98,6 +98,7 @@ window.renderStockTable = function(data) {
             <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
             <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
             <td>${sellPrice}</td>
+            <td>${stock.price_avg != null ? Number(stock.price_avg).toLocaleString('vi-VN') : 'N/A'}</td>
             <td style="color: ${getRisk(stock.risk_level).color}">
                 ${getRisk(stock.risk_level).label}
             </td>

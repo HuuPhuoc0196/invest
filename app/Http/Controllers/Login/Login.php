@@ -11,6 +11,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class Login extends Controller
 {
@@ -33,12 +35,18 @@ class Login extends Controller
                         'message' => 'Email hoặc mật khẩu không đúng.'
                     ]);
                 }
+                if (!$existingUser->hasVerifiedEmail()) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Vui lòng xác thực email trước khi đăng nhập.'
+                    ]);
+                }
                 Auth::login($existingUser);
-                // Trả kết quả JSON
+                // Trả kết quả JSON (chỉ trả field cần thiết, không lộ role/active/email_verified_at)
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Login thành công.',
-                    'data' => $existingUser
+                    'data' => ['id' => $existingUser->id, 'name' => $existingUser->name, 'role' => $existingUser->role]
                 ]);
             } catch (ValidationException $e) {
                 Log::error($e->errors());
@@ -67,7 +75,9 @@ class Login extends Controller
                 $validated = $request->validate([
                     'name' => 'required|string|max:100',
                     'email' => 'required|email|max:255',
-                    'password' => 'required|string|min:6',
+                    'password' => 'required|string|min:6|confirmed',
+                ], [
+                    'password.confirmed' => 'Nhập lại mật khẩu không khớp.',
                 ]);
 
                 // Kiểm tra email đã tồn tại chưa
@@ -84,15 +94,26 @@ class Login extends Controller
                 $user->name = trim($validated['name']);
                 $user->email = trim($validated['email']);
                 $user->role = 0;
-                $user->password = Hash::make($validated['password']); // mã hóa password
+                $user->password = Hash::make($validated['password']);
 
                 $user->save();
 
-                // Trả kết quả JSON
+                // Gửi email xác thực (bắt lỗi để đăng ký vẫn thành công, lỗi ghi log)
+                try {
+                    $user->sendEmailVerificationNotification();
+                } catch (\Throwable $e) {
+                    Log::error('Gửi email xác thực thất bại: ' . $e->getMessage(), [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'exception' => $e,
+                    ]);
+                }
+
+                // Trả kết quả JSON (không đăng nhập, chỉ trả field cần thiết)
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Đăng ký thành công.',
-                    'data' => $user
+                    'message' => 'Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.',
+                    'data' => ['id' => $user->id, 'name' => $user->name]
                 ]);
             } catch (ValidationException $e) {
                 return response()->json([
@@ -130,19 +151,23 @@ class Login extends Controller
                     ]);
                 }
 
-                $newPassword = $this->generate_password(12, true, true, true);
-                $existingUser->password = Hash::make($newPassword); // mã hóa password
-                $existingUser->save();
+                $email = trim($validated['email']);
+                $token = Str::random(64);
+                $expiryMinutes = 60;
 
-                $result = EmailService::sendForgetPassword(trim($validated['email']), $newPassword);
-                $message = 'Khách hàng <span style="color:red;">' . trim($validated['email']) . '</span> đã forget password : <span style="color:red;">' . $newPassword . '</span> ';
-                Log::info($message);
-                Log::info("Send mail: " . $result);
-                // Auth::login($existingUser);
-                // Trả kết quả JSON
+                DB::table('password_resets')->updateOrInsert(
+                    ['email' => $email],
+                    ['token' => Hash::make($token), 'created_at' => now()]
+                );
+
+                // APP_URL trong .env phải đúng để link reset trỏ đúng domain
+                $resetUrl = url('/reset-password?token=' . urlencode($token) . '&email=' . urlencode($email));
+                $result = EmailService::sendPasswordResetLink($email, $resetUrl, $expiryMinutes);
+                Log::info("Password reset link sent to {$email}: " . $result);
+
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Mật khẩu đã được gửi vào email.',
+                    'message' => 'Vui lòng kiểm tra email để lấy link đặt lại mật khẩu.',
                 ]);
             } catch (ValidationException $e) {
                 Log::error($e->errors());
@@ -160,6 +185,77 @@ class Login extends Controller
         } else {
             return view('Login.ForgotPassword');
         }
+    }
+
+    /**
+     * Hiển thị form đặt lại mật khẩu (khi user click link trong email).
+     */
+    public function showResetPasswordForm(Request $request)
+    {
+        $token = $request->query('token');
+        $email = $request->query('email');
+        $error = null;
+
+        if (!$token || !$email) {
+            $error = 'Link không hợp lệ. Thiếu token hoặc email.';
+            return view('Login.ResetPassword', compact('token', 'email', 'error'));
+        }
+
+        $row = DB::table('password_resets')->where('email', $email)->first();
+        if (!$row || !Hash::check($token, $row->token)) {
+            $error = 'Link không hợp lệ hoặc đã được sử dụng.';
+            return view('Login.ResetPassword', compact('token', 'email', 'error'));
+        }
+
+        $createdAt = \Carbon\Carbon::parse($row->created_at)->copy();
+        if ($createdAt->addMinutes(60)->isPast()) {
+            $error = 'Link đã hết hạn. Vui lòng gửi lại yêu cầu từ trang Quên mật khẩu.';
+            return view('Login.ResetPassword', compact('token', 'email', 'error'));
+        }
+
+        return view('Login.ResetPassword', compact('token', 'email', 'error'));
+    }
+
+    /**
+     * Xử lý submit đặt lại mật khẩu.
+     */
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|string|min:6|confirmed',
+        ], [
+            'password.confirmed' => 'Nhập lại mật khẩu không khớp.',
+        ]);
+
+        $row = DB::table('password_resets')->where('email', $validated['email'])->first();
+        if (!$row || !Hash::check($validated['token'], $row->token)) {
+            return redirect()->route('password.reset', [
+                'token' => $validated['token'],
+                'email' => $validated['email'],
+            ])->with('error', 'Link không hợp lệ hoặc đã được sử dụng.');
+        }
+
+        $createdAt = \Carbon\Carbon::parse($row->created_at)->copy();
+        if ($createdAt->addMinutes(60)->isPast()) {
+            return redirect()->route('password.reset', [
+                'token' => $validated['token'],
+                'email' => $validated['email'],
+            ])->with('error', 'Link đã hết hạn. Vui lòng gửi lại yêu cầu từ trang Quên mật khẩu.');
+        }
+
+        $user = User::getUserByEmail($validated['email']);
+        if (!$user) {
+            return redirect()->route('forgotPassword')->with('error', 'Tài khoản không tồn tại.');
+        }
+
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+
+        DB::table('password_resets')->where('email', $validated['email'])->delete();
+
+        return redirect()->route('login')->with('message', 'Đã đặt lại mật khẩu. Vui lòng đăng nhập.');
     }
 
     public function profile()

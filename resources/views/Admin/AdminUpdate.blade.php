@@ -114,6 +114,7 @@
     <script>
         const baseUrl = "{{ url('') }}";
         const stockData = @json($stock);
+        const syncBaseUrl = "{{ $syncBaseUrl ?? config('services.sync.base_url') }}";
 
         // Modal logic
         function openSyncStockModal() {
@@ -128,7 +129,7 @@
             btn.disabled = true;
             btn.textContent = 'Đang xử lý...';
             $.ajax({
-                url: 'http://163.61.182.174/run-sync-update-stocks/' + encodeURIComponent(stockData.code),
+                url: (typeof syncBaseUrl !== 'undefined' ? syncBaseUrl : '') + '/run-sync-update-stocks/' + encodeURIComponent(stockData.code),
                 type: 'GET',
                 success: function(res) {
                     btn.disabled = false;

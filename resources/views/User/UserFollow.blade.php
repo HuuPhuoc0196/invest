@@ -124,16 +124,25 @@
         const userFollow = @json($userFollow);
         let deleteUrl = "";
 
-        // Merge: chỉ lấy stocks mà user đang follow, follow_price_buy ghi đè recommended_buy_price
+        // Merge: chỉ lấy stocks mà user đang follow; Giá mua tốt & Giá bán tốt lấy từ user_follows
         const followMap = {};
-        userFollow.forEach(f => { followMap[f.code] = f.follow_price_buy; });
+        userFollow.forEach(f => {
+            followMap[f.code] = {
+                follow_price_buy: f.follow_price_buy,
+                follow_price_sell: f.follow_price_sell
+            };
+        });
 
         const stocks = allStocks
             .filter(s => followMap.hasOwnProperty(s.code))
             .map(s => {
                 const merged = Object.assign({}, s);
-                if (followMap[s.code] !== null && followMap[s.code] !== undefined) {
-                    merged.recommended_buy_price = followMap[s.code];
+                const follow = followMap[s.code];
+                if (follow.follow_price_buy !== null && follow.follow_price_buy !== undefined) {
+                    merged.recommended_buy_price = follow.follow_price_buy;
+                }
+                if (follow.follow_price_sell !== null && follow.follow_price_sell !== undefined) {
+                    merged.recommended_sell_price = follow.follow_price_sell;
                 }
                 return merged;
             });
@@ -399,11 +408,13 @@
                 if (keyword && !stock.code.includes(keyword)) return false;
                 if (risk && Number(stock.risk_level) !== Number(risk)) return false;
 
-                if (stocksVn === 'ALL') {
-                    if ([30, 100].includes(Number(stock.stocks_vn))) return false;
-                } else if (stocksVn !== '' && Number(stock.stocks_vn) !== Number(stocksVn)) {
-                    return false;
+                // Thuộc VN: lọc bao gồm theo tầng (30 ⊆ 100 ⊆ ALL ⊆ tất cả)
+                if (stocksVn === '30') {
+                    if (Number(stock.stocks_vn) !== 30) return false;
+                } else if (stocksVn === '100') {
+                    if (![30, 100].includes(Number(stock.stocks_vn))) return false;
                 }
+                // stocksVn === '' (Tất cả) hoặc 'ALL': không lọc thêm
 
                 const rating = parseFloat(stock.rating_stocks);
                 if (ratingMin !== '' && (isNaN(rating) || rating < parseFloat(ratingMin))) return false;

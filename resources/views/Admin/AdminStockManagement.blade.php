@@ -100,6 +100,7 @@
                     <th data-sort-key="recommended_buy_price" onclick="sortByColumn('recommended_buy_price')">Giá mua tốt <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="current_price" onclick="sortByColumn('current_price')">Giá hiện tại <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="recommended_sell_price" onclick="sortByColumn('recommended_sell_price')">Giá bán tốt <span class="sort-icon">⇅</span></th>
+                    <th data-sort-key="price_avg" onclick="sortByColumn('price_avg')">Giá trung bình <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="risk_level" onclick="sortByColumn('risk_level')">Trạng thái <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="percent_buy" onclick="sortByColumn('percent_buy')">Tỉ lệ mua <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="percent_sell" onclick="sortByColumn('percent_sell')">Tỉ lệ bán <span class="sort-icon">⇅</span></th>
@@ -197,12 +198,13 @@
                 // Filter: Trạng thái
                 if (risk && Number(stock.risk_level) !== Number(risk)) return false;
 
-                // Filter: Thuộc VN
-                if (stocksVn === 'ALL') {
-                    if ([30, 100].includes(Number(stock.stocks_vn))) return false;
-                } else if (stocksVn !== '' && Number(stock.stocks_vn) !== Number(stocksVn)) {
-                    return false;
+                // Filter: Thuộc VN - lọc bao gồm theo tầng (30 ⊆ 100 ⊆ ALL ⊆ tất cả)
+                if (stocksVn === '30') {
+                    if (Number(stock.stocks_vn) !== 30) return false;
+                } else if (stocksVn === '100') {
+                    if (![30, 100].includes(Number(stock.stocks_vn))) return false;
                 }
+                // stocksVn === '' (Tất cả) hoặc 'ALL': không lọc thêm
 
                 // Filter: Điểm
 

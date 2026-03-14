@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Mail\NotifyUserMail;
+use App\Mail\ResetPasswordMail;
 use Illuminate\Support\Facades\Mail;
 
 class EmailService
@@ -12,7 +13,7 @@ class EmailService
         $oldRiskText = self::getRisk($oldRisk);
         $newRiskText = self::getRisk($newRisk);
 
-        $to = 'lehuuphuoc0196@gmail.com';
+        $to = config('mail.notification_to');
         $subject = 'Investment cá nhân thông báo cổ phiếu <span style="color:red;"> ' . $code . '</span>';
         $message = 'Hệ thống ghi nhận cổ phiếu <span style="color:red;">' . $code . '</span> có thay đổi mức độ rủi ro.';
         $message .= '<br/>Chuyển từ ' . $oldRiskText;
@@ -27,7 +28,7 @@ class EmailService
     public static function sendVnindexChangeNotification($index_current, $index_suggest)
     {
 
-        $to = 'lehuuphuoc0196@gmail.com';
+        $to = config('mail.notification_to');
         $subject = 'Investment cá nhân thông báo chỉ số VN-Index hiện tại là: <span style="color:red;"> ' . $index_current . '</span>';
         $message = 'Hệ thống ghi nhận chỉ số VN-Index hiện tại là: <span style="color:red;">' . $index_current . '</span>';
         $message .= '<br/>Đang trong vùng mua tốt ';
@@ -39,7 +40,7 @@ class EmailService
 
     public static function sendSuggestStocksHave1tr($code)
     {
-        $to = 'lehuuphuoc0196@gmail.com';
+        $to = config('mail.notification_to');
         $subject = 'Investment cá nhân thông báo cổ phiếu <span style="color:red;"> ' . $code . '</span>';
         $message = 'Hệ thống ghi nhận cổ phiếu <span style="color:red;">' . $code . '</span> đã có khối lượng giao dịch trên 1.000.000 và chưa được thêm vào hệ thống.';
         $message .= "<br/>url: https://finance.vietstock.vn/lich-su-kien.htm?page=1&tab=2&code=" . $code;
@@ -50,7 +51,7 @@ class EmailService
 
     public static function sendErrorNotification($file, $function, $message)
     {
-        $to = 'lehuuphuoc0196@gmail.com';
+        $to = config('mail.notification_to');
         $subject = 'Investment cá nhân thông báo lỗi';
         $messageEmail = 'Hệ thống ghi nhận lỗi trong file <span style="color:red;">' . $file . '</span> tại function <span style="color:red;">' . $function . '</span>.';
         $messageEmail .= '<br/>Thông báo lỗi: ' . $message;
@@ -62,7 +63,7 @@ class EmailService
 
     public static function sendSuggestStocksHave10tr($code)
     {
-        $to = 'lehuuphuoc0196@gmail.com';
+        $to = config('mail.notification_to');
         $subject = 'Investment cá nhân thông báo cổ phiếu <span style="color:red;"> ' . $code . '</span>';
         $message = 'Hệ thống ghi nhận cổ phiếu <span style="color:red;">' . $code . '</span> đã có khối lượng giao dịch trên 10.000.000 và đã thêm vào table user_follow.';
         $message .= "<br/>url: https://finance.vietstock.vn/lich-su-kien.htm?page=1&tab=2&code=" . $code;
@@ -73,7 +74,7 @@ class EmailService
 
     public static function sendFollowStocksEveryDay($stock, $avg_buy_price)
     {
-        $to = 'lehuuphuoc0196@gmail.com';
+        $to = config('mail.notification_to');
         $subject = 'Investment cá nhân thông báo cổ phiếu <span style="color:red;"> ' . $stock->code . '</span>';
         $message = 'Hệ thông theo dõi cổ phiếu cuối ngày thông báo.';
         $message .= '<br/>Ngày: ' . date('d-m-Y H:i:s');
@@ -96,6 +97,20 @@ class EmailService
         $message = 'Mật khẩu mới của bạn là : <span style="color:red;">' . $newPassword . '</span> ';
         Mail::to($to)->send(new NotifyUserMail($subject, $message));
 
+        return "Email đã được gửi!";
+    }
+
+    /**
+     * Gửi email chứa link đặt lại mật khẩu (template chuẩn hệ thống đầu tư cá nhân).
+     *
+     * @param string $email
+     * @param string $resetUrl
+     * @param int $expiryMinutes
+     * @return string
+     */
+    public static function sendPasswordResetLink(string $email, string $resetUrl, int $expiryMinutes = 60): string
+    {
+        Mail::to($email)->send(new ResetPasswordMail($resetUrl, $expiryMinutes));
         return "Email đã được gửi!";
     }
 
@@ -154,7 +169,7 @@ class EmailService
         if (!$content) return $content;
         if ($risk > 2) return false;
         $riskText = self::getRisk($risk);
-        $to = 'lehuuphuoc0196@gmail.com';
+        $to = config('mail.notification_to');
         $subject = 'Investment suggest cổ phiếu <span style="color:red;"> ' . $code . '</span>';
         $message = 'Hệ thống ghi nhận cổ phiếu <span style="color:red;">' . $code . '</span> có giá hấp dẫn.';
         $message .= '<br/>Giá hiện tại là: ' . number_format($current_price, 0, ',', '.');

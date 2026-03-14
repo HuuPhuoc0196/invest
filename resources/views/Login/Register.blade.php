@@ -7,6 +7,21 @@
 
 @section('header-css')
   @vite('resources/css/loginRegister.css')
+  <style>
+    .login-btn .btn-spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: btn-spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .login-btn .btn-spinner.is-loading { display: inline-block; }
+    @keyframes btn-spin { to { transform: rotate(360deg); } }
+  </style>
 @endsection
 
 @section('header-js')
@@ -31,7 +46,15 @@
       <input type="password" id="password" name="password" required />
       <div class="input-error" id="passwordError"></div>
     </div>
-    <button type="submit" class="login-btn">Đăng ký</button>
+    <div class="input-group">
+      <label for="password_confirmation">Nhập lại mật khẩu:</label>
+      <input type="password" id="password_confirmation" name="password_confirmation" required />
+      <div class="input-error" id="password_confirmationError"></div>
+    </div>
+    <button type="submit" class="login-btn" id="btnRegister">
+      <span class="btn-spinner" id="btnRegisterSpinner" aria-hidden="true"></span>
+      <span class="btn-text" id="btnRegisterText">Đăng ký</span>
+    </button>
     <div class="error-message" id="registerError">Thông tin không hợp lệ hoặc đã tồn tại!</div>
   </form>
   <div id="toast" class="toast"></div>
@@ -49,6 +72,7 @@
     const nameField = document.getElementById('name');
     const emailField = document.getElementById('email');
     const passwordField = document.getElementById('password');
+    const passwordConfirmationField = document.getElementById('password_confirmation');
     const registerError = document.getElementById('registerError');
 
     function toastSuccess() {
@@ -69,6 +93,7 @@
       nameField.value = '';
       emailField.value = '';
       passwordField.value = '';
+      passwordConfirmationField.value = '';
     }
 
     const showError = (element, message) => {
@@ -76,7 +101,7 @@
     };
 
     const clearErrors = () => {
-      ['name', 'email', 'password'].forEach(field => {
+      ['name', 'email', 'password', 'password_confirmation'].forEach(field => {
         showError(field, '');
       });
       registerError.style.display = 'none';
@@ -93,7 +118,8 @@
       const name = nameField.value.trim();
       const email = emailField.value.trim();
       const password = passwordField.value;
-      const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      const passwordConfirmation = passwordConfirmationField.value;
+      const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
       let valid = true;
 
@@ -112,13 +138,24 @@
         valid = false;
       }
 
-      // Nếu hợp lệ
+      if (password !== passwordConfirmation) {
+        showError('password_confirmation', 'Nhập lại mật khẩu không khớp.');
+        valid = false;
+      }
+
       if (valid) {
-        // Gửi AJAX đến server hoặc lưu vào DB ở đây nếu cần
+        const btnRegister = document.getElementById('btnRegister');
+        const btnSpinner = document.getElementById('btnRegisterSpinner');
+        const btnText = document.getElementById('btnRegisterText');
+        btnRegister.disabled = true;
+        btnSpinner.classList.add('is-loading');
+        btnText.textContent = 'Đang xử lý...';
+
         const data = {
             name: name,
             email: email,
-            password: password
+            password: password,
+            password_confirmation: passwordConfirmation
         };
         $.ajax({
           url: baseUrl + '/register',
@@ -129,9 +166,12 @@
           },
           data: JSON.stringify(data),
           success: function(response) {
+            btnRegister.disabled = false;
+            btnSpinner.classList.remove('is-loading');
+            btnText.textContent = 'Đăng ký';
             if (response.status == "success") {
                 const toast = document.getElementById("toast");
-                toast.innerHTML = `✅ Đã đăng ký thành công: <b>${email}</b><br>`;
+                toast.innerHTML = `✅ ${response.message}<br><small>Kiểm tra hộp thư <b>${email}</b> để xác thực.</small>`;
                 toast.className = "toast show";
                 toastSuccess();
                 setTimeout(() => {
@@ -151,9 +191,12 @@
             }
           },
           error: function(xhr) {
-            console.log(xhr);
+            btnRegister.disabled = false;
+            btnSpinner.classList.remove('is-loading');
+            btnText.textContent = 'Đăng ký';
+            const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Lỗi kết nối.';
             const toast = document.getElementById("toast");
-            toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;
+            toast.innerHTML = '❌ ' + msg;
             toast.className = "toast show";
             toastError();
             setTimeout(() => {

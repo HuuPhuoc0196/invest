@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class UserPortfolio extends Model
 {
     protected $table = 'user_portfolios';
-    protected $fillable = ['id', 'user_id', 'stock_id', 'buy_price', 'buy_date', 'quantity', 'session_closed_flag'];
+    protected $fillable = ['user_id', 'stock_id', 'buy_price', 'buy_date', 'quantity', 'session_closed_flag'];
 
     public static function getProfileUser($userId)
     {
@@ -72,6 +72,9 @@ class UserPortfolio extends Model
 
             // 6. Lấy thông tin mã cổ phiếu
             $stockInfo = DB::table('stocks')->where('id', $stockId)->first();
+            if (!$stockInfo) {
+                continue;
+            }
 
             $result[] = [
                 'code' => $stockInfo->code,
@@ -192,6 +195,9 @@ class UserPortfolio extends Model
 
             // 6. Lấy thông tin cổ phiếu
             $stock = DB::table('stocks')->where('id', $stockId)->first();
+            if (!$stock) {
+                continue;
+            }
 
             // 7. Trả về format giống method dưới
             $result[] = (object)[
@@ -244,6 +250,9 @@ class UserPortfolio extends Model
                 ->first();
 
             $stockInfo = DB::table('stocks')->where('id', $stockId)->first();
+            if (!$stockInfo) {
+                continue;
+            }
 
             $result[] = (object)[
                 'stock_id' => $stockId,
