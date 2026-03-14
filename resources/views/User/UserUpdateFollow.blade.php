@@ -30,10 +30,16 @@
         </div>
 
         <div class="form-group">
-            <label for="followPrice">Giá theo dõi:</label>
-            <input type="text" id="followPrice" placeholder="VD: 100000">
-             <div class="error" id="errorFollowPrice">Vui lòng nhập Giá mua</div>
-            <div class="error" id="errorFollowPriceType">Vui lòng nhập Số</div>
+            <label for="followPriceBuy">Giá mua theo dõi:</label>
+            <input type="text" id="followPriceBuy" placeholder="VD: 100000">
+             <div class="error" id="errorFollowPriceBuy">Vui lòng nhập Giá mua</div>
+            <div class="error" id="errorFollowPriceBuyType">Vui lòng nhập Số</div>
+        </div>
+
+        <div class="form-group">
+            <label for="followPriceSell">Giá bán theo dõi:</label>
+            <input type="text" id="followPriceSell" placeholder="VD: 150000">
+            <div class="error" id="errorFollowPriceSellType">Vui lòng nhập Số</div>
         </div>
 
         <div id="toast" class="toast"></div>
@@ -49,12 +55,14 @@
         document.addEventListener("DOMContentLoaded", function () {
             const userFollow = @json($userFollow);
             document.getElementById("code").value = userFollow.code|| "";
-            document.getElementById("followPrice").value = Number(userFollow.follow_price).toLocaleString('vi-VN') || 0;
+            document.getElementById("followPriceBuy").value = userFollow.follow_price_buy ? Number(userFollow.follow_price_buy).toLocaleString('vi-VN') : '';
+            document.getElementById("followPriceSell").value = userFollow.follow_price_sell ? Number(userFollow.follow_price_sell).toLocaleString('vi-VN') : '';
 
         });
         const baseUrl = "{{ url('') }}";
         const formatter = new Intl.NumberFormat('vi-VN');
-        const followPriceInput = document.getElementById("followPrice");
+        const followPriceBuyInput = document.getElementById("followPriceBuy");
+        const followPriceSellInput = document.getElementById("followPriceSell");
 
         function isNumber(value) {
             return !isNaN(value) && value.trim() !== '';
@@ -72,8 +80,12 @@
             input.value = formatted;
         }
 
-        followPriceInput.addEventListener("input", () => {
-            formatToVND(followPriceInput);
+        followPriceBuyInput.addEventListener("input", () => {
+            formatToVND(followPriceBuyInput);
+        });
+
+        followPriceSellInput.addEventListener("input", () => {
+            formatToVND(followPriceSellInput);
         });
 
         function toastSuccess() {
@@ -94,7 +106,8 @@
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
            
             const code = document.getElementById("code").value.trim().toUpperCase();
-            const followPrice = parseNumber(followPriceInput.value);
+            const followPriceBuy = parseNumber(followPriceBuyInput.value);
+            const followPriceSell = parseNumber(followPriceSellInput.value);
             let isValid = true;
 
             document.querySelectorAll(".error").forEach(el => el.style.display = "none");
@@ -105,12 +118,18 @@
                 isValid = false;
             }
 
-            // Validate Giá follow
-            if (!followPrice) {
-                document.getElementById("errorFollowPrice").style.display = "block";
+            // Validate Giá mua follow
+            if (!followPriceBuy) {
+                document.getElementById("errorFollowPriceBuy").style.display = "block";
                 isValid = false;
-            } else if (!isNumber(followPrice)) {
-                document.getElementById("errorFollowPriceType").style.display = "block";
+            } else if (!isNumber(followPriceBuy)) {
+                document.getElementById("errorFollowPriceBuyType").style.display = "block";
+                isValid = false;
+            }
+
+            // Validate Giá bán follow
+            if (followPriceSell && !isNumber(followPriceSell)) {
+                document.getElementById("errorFollowPriceSellType").style.display = "block";
                 isValid = false;
             }
 
@@ -119,7 +138,8 @@
                 // Gửi AJAX đến server hoặc lưu vào DB ở đây nếu cần
                 const data = {
                     code: code,
-                    followPrice: followPrice
+                    followPriceBuy: followPriceBuy,
+                    followPriceSell: followPriceSell || null
                 };
                 $.ajax({
                     url: baseUrl + '/user/updateFollow/' + code,

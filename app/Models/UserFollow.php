@@ -8,19 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserFollow extends Model
 {
-    protected $fillable = ['user_id', 'stock_id', 'follow_price'];
+    protected $fillable = ['user_id', 'stock_id', 'follow_price_buy', 'follow_price_sell', 'notice_flag'];
 
     public static function getUserFollow($userId)
     {
         return DB::table('user_follows')
             ->join('stocks', 'user_follows.stock_id', '=', 'stocks.id')
             ->where('user_follows.user_id', $userId)
-            ->select('stocks.code', 'user_follows.follow_price')
+            ->select('stocks.code', 'user_follows.follow_price_buy', 'user_follows.follow_price_sell')
             ->get()
             ->map(function ($row) {
                 return [
                     'code' => $row->code,
-                    'follow_price' => $row->follow_price
+                    'follow_price_buy' => $row->follow_price_buy,
+                    'follow_price_sell' => $row->follow_price_sell
                 ];
             });
     }
@@ -52,7 +53,28 @@ class UserFollow extends Model
             ->join('stocks', 'user_follows.stock_id', '=', 'stocks.id')
             ->where('stock_id', $code_id)
             ->where('user_id', $userId)
-            ->select('stocks.code', 'user_follows.follow_price')
+            ->select('stocks.code', 'user_follows.follow_price_buy', 'user_follows.follow_price_sell')
             ->first();
     }
+
+    /**
+     * Lấy danh sách follow của user cho email settings (thay thế NoticeStockFollow::getByUser)
+     */
+    public static function getFollowNoticeByUser(int $userId)
+    {
+        return DB::table('user_follows')
+            ->join('stocks', 'user_follows.stock_id', '=', 'stocks.id')
+            ->where('user_follows.user_id', $userId)
+            ->select(
+                'user_follows.id',
+                'user_follows.stock_id',
+                'stocks.code',
+                'user_follows.follow_price_buy',
+                'user_follows.follow_price_sell',
+                'user_follows.notice_flag'
+            )
+            ->orderBy('stocks.code', 'asc')
+            ->get();
+    }
+
 }

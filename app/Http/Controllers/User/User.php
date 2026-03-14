@@ -343,7 +343,8 @@ class User extends Controller
                 // Validation dữ liệu
                 $validated = $request->validate([
                     'code' => 'required|string|max:10',
-                    'followPrice' => 'nullable|numeric|gt:0',
+                    'followPriceBuy' => 'nullable|numeric|gt:0',
+                    'followPriceSell' => 'nullable|numeric|gt:0',
                 ]);
 
                 // Kiểm tra code đã tồn tại chưa
@@ -369,10 +370,13 @@ class User extends Controller
                 // Mapping data vào model
                 $userFollow->user_id = auth()->id();
                 $userFollow->stock_id = $stock->id;
-                $followPrice = $validated['followPrice'] != 0 ? $validated['followPrice'] : $stock->recommended_buy_price;
-                $userFollow->follow_price = $followPrice;
+                $followPriceBuy = !empty($validated['followPriceBuy']) ? $validated['followPriceBuy'] : $stock->recommended_buy_price;
+                $followPriceSell = !empty($validated['followPriceSell']) ? $validated['followPriceSell'] : ($stock->recommended_sell_price ?? null);
+                $userFollow->follow_price_buy = $followPriceBuy;
+                $userFollow->follow_price_sell = $followPriceSell;
+                $userFollow->notice_flag = 0;
 
-                // Lưu vào database (ví dụ bảng stocks)
+                // Lưu vào database
                 $userFollow->save();
 
                 // Trả kết quả JSON
@@ -400,10 +404,10 @@ class User extends Controller
                 // Validation dữ liệu
                 $validated = $request->validate([
                     'code' => 'required|string|max:10',
-                    'followPrice' => 'required|numeric|gt:0',
+                    'followPriceBuy' => 'required|numeric|gt:0',
+                    'followPriceSell' => 'nullable|numeric|gt:0',
                 ]);
                 // Kiểm tra code đã tồn tại chưa
-                $userFollow = new UserFollow();
                 $stock = Stock::getByCode(strtoupper($validated['code']));
 
                 if (!$stock) {
@@ -423,9 +427,10 @@ class User extends Controller
                 }
 
                 // Mapping data vào model
-                $userFollowExit->follow_price = $validated['followPrice'];
+                $userFollowExit->follow_price_buy = $validated['followPriceBuy'];
+                $userFollowExit->follow_price_sell = $validated['followPriceSell'] ?? null;
 
-                // Lưu vào database (ví dụ bảng stocks)
+                // Lưu vào database
                 $userFollowExit->save();
 
                 // Trả kết quả JSON
@@ -596,4 +601,63 @@ class User extends Controller
             return view('User.UserCashOut',compact('cash'));
         }
     }
+
+    public function emailSettings()
+    {
+        $userId = auth()->id();
+        $noticesFollow = UserFollow::getFollowNoticeByUser($userId);
+        $sessionClosedItems = UserPortfolio::getSessionClosedByUser($userId);
+        return view('User.UserEmailSettings', compact('noticesFollow', 'sessionClosedItems'));
+    }
+
+    public function saveSessionClosedFlags(Request $request)
+    {
+        $userId = auth()->id();
+        $items = $request->input('items', []);
+
+        try {
+            foreach ($items as $item) {
+                UserPortfolio::updateSessionClosedFlag(
+                    $userId,
+                    $item['stock_id'],
+                    $item['session_closed_flag'] ? 1 : 0
+                );
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Lưu cài đặt thành công.'
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function saveEmailSettingsFollow(Request $request)
+    {
+        $userId = auth()->id();
+        $items = $request->input('items', []);
+
+        try {
+            foreach ($items as $item) {
+                UserFollow::where('id', $item['id'])
+                    ->where('user_id', $userId)
+                    ->update(['notice_flag' => $item['notice_flag'] ? 1 : 0]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Lưu cài đặt thành công.'
+            ]);
+        } catch (QueryException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

@@ -324,7 +324,7 @@ export default class User{
          // 1. Tạo danh sách mã CK trong danh mục đầu tư
         // const portfolioCodes = userFollow.map(p => p.code);
         const portfolioCodes = userFollow.reduce((acc, p) => {
-            acc[p.code] = p.follow_price;
+            acc[p.code] = p.follow_price_buy;
             return acc;
         }, {});
 
@@ -370,7 +370,7 @@ export default class User{
             const row = document.createElement('tr');
             // Gộp class màu định giá và class nổi bật
             const isInPortfolio = userFollow.some(port => port.code === stock.code);
-            const valuationClass = this.getRowClass(parseFloat(stock.follow_price), parseFloat(stock.current_price));
+            const valuationClass = this.getRowClass(parseFloat(stock.follow_price_buy), parseFloat(stock.current_price));
             if (isInPortfolio) {
                 row.className = `${valuationClass} highlighted-row`;
             } else {

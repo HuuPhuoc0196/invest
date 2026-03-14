@@ -19,6 +19,7 @@
     <a href="{{ url('/user/infoProfile') }}" class="button-link">👤 Thông tin cá nhân</a>
     <a href="{{ url('/user/cashIn') }}" class="button-link">💰 Nạp tiền</a>
     <a href="{{ url('/user/cashOut') }}" class="button-link">💵 Rút tiền</a>
+    <a href="{{ url('/user/email-settings') }}" class="button-link">📧 Cài đặt thông báo</a>
     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
         @csrf
     </form>

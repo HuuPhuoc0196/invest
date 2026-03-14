@@ -124,9 +124,9 @@
         const userFollow = @json($userFollow);
         let deleteUrl = "";
 
-        // Merge: chỉ lấy stocks mà user đang follow, follow_price ghi đè recommended_buy_price
+        // Merge: chỉ lấy stocks mà user đang follow, follow_price_buy ghi đè recommended_buy_price
         const followMap = {};
-        userFollow.forEach(f => { followMap[f.code] = f.follow_price; });
+        userFollow.forEach(f => { followMap[f.code] = f.follow_price_buy; });
 
         const stocks = allStocks
             .filter(s => followMap.hasOwnProperty(s.code))

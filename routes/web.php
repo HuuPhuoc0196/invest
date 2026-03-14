@@ -97,4 +97,11 @@ Route::middleware(['auth', 'user'])->group(function () {
     // info profile
     Route::match(['get', 'put'], '/user/updateInfoProfile', [User::class, 'updateInfoProfile'])->name('updateInfoProfile');
     Route::match(['get', 'put'], '/user/changePassword', [User::class, 'changePassword'])->name('changePassword');
+
+    // Email settings
+    Route::get('/user/email-settings', [User::class, 'emailSettings'])->name('user.emailSettings');
+    Route::post('/user/email-settings/save-session-closed', [User::class, 'saveSessionClosedFlags'])->name('user.saveSessionClosedFlags');
+
+    // Email settings follow
+    Route::post('/user/email-settings-follow/save', [User::class, 'saveEmailSettingsFollow'])->name('user.saveEmailSettingsFollow');
 });

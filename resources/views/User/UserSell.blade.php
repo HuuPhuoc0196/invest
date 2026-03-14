@@ -142,7 +142,22 @@
                 return false; // vượt quá số lượng hiện có
             }
             stock.total_quantity -= quantity;
+            // Cập nhật lại dropdown mã cổ phiếu
+            refreshStockSelect();
             return true;
+        }
+
+        function refreshStockSelect() {
+            const select = document.getElementById("code");
+            select.innerHTML = '<option value="">-- Chọn mã cổ phiếu --</option>';
+            userPortfolios.forEach(p => {
+                if (p.total_quantity > 0) {
+                    const option = document.createElement("option");
+                    option.value = p.code;
+                    option.textContent = p.code;
+                    select.appendChild(option);
+                }
+            });
         }
 
         function toastSuccess() {

@@ -36,9 +36,15 @@
         </div>
 
         <div class="form-group">
-            <label for="followPrice">Giá theo dõi:</label>
-            <input type="text" id="followPrice" placeholder="VD: 100000">
-            <div class="error" id="errorFollowPriceType">Vui lòng nhập Số</div>
+            <label for="followPriceBuy">Giá mua theo dõi:</label>
+            <input type="text" id="followPriceBuy" placeholder="VD: 100000">
+            <div class="error" id="errorFollowPriceBuyType">Vui lòng nhập Số</div>
+        </div>
+
+        <div class="form-group">
+            <label for="followPriceSell">Giá bán theo dõi:</label>
+            <input type="text" id="followPriceSell" placeholder="VD: 150000">
+            <div class="error" id="errorFollowPriceSellType">Vui lòng nhập Số</div>
         </div>
 
         <div id="toast" class="toast"></div>
@@ -53,7 +59,8 @@
     <script>
         const baseUrl = "{{ url('') }}";
         const formatter = new Intl.NumberFormat('vi-VN');
-        const followPriceInput = document.getElementById("followPrice");
+        const followPriceBuyInput = document.getElementById("followPriceBuy");
+        const followPriceSellInput = document.getElementById("followPriceSell");
         const codeInput = document.getElementById("code");
         const btnCheckCode = document.getElementById("btnCheckCode");
 
@@ -72,8 +79,12 @@
             input.value = formatted;
         }
 
-        followPriceInput.addEventListener("input", () => {
-            formatToVND(followPriceInput);
+        followPriceBuyInput.addEventListener("input", () => {
+            formatToVND(followPriceBuyInput);
+        });
+
+        followPriceSellInput.addEventListener("input", () => {
+            formatToVND(followPriceSellInput);
         });
 
         // Toggle check button & submit button based on code input
@@ -114,9 +125,13 @@
                         toast.className = 'toast show';
                         toastSuccess();
 
-                        // Auto-fill Giá theo dõi = Giá mua tốt (recommended_buy_price)
+                        // Auto-fill Giá mua theo dõi = Giá mua tốt (recommended_buy_price)
                         if (response.data && response.data.recommended_buy_price) {
-                            followPriceInput.value = formatter.format(response.data.recommended_buy_price);
+                            followPriceBuyInput.value = formatter.format(response.data.recommended_buy_price);
+                        }
+                        // Auto-fill Giá bán theo dõi = Giá bán tốt (recommended_sell_price)
+                        if (response.data && response.data.recommended_sell_price) {
+                            followPriceSellInput.value = formatter.format(response.data.recommended_sell_price);
                         }
                     } else if (response.status === 'warning') {
                         toast.innerHTML = `⚠️ ${response.message}`;
@@ -125,13 +140,17 @@
 
                         // Vẫn auto-fill giá để user tham khảo
                         if (response.data && response.data.recommended_buy_price) {
-                            followPriceInput.value = formatter.format(response.data.recommended_buy_price);
+                            followPriceBuyInput.value = formatter.format(response.data.recommended_buy_price);
+                        }
+                        if (response.data && response.data.recommended_sell_price) {
+                            followPriceSellInput.value = formatter.format(response.data.recommended_sell_price);
                         }
                     } else {
                         toast.innerHTML = `❌ ${response.message}`;
                         toast.className = 'toast show';
                         toastError();
-                        followPriceInput.value = '';
+                        followPriceBuyInput.value = '';
+                        followPriceSellInput.value = '';
                     }
                     setTimeout(() => {
                         toast.className = toast.className.replace('show', '');
@@ -161,7 +180,8 @@
 
         function resetForm() {
             codeInput.value = "";
-            followPriceInput.value = "";
+            followPriceBuyInput.value = "";
+            followPriceSellInput.value = "";
             btnCheckCode.disabled = true;
             btnCheckCode.style.background = '#ccc';
             btnCheckCode.style.color = '#666';
@@ -189,7 +209,8 @@
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             const code = codeInput.value.trim().toUpperCase();
-            const followPrice = parseNumber(followPriceInput.value);
+            const followPriceBuy = parseNumber(followPriceBuyInput.value);
+            const followPriceSell = parseNumber(followPriceSellInput.value);
             let isValid = true;
 
             document.querySelectorAll(".error").forEach(el => el.style.display = "none");
@@ -200,10 +221,18 @@
                 isValid = false;
             }
 
-            // Validate Giá follow
-            if (followPrice) {
-                if (!isNumber(followPrice)) {
-                    document.getElementById("errorFollowPriceType").style.display = "block";
+            // Validate Giá mua follow
+            if (followPriceBuy) {
+                if (!isNumber(followPriceBuy)) {
+                    document.getElementById("errorFollowPriceBuyType").style.display = "block";
+                    isValid = false;
+                }
+            }
+
+            // Validate Giá bán follow
+            if (followPriceSell) {
+                if (!isNumber(followPriceSell)) {
+                    document.getElementById("errorFollowPriceSellType").style.display = "block";
                     isValid = false;
                 }
             }
@@ -212,7 +241,8 @@
             if (isValid) {
                 const data = {
                     code: code,
-                    followPrice: followPrice
+                    followPriceBuy: followPriceBuy,
+                    followPriceSell: followPriceSell
                 };
                 $.ajax({
                     url: baseUrl + '/user/insertFollow',

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class UserPortfolio extends Model
 {
     protected $table = 'user_portfolios';
-    protected $fillable = ['id', 'user_id', 'stock_id', 'buy_price', 'buy_date', 'quantity'];
+    protected $fillable = ['id', 'user_id', 'stock_id', 'buy_price', 'buy_date', 'quantity', 'session_closed_flag'];
 
     public static function getProfileUser($userId)
     {
@@ -204,5 +204,65 @@ class UserPortfolio extends Model
         }
 
         return collect($result);
+    }
+
+    /**
+     * Lấy danh sách cổ phiếu đang nắm giữ kèm session_closed_flag
+     * Mỗi stock chỉ xuất hiện 1 lần, lấy flag từ record mua đầu tiên (FIFO)
+     */
+    public static function getSessionClosedByUser(int $userId)
+    {
+        // Lấy danh sách mã đang nắm giữ (total > 0)
+        $stocks = DB::table('user_portfolios')
+            ->where('user_id', $userId)
+            ->select('stock_id')
+            ->groupBy('stock_id')
+            ->get();
+
+        $result = [];
+
+        foreach ($stocks as $s) {
+            $stockId = $s->stock_id;
+
+            $totalBought = DB::table('user_portfolios')
+                ->where('user_id', $userId)
+                ->where('stock_id', $stockId)
+                ->sum('quantity');
+
+            $totalSold = DB::table('user_portfolios_sell')
+                ->where('user_id', $userId)
+                ->where('stock_id', $stockId)
+                ->sum('quantity');
+
+            if ($totalBought - $totalSold <= 0) continue;
+
+            // Lấy session_closed_flag từ record đầu tiên (FIFO)
+            $firstRecord = DB::table('user_portfolios')
+                ->where('user_id', $userId)
+                ->where('stock_id', $stockId)
+                ->orderBy('buy_date', 'asc')
+                ->first();
+
+            $stockInfo = DB::table('stocks')->where('id', $stockId)->first();
+
+            $result[] = (object)[
+                'stock_id' => $stockId,
+                'code' => $stockInfo->code,
+                'session_closed_flag' => $firstRecord->session_closed_flag ?? 0,
+            ];
+        }
+
+        return collect($result)->sortBy('code')->values();
+    }
+
+    /**
+     * Update session_closed_flag cho tất cả records của user + stock
+     */
+    public static function updateSessionClosedFlag(int $userId, int $stockId, int $flag)
+    {
+        return DB::table('user_portfolios')
+            ->where('user_id', $userId)
+            ->where('stock_id', $stockId)
+            ->update(['session_closed_flag' => $flag]);
     }
 }

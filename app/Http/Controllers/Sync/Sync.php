@@ -292,8 +292,10 @@ class Sync extends Controller
         }
         $userFollow->user_id = 1;
         $userFollow->stock_id = $stock->id;
-        $userFollow->follow_price = $stock->recommended_buy_price;
-        // Lưu vào database (ví dụ bảng stocks)
+        $userFollow->follow_price_buy = $stock->recommended_buy_price;
+        $userFollow->follow_price_sell = $stock->recommended_sell_price ?? null;
+        $userFollow->notice_flag = 0;
+        // Lưu vào database
         $userFollow->save();
         $result = EmailService::sendSuggestStocksHave10tr($code);
         $message = 'Hệ thống ghi nhận cổ phiếu ' . $code . ' đã có khối lượng giao dịch trên 10.000.000 và thêm vào table user_follow.';
