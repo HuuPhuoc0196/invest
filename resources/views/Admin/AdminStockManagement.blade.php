@@ -175,10 +175,19 @@
             });
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            updateSortIcons();
-            renderStockTable(stocks);
-        });
+        // Đợi AdminStockManagement.js (Vite module) load xong rồi mới gọi renderStockTable (tránh lỗi khi script defer chạy sau DOMContentLoaded)
+        var renderReadyAttempts = 0;
+        var renderReadyMaxAttempts = 200; // ~6 giây
+        function runWhenRenderReady() {
+            if (typeof window.renderStockTable === 'function') {
+                updateSortIcons();
+                renderStockTable(stocks);
+            } else if (renderReadyAttempts < renderReadyMaxAttempts) {
+                renderReadyAttempts++;
+                setTimeout(runWhenRenderReady, 30);
+            }
+        }
+        document.addEventListener("DOMContentLoaded", runWhenRenderReady);
 
         function getFilteredStocks() {
             const keyword = document.getElementById('searchInput').value.trim().toUpperCase();
