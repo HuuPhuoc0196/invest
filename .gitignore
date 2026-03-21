@@ -4,9 +4,12 @@
 /public/storage
 /storage/*.key
 /vendor
+
+# Env — không commit secrets; mọi file .env* đều ignore trừ .env.example
 .env
-.env.backup
-.env.production
+.env.*
+!.env.example
+
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
