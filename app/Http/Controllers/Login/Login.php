@@ -94,6 +94,7 @@ class Login extends Controller
                 $user->name = trim($validated['name']);
                 $user->email = trim($validated['email']);
                 $user->role = 0;
+                $user->active = 0; // chỉ bật 1 sau khi verify email (xem routes verification.verify)
                 $user->password = Hash::make($validated['password']);
 
                 $user->save();

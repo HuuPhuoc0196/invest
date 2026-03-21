@@ -36,11 +36,14 @@ Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Http\Request $requ
         return redirect()->route('login')->with('error', 'Link xác thực không hợp lệ hoặc đã hết hạn.');
     }
     if ($user->hasVerifiedEmail()) {
-        $user->update(['active' => 1]);
+        // active không nằm trong $fillable → không dùng update([...]); gán trực tiếp
+        $user->active = 1;
+        $user->save();
         return redirect()->route('login')->with('message', 'Email đã được xác thực trước đó. Bạn có thể đăng nhập.');
     }
     $user->markEmailAsVerified();
-    $user->update(['active' => 1]);
+    $user->active = 1;
+    $user->save();
     return redirect()->route('login')->with('message', 'Email đã được xác thực. Bạn có thể đăng nhập.');
 })->middleware(['signed'])->name('verification.verify');
 
