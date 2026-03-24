@@ -179,6 +179,83 @@ th {
     background-color: #34495e;
 }
 
+/* Sticky left columns for stock table */
+#stock-table th.col-code-sticky,
+#stock-table td.col-code-sticky {
+    position: sticky;
+    left: 0;
+    z-index: 1002;
+}
+
+/* Keep backgrounds visible when sticky overlays other cells */
+#stock-table th.col-code-sticky {
+    background-color: #34495e;
+}
+
+#stock-table td.col-code-sticky {
+    background-color: #fff;
+    box-shadow: 2px 0 0 #e5e7eb, 6px 0 10px -8px rgba(0, 0, 0, 0.22);
+}
+
+/* Keep colored row states readable with sticky cells */
+#stock-table tr.yellow td.col-code-sticky {
+    background-color: #fffae6;
+}
+
+#stock-table tr.green td.col-code-sticky {
+    background-color: #e6ffea;
+}
+
+#stock-table tr.purple td.col-code-sticky {
+    background-color: #f3e6ff;
+}
+
+#stock-table tr.red td.col-code-sticky {
+    background-color: #eee4e4ff;
+}
+
+/* Sticky cloned header must keep left-sticky behavior too */
+.sticky-clone th.col-code-sticky {
+    position: sticky;
+    left: 0;
+    z-index: 1004;
+}
+
+/* Subtle sticky separator for touch devices */
+@media (max-width: 768px) {
+    #stock-table td.col-code-sticky {
+        box-shadow: 2px 0 0 #dfe4ea, 8px 0 12px -10px rgba(0, 0, 0, 0.28);
+    }
+}
+
+/* Shared sticky-left rules for profile/performance secondary table */
+#invest-table th.col-code-sticky,
+#invest-table td.col-code-sticky {
+    position: sticky;
+    left: 0;
+    z-index: 1002;
+}
+
+#invest-table th.col-code-sticky {
+    background-color: #34495e;
+}
+
+#invest-table td.col-code-sticky {
+    background-color: #fff;
+    box-shadow: 2px 0 0 #e5e7eb, 6px 0 10px -8px rgba(0, 0, 0, 0.22);
+}
+
+#stock-table tr.total-row td.col-code-sticky,
+#invest-table tr.total-row td.col-code-sticky {
+    background-color: #f8f9fa;
+}
+
+.sticky-clone-total td.col-code-sticky {
+    position: sticky;
+    left: 0;
+    z-index: 1004;
+}
+
 /* Row color classes */
 tr.yellow {
     background-color: #fffae6;

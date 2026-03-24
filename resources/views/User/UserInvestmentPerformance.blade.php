@@ -5,6 +5,7 @@
 @section('header-css')
     @vite('resources/css/app.css')
     @vite('resources/css/adminView.css')
+    @vite('resources/css/adminStockManagement.css')
     <style>
         .table-container {
             overflow-x: auto;
@@ -84,7 +85,7 @@
         <table id="stock-table">
             <thead>
                 <tr>
-                    <th>Mã cổ phiếu</th>
+                    <th class="col-code-sticky">Mã cổ phiếu</th>
                     <th>Khối lượng đặt</th>
                     <th>Giá</th>
                     <th>Giá trị giao dịch</th>

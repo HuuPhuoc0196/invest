@@ -183,6 +183,20 @@ class User extends Controller
         return $this->follow();
     }
 
+    public function deleteAllFollow(Request $request)
+    {
+        $userId = auth()->id();
+        $deletedCount = UserFollow::deleteAllByUserId($userId);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $deletedCount > 0
+                ? 'Đã xoá tất cả mã theo dõi.'
+                : 'Không có mã theo dõi để xoá.',
+            'deleted_count' => $deletedCount,
+        ]);
+    }
+
     // public function deleteUserProfileCode($code)
     // {
     //     $stock = Stock::where('code', $code)->first();

@@ -103,7 +103,7 @@
         <table id="stock-table">
             <thead class="sticky-header">
                 <tr>
-                    <th data-sort-key="code" onclick="sortByColumn('code')">Mã cổ phiếu <span class="sort-icon">⇅</span></th>
+                    <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã cổ phiếu <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="stocks_vn" onclick="sortByColumn('stocks_vn')">Thuộc VN <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="recommended_buy_price" onclick="sortByColumn('recommended_buy_price')">Giá mua tốt <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="current_price" onclick="sortByColumn('current_price')">Giá hiện tại <span class="sort-icon">⇅</span></th>
@@ -352,7 +352,7 @@
                 const row = document.createElement('tr');
                 row.className = getRowClass(buyPrice, currentPrice);
                 row.innerHTML = `
-                    <td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
+                    <td class="col-code-sticky"><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
                     <td>${[30, 100].includes(Number(stock.stocks_vn)) ? Number(stock.stocks_vn) : 'ALL'}</td>
                     <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
                     <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>

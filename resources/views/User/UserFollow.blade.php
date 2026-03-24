@@ -1,5 +1,9 @@
 @extends('Layout.Layout')
 
+@section('csrf-token')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+
 @section('title', 'Danh sách mã cổ phiếu theo dõi')
 
 @section('header-css')
@@ -84,11 +88,24 @@
         </div>
     </div>
 
+    <div style="display:flex;justify-content:flex-end;align-items:center;">
+        <button
+            id="btnDeleteAllFollow"
+            class="btn-delete"
+            type="button"
+            disabled
+            style="opacity:.6;cursor:not-allowed;"
+            onclick="openDeleteAllModal()"
+        >
+            🗑️ Xoá tất cả
+        </button>
+    </div>
+
     <div class="table-container">
         <table id="stock-table">
             <thead class="sticky-header">
                 <tr>
-                    <th data-sort-key="code" onclick="sortByColumn('code')">Mã cổ phiếu <span class="sort-icon">⇅</span></th>
+                    <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã cổ phiếu <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="stocks_vn" onclick="sortByColumn('stocks_vn')">Thuộc VN <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="recommended_buy_price" onclick="sortByColumn('recommended_buy_price')">Giá mua tốt <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="current_price" onclick="sortByColumn('current_price')">Giá hiện tại <span class="sort-icon">⇅</span></th>
@@ -114,12 +131,25 @@
             <button id="confirmNo">Không</button>
         </div>
     </div>
+
+    <!-- Modal xác nhận xoá tất cả -->
+    <div id="confirmDeleteAllModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 20px; border-radius: 10px; width: 360px; text-align: center;">
+            <p style="margin-bottom:16px;">Bạn có chắc muốn xoá tất cả mã đã theo dõi không?</p>
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button id="confirmDeleteAllYes" class="btn-delete">Xác nhận</button>
+                <button id="confirmDeleteAllNo" class="btn-filter-reset">Huỷ bỏ</button>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('user-script')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         const baseUrl = "{{ url('') }}";
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         const allStocks = @json($stocks);
         const userFollow = @json($userFollow);
         let deleteUrl = "";
@@ -200,6 +230,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             updateSortIcons();
             renderTable(stocks);
+            syncDeleteAllButtonState();
 
             // Drag-to-scroll
             const container = document.querySelector('.table-container');
@@ -242,6 +273,14 @@
             document.getElementById("confirmNo").onclick = function () {
                 document.getElementById("confirmModal").style.display = "none";
                 deleteUrl = "";
+            };
+
+            // Modal confirm delete all
+            document.getElementById("confirmDeleteAllYes").onclick = function () {
+                submitDeleteAllFollow();
+            };
+            document.getElementById("confirmDeleteAllNo").onclick = function () {
+                closeDeleteAllModal();
             };
 
             // JS-based sticky header (works with overflow-x container)
@@ -349,6 +388,54 @@
             document.getElementById("confirmModal").style.display = "flex";
         }
 
+        function syncDeleteAllButtonState() {
+            const btn = document.getElementById('btnDeleteAllFollow');
+            if (!btn) return;
+            const hasFollow = stocks.length > 0;
+            btn.disabled = !hasFollow;
+            btn.style.opacity = hasFollow ? '1' : '.6';
+            btn.style.cursor = hasFollow ? 'pointer' : 'not-allowed';
+        }
+
+        function openDeleteAllModal() {
+            const btn = document.getElementById('btnDeleteAllFollow');
+            if (!btn || btn.disabled) return;
+            document.getElementById('confirmDeleteAllModal').style.display = 'flex';
+        }
+
+        function closeDeleteAllModal() {
+            document.getElementById('confirmDeleteAllModal').style.display = 'none';
+        }
+
+        function submitDeleteAllFollow() {
+            const btnConfirm = document.getElementById('confirmDeleteAllYes');
+            if (!btnConfirm) return;
+            btnConfirm.disabled = true;
+            btnConfirm.textContent = 'Đang xử lý...';
+
+            $.ajax({
+                url: baseUrl + '/user/deleteFollowAll',
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                success: function(res) {
+                    closeDeleteAllModal();
+                    alert(res && res.message ? res.message : 'Đã xoá tất cả mã theo dõi.');
+                    window.location.reload();
+                },
+                error: function(xhr) {
+                    const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Xoá tất cả thất bại.';
+                    alert(msg);
+                },
+                complete: function() {
+                    btnConfirm.disabled = false;
+                    btnConfirm.textContent = 'Xác nhận';
+                }
+            });
+        }
+
         function renderTable(data) {
             const tbody = document.getElementById('stockTableBody');
             tbody.innerHTML = '';
@@ -370,7 +457,7 @@
                 const row = document.createElement('tr');
                 row.className = getRowClass(buyPrice, currentPrice);
                 row.innerHTML = `
-                    <td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
+                    <td class="col-code-sticky"><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
                     <td>${[30, 100].includes(Number(stock.stocks_vn)) ? Number(stock.stocks_vn) : 'ALL'}</td>
                     <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
                     <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
@@ -474,5 +561,6 @@
                 icon.textContent = '▼';
             }
         }
+
     </script>
 @endsection

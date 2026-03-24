@@ -157,7 +157,7 @@ export default class User{
             let percentSign = profitPercent > 0 ? '+' : profitPercent < 0 ? '-' : '+';
 
             row.innerHTML = `
-                <td><a href="https://fireant.vn/dashboard/content/symbols/${userPortfolio.code}" target="_blank" style="color: inherit; text-decoration: none;">${userPortfolio.code}</a></td>
+                <td class="col-code-sticky"><a href="https://fireant.vn/dashboard/content/symbols/${userPortfolio.code}" target="_blank" style="color: inherit; text-decoration: none;">${userPortfolio.code}</a></td>
                 <td>${total_quantity.toLocaleString('vi-VN')}</td>
                 <td>${avg_price.toLocaleString('vi-VN')}</td>
                 <td>${current_price.toLocaleString('vi-VN')}</td>
@@ -184,7 +184,7 @@ export default class User{
         const totalRow = document.createElement('tr');
         totalRow.classList.add('total-row');
         totalRow.innerHTML = `
-            <td><strong>Tổng:</strong></td>
+            <td class="col-code-sticky"><strong>Tổng:</strong></td>
             <td><strong>${totalQuantity.toLocaleString('vi-VN')}</strong></td>
             <td></td>
             <td></td>
@@ -215,7 +215,7 @@ export default class User{
         // Dòng tổng cộng
         const totalRow = document.createElement('tr');
         totalRow.innerHTML = `
-            <td><strong>Tổng:</strong></td>
+            <td class="col-code-sticky"><strong>Tổng:</strong></td>
             <td><strong>${Number(data.cash_in).toLocaleString('vi-VN')}</strong></td>
             <td><strong>${Number(data.cash).toLocaleString('vi-VN')}</strong</td>
             <td style="color:${totalProfitColor}"><strong>${totalProfitSign}${Math.abs(totalProfit).toLocaleString('vi-VN')}</strong></td>
@@ -278,7 +278,7 @@ export default class User{
 
             row.className = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
             row.innerHTML = `
-                <td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
+                <td class="col-code-sticky"><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
                 <td>${Number(stock.quantity).toLocaleString('vi-VN')}</td>
                 <td>${Number(price).toLocaleString('vi-VN')}</td>
                 <td>${Number(stock.quantity * price).toLocaleString('vi-VN')}</td>
@@ -310,7 +310,7 @@ export default class User{
         const totalRow = document.createElement('tr');
         totalRow.classList.add('total-row');
         totalRow.innerHTML = `
-            <td><strong>Tổng :</strong></td>
+            <td class="col-code-sticky"><strong>Tổng :</strong></td>
             <td><strong>${totalQuantity.toLocaleString('vi-VN')}</strong></td>
             <td></td>
             <td><strong>${totalValue.toLocaleString('vi-VN')}</strong></td>

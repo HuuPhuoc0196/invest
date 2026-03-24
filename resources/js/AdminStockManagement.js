@@ -93,7 +93,7 @@ window.renderStockTable = function(data) {
         const row = document.createElement('tr');
         row.className = getRowClass(buyPrice, currentPrice);
         row.innerHTML = `
-            <td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
+            <td class="col-code-sticky"><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>
             <td>${[30, 100].includes(Number(stock.stocks_vn)) ? Number(stock.stocks_vn) : 'ALL'}</td>
             <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
             <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>

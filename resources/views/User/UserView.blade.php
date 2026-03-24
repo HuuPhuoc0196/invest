@@ -144,7 +144,7 @@
                     @auth
                     <th class="col-select">Chọn</th>
                     @endauth
-                    <th data-sort-key="code" onclick="sortByColumn('code')">Mã cổ phiếu <span class="sort-icon">⇅</span></th>
+                    <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã cổ phiếu <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="stocks_vn" onclick="sortByColumn('stocks_vn')">Thuộc VN <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="recommended_buy_price" onclick="sortByColumn('recommended_buy_price')">Giá mua tốt <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="current_price" onclick="sortByColumn('current_price')">Giá hiện tại <span class="sort-icon">⇅</span></th>
@@ -410,8 +410,8 @@
                     ? `<td class="col-select"><label class="cell-label-select"><input type="checkbox" class="follow-checkbox" data-code="${stock.code}"${checkboxAttrs}></label></td>`
                     : '';
                 const codeCell = isLoggedIn
-                    ? `<td class="td-code-toggle" style="cursor: pointer;" title="Click để chọn/bỏ chọn theo dõi"><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>`
-                    : `<td><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>`;
+                    ? `<td class="td-code-toggle col-code-sticky" style="cursor: pointer;" title="Click để chọn/bỏ chọn theo dõi"><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>`
+                    : `<td class="col-code-sticky"><a href="https://fireant.vn/dashboard/content/symbols/${stock.code}" target="_blank" style="color: inherit; text-decoration: none;">${stock.code}</a></td>`;
                 row.innerHTML = `
                     ${selectCell}
                     ${codeCell}
@@ -559,5 +559,6 @@
                 icon.textContent = '▼';
             }
         }
+
     </script>
 @endsection

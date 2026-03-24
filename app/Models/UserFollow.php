@@ -39,6 +39,11 @@ class UserFollow extends Model
             ->delete() > 0;
     }
 
+    public static function deleteAllByUserId(int $userId): int
+    {
+        return self::where('user_id', $userId)->delete();
+    }
+
     public static function getUserFollowFirst(int $code_id, int $userId)
     {
         // Trả về bản ghi user_follows tương ứng

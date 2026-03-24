@@ -109,6 +109,7 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/user/investment-performance', [User::class, 'investmentPerformance']);
     // Route::get('/user/deleteUserProfileCode/{code}', [User::class, 'deleteUserProfileCode']);
     Route::get('/user/deleteFollow/{code}', [User::class, 'deleteFollow'])->name('user.deleteFollow');
+    Route::post('/user/deleteFollowAll', [User::class, 'deleteAllFollow'])->name('user.deleteFollowAll');
 
     // Giao dịch
     Route::match(['get', 'post'], '/user/buy', [User::class, 'buy'])->name('buy');
