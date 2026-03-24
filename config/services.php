@@ -36,6 +36,8 @@ return [
     */
     'sync' => [
         'base_url' => env('SYNC_SERVICE_URL', 'http://163.61.182.174'),
+        /** Path trên VPS (GET) — browser không gọi trực tiếp; Laravel proxy qua runSyncUpdateStock */
+        'run_update_stock_path' => env('SYNC_RUN_UPDATE_STOCK_PATH', '/run-sync-update-stocks'),
     ],
 
 ];

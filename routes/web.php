@@ -78,6 +78,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::match(['get', 'post'], '/admin/insert', [Admin::class, 'insert'])->name('insert');
     Route::match(['get', 'put'], '/admin/update/{code}', [Admin::class, 'update'])->name('admin.update');
     Route::match(['get', 'post'], '/admin/updateRiskForCode', [Sync::class, 'updateRiskForCode'])->name('updateRiskForCode');
+    Route::post('/admin/sync/run-update-stock/{code}', [Sync::class, 'runSyncUpdateStock'])->name('admin.sync.runUpdateStock');
 
     // Quản lý cổ phiếu
     Route::get('/admin/stocks', [Admin::class, 'stockManagement'])->name('admin.stocks');

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\EmailService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\File;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use App\Models\UserPortfolio;
 
@@ -400,6 +401,83 @@ class Sync extends Controller
             }
         }
         return $finalPrice;
+    }
+
+    /**
+     * Proxy: admin (HTTPS) gọi Laravel cùng origin → server gọi HTTP tới VPS sync.
+     * Tránh Mixed Content và CORS khi trình duyệt gọi thẳng SYNC_SERVICE_URL.
+     */
+    public function runSyncUpdateStock(Request $request, string $code)
+    {
+        $code = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $code));
+        if ($code === '' || strlen($code) > 20) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Mã cổ phiếu không hợp lệ.',
+            ], 422);
+        }
+
+        if (! Stock::getByCode($code)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Mã cổ phiếu không tồn tại trong hệ thống.',
+            ], 404);
+        }
+
+        $baseUrl = rtrim((string) config('services.sync.base_url'), '/');
+        $path = (string) config('services.sync.run_update_stock_path', '/run-sync-update-stocks');
+        $path = '/' . ltrim($path, '/');
+
+        if ($baseUrl === '') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Chưa cấu hình SYNC_SERVICE_URL.',
+            ], 500);
+        }
+
+        $url = $baseUrl . $path . '/' . rawurlencode($code);
+
+        try {
+            $response = Http::timeout(120)->acceptJson()->get($url);
+        } catch (ConnectionException $e) {
+            Log::error('runSyncUpdateStock connection: ' . $e->getMessage());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Không kết nối được tới service sync. Kiểm tra SYNC_SERVICE_URL và firewall VPS.',
+            ], 502);
+        } catch (\Throwable $e) {
+            Log::error('runSyncUpdateStock: ' . $e->getMessage());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Lỗi khi gọi service sync.',
+            ], 502);
+        }
+
+        $payload = $response->json();
+
+        if (! $response->successful()) {
+            $msg = is_array($payload) && ! empty($payload['message'])
+                ? (string) $payload['message']
+                : ('Service sync trả lỗi HTTP ' . $response->status());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => $msg,
+                'sync_status' => $response->status(),
+            ], $response->status() >= 500 ? 502 : $response->status());
+        }
+
+        $message = is_array($payload) && isset($payload['message'])
+            ? (string) $payload['message']
+            : 'Đã gửi yêu cầu cập nhật cho mã ' . $code . '.';
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $message,
+            'sync' => $payload,
+        ]);
     }
 
     public function getLogsVPS()

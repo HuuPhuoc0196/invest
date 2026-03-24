@@ -118,8 +118,7 @@ class Admin extends Controller
             if (!$stock) {
                 return redirect()->route('admin.stocks')->with('error', 'Mã cổ phiếu không tồn tại.');
             }
-            $syncBaseUrl = config('services.sync.base_url');
-            return view('Admin.AdminUpdate', compact('stock', 'syncBaseUrl'));
+            return view('Admin.AdminUpdate', compact('stock'));
         }
     }
 

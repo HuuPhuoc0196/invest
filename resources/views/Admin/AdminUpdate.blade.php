@@ -114,7 +114,7 @@
     <script>
         const baseUrl = "{{ url('') }}";
         const stockData = @json($stock);
-        const syncBaseUrl = "{{ $syncBaseUrl ?? config('services.sync.base_url') }}";
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
         // Modal logic
         function openSyncStockModal() {
@@ -129,19 +129,25 @@
             btn.disabled = true;
             btn.textContent = 'Đang xử lý...';
             $.ajax({
-                url: (typeof syncBaseUrl !== 'undefined' ? syncBaseUrl : '') + '/run-sync-update-stocks/' + encodeURIComponent(stockData.code),
-                type: 'GET',
+                url: baseUrl + '/admin/sync/run-update-stock/' + encodeURIComponent(stockData.code),
+                type: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
                 success: function(res) {
                     btn.disabled = false;
                     btn.textContent = 'Đồng ý';
                     closeSyncStockModal();
-                    showToast('✅ Đã gửi yêu cầu cập nhật cho mã ' + stockData.code);
+                    if (res && res.status === 'success') {
+                        showToast('✅ ' + (res.message || ('Đã gửi yêu cầu cập nhật cho mã ' + stockData.code)));
+                    } else {
+                        showToast('❌ ' + (res && res.message ? res.message : 'Lỗi gửi yêu cầu cập nhật!'));
+                    }
                 },
                 error: function(xhr) {
                     btn.disabled = false;
                     btn.textContent = 'Đồng ý';
                     closeSyncStockModal();
-                    showToast('❌ Lỗi gửi yêu cầu cập nhật!');
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Lỗi gửi yêu cầu cập nhật!';
+                    showToast('❌ ' + msg);
                 }
             });
         }
