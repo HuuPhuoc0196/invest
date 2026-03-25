@@ -144,7 +144,7 @@
                     @auth
                     <th class="col-select">Chọn</th>
                     @endauth
-                    <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã cổ phiếu <span class="sort-icon">⇅</span></th>
+                    <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã CK <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="stocks_vn" onclick="sortByColumn('stocks_vn')">Thuộc VN <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="recommended_buy_price" onclick="sortByColumn('recommended_buy_price')">Giá mua tốt <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="current_price" onclick="sortByColumn('current_price')">Giá hiện tại <span class="sort-icon">⇅</span></th>
@@ -321,8 +321,10 @@
                 function syncScroll() {
                     if (!cloneWrap) return;
                     const containerRect = stickyContainer.getBoundingClientRect();
+                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
                     cloneWrap.style.left = containerRect.left + 'px';
                     cloneWrap.style.width = containerRect.width + 'px';
+                    cloneWrap.style.top = topOffset + 'px';
                     cloneTable.style.marginLeft = -stickyContainer.scrollLeft + 'px';
                 }
 
@@ -330,7 +332,8 @@
                     if (!cloneWrap) return;
                     const tableRect = stickyTable.getBoundingClientRect();
                     const theadHeight = thead.offsetHeight;
-                    if (tableRect.top < 0 && tableRect.bottom > theadHeight) {
+                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
                         cloneWrap.style.display = 'block';
                         syncScroll();
                     } else {

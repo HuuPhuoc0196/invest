@@ -15,7 +15,7 @@
     @yield('header-js')
 </head>
 
-<body class="antialiased">
+<body class="antialiased {{ !request()->is('admin') ? 'has-mobile-back' : '' }}">
      <!-- User Info -->
      @yield('user-info')
 
@@ -38,6 +38,16 @@
     </div>
 
     <main>
+        @if (!request()->is('admin'))
+            <button
+                type="button"
+                class="mobile-menu-toggle mobile-back-button"
+                onclick="mobileGoBack()"
+                aria-label="Quay lại trang trước"
+            >
+                ←
+            </button>
+        @endif
         <div id="mobileActionsRightSlot" class="mobile-actions-right-slot"></div>
         @yield('admin-body-content')
     </main>
@@ -64,20 +74,48 @@
             }
         });
 
-        function relocateActionsRightByViewport() {
+        function relocateActionsRightByViewport(attempt) {
+            attempt = attempt || 0;
             var actions = document.querySelector('.actions');
             var right = document.getElementById('actionsRightContent');
             var mobileSlot = document.getElementById('mobileActionsRightSlot');
             if (!actions || !right || !mobileSlot) return;
 
+            var hasActions = right.innerHTML && right.innerHTML.trim() !== '';
+
             if (window.innerWidth <= 768) {
-                var tableContainer = document.querySelector('main .table-container');
-                if (tableContainer && tableContainer.parentElement) {
-                    if (right.nextElementSibling !== tableContainer || right.parentElement !== tableContainer.parentElement) {
-                        tableContainer.parentElement.insertBefore(right, tableContainer);
+                // If page has no actions-right content, don't inject an empty wrapper into main.
+                if (!hasActions) {
+                    if (right.parentElement !== actions) {
+                        actions.appendChild(right);
                     }
-                } else if (right.parentElement !== mobileSlot) {
-                    mobileSlot.appendChild(right);
+                    return;
+                }
+
+                // Place search box right under filter (if exists) and right above table (match /admin).
+                var filterPanel = document.querySelector('main .filter-panel');
+                var tableContainer = document.querySelector('main .table-container');
+
+                if (!tableContainer && attempt < 10) {
+                    // Wait until table markup exists (avoid hiding actions-right before relocation)
+                    setTimeout(function () {
+                        relocateActionsRightByViewport(attempt + 1);
+                    }, 50);
+                    return;
+                }
+
+                // If there's a table, put actions-right right above it.
+                if (tableContainer && tableContainer.parentElement) {
+                    var parent = tableContainer.parentElement; // usually main
+                    var beforeEl = tableContainer;
+                    if (right.parentElement !== parent || right.nextElementSibling !== beforeEl) {
+                        parent.insertBefore(right, beforeEl);
+                    }
+                } else {
+                    // Fallback: put into slot.
+                    if (right.parentElement !== mobileSlot) {
+                        mobileSlot.appendChild(right);
+                    }
                 }
             } else {
                 if (right.parentElement !== actions) {
@@ -87,8 +125,23 @@
             }
         }
 
-        window.addEventListener('resize', relocateActionsRightByViewport);
-        document.addEventListener('DOMContentLoaded', relocateActionsRightByViewport);
+        var relocateTimer = null;
+        function scheduleRelocate() {
+            if (relocateTimer) clearTimeout(relocateTimer);
+            relocateTimer = setTimeout(function () { relocateActionsRightByViewport(0); }, 120);
+        }
+
+        window.addEventListener('resize', scheduleRelocate);
+        document.addEventListener('DOMContentLoaded', scheduleRelocate);
+
+        function mobileGoBack() {
+            // Ưu tiên quay lại lịch sử trình duyệt; nếu không có thì fallback về /admin.
+            if (document.referrer) {
+                window.history.back();
+                return;
+            }
+            window.location.href = "{{ url('/admin') }}";
+        }
     </script>
     @yield('admin-script')
 </body>

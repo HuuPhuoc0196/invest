@@ -134,7 +134,7 @@
                 <table id="notice-table-follow">
                     <thead>
                         <tr>
-                            <th>Mã cổ phiếu</th>
+                            <th>Mã CK</th>
                             <th>Giá mua theo dõi</th>
                             <th>Giá bán theo dõi</th>
                             <th><input type="checkbox" class="checkbox-all" id="checkAllFollow" onclick="toggleAllFollow()"></th>
@@ -160,7 +160,7 @@
                 <table id="notice-table-session">
                     <thead>
                         <tr>
-                            <th>Mã cổ phiếu</th>
+                            <th>Mã CK</th>
                             <th><input type="checkbox" class="checkbox-all" id="checkAllSession" onclick="toggleAllSession()"></th>
                         </tr>
                     </thead>
@@ -237,8 +237,10 @@
                 function syncScrollFollow() {
                     if (!cloneWrapFollow) return;
                     const containerRect = stickyContainerFollow.getBoundingClientRect();
+                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
                     cloneWrapFollow.style.left = containerRect.left + 'px';
                     cloneWrapFollow.style.width = containerRect.width + 'px';
+                    cloneWrapFollow.style.top = topOffset + 'px';
                     cloneTableFollow.style.marginLeft = -stickyContainerFollow.scrollLeft + 'px';
                 }
 
@@ -255,7 +257,8 @@
                     if (!cloneWrapFollow) return;
                     const tableRect = stickyTableFollow.getBoundingClientRect();
                     const theadHeight = theadFollow.offsetHeight;
-                    if (tableRect.top < 0 && tableRect.bottom > theadHeight) {
+                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
                         cloneWrapFollow.style.display = 'block';
                         syncScrollFollow();
                         syncCheckAllFollow();
@@ -327,8 +330,10 @@
                 function syncScrollSession() {
                     if (!cloneWrapSession) return;
                     const containerRect = stickyContainerSession.getBoundingClientRect();
+                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
                     cloneWrapSession.style.left = containerRect.left + 'px';
                     cloneWrapSession.style.width = containerRect.width + 'px';
+                    cloneWrapSession.style.top = topOffset + 'px';
                     cloneTableSession.style.marginLeft = -stickyContainerSession.scrollLeft + 'px';
                 }
 
@@ -345,7 +350,8 @@
                     if (!cloneWrapSession) return;
                     const tableRect = stickyTableSession.getBoundingClientRect();
                     const theadHeight = theadSession.offsetHeight;
-                    if (tableRect.top < 0 && tableRect.bottom > theadHeight) {
+                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
                         cloneWrapSession.style.display = 'block';
                         syncScrollSession();
                         syncCheckAllSession();

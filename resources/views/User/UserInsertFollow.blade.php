@@ -24,7 +24,7 @@
 
     <div class="form-container">
         <div class="form-group">
-            <label for="code">Mã Cổ Phiếu:</label>
+            <label for="code">Mã cổ phiếu:</label>
             <div style="display: flex; gap: 8px; align-items: center;">
                 <input type="text" id="code" placeholder="VD: FPT" style="flex: 1; min-width: 0;">
                 <button type="button" id="btnCheckCode" onclick="checkStockCode()" disabled

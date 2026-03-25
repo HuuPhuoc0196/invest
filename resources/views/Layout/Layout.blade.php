@@ -13,7 +13,7 @@
     @vite('resources/css/footer.css')
     @yield('header-js')
 </head>
-<body class="antialiased">
+<body @class(['antialiased', 'has-mobile-back' => !request()->routeIs('home') && !request()->is('home', 'user')])>
     <!-- User Info -->
     @yield('user-info')
 
@@ -36,6 +36,16 @@
     </div>
 
     <main>
+        @if (!request()->routeIs('home') && !request()->is('home', 'user'))
+            <button
+                type="button"
+                class="mobile-menu-toggle mobile-back-button"
+                onclick="mobileGoBack()"
+                aria-label="Quay lại trang trước"
+            >
+                ←
+            </button>
+        @endif
         <div id="mobileActionsRightSlot" class="mobile-actions-right-slot"></div>
         @yield('user-body-content')
     </main>
@@ -62,20 +72,43 @@
             }
         });
 
-        function relocateActionsRightByViewport() {
+        function relocateActionsRightByViewport(attempt) {
+            attempt = attempt || 0;
             var actions = document.querySelector('.actions');
             var right = document.getElementById('actionsRightContent');
             var mobileSlot = document.getElementById('mobileActionsRightSlot');
             if (!actions || !right || !mobileSlot) return;
 
+            var hasActions = right.innerHTML && right.innerHTML.trim() !== '';
+
             if (window.innerWidth <= 768) {
-                var tableContainer = document.querySelector('main .table-container');
-                if (tableContainer && tableContainer.parentElement) {
-                    if (right.nextElementSibling !== tableContainer || right.parentElement !== tableContainer.parentElement) {
-                        tableContainer.parentElement.insertBefore(right, tableContainer);
+                // If page has no actions-right content, don't inject an empty wrapper into main.
+                if (!hasActions) {
+                    if (right.parentElement !== actions) {
+                        actions.appendChild(right);
                     }
-                } else if (right.parentElement !== mobileSlot) {
-                    mobileSlot.appendChild(right);
+                    return;
+                }
+
+                var tableContainer = document.querySelector('main .table-container');
+                if (!tableContainer || !tableContainer.parentElement) {
+                    // Until table is ready, keep right in its original place to avoid flicker.
+                    if (attempt < 15) {
+                        setTimeout(function () {
+                            relocateActionsRightByViewport(attempt + 1);
+                        }, 50);
+                        return;
+                    }
+                    // Fallback: if table never appears, place it in slot.
+                    if (right.parentElement !== mobileSlot) {
+                        mobileSlot.appendChild(right);
+                    }
+                    return;
+                }
+
+                // Move only if not already in correct position.
+                if (right.parentElement !== tableContainer.parentElement || right.nextElementSibling !== tableContainer) {
+                    tableContainer.parentElement.insertBefore(right, tableContainer);
                 }
             } else {
                 if (right.parentElement !== actions) {
@@ -85,8 +118,22 @@
             }
         }
 
-        window.addEventListener('resize', relocateActionsRightByViewport);
-        document.addEventListener('DOMContentLoaded', relocateActionsRightByViewport);
+        var relocateTimer = null;
+        function scheduleRelocate() {
+            if (relocateTimer) clearTimeout(relocateTimer);
+            relocateTimer = setTimeout(function () { relocateActionsRightByViewport(0); }, 120);
+        }
+
+        window.addEventListener('resize', scheduleRelocate);
+        document.addEventListener('DOMContentLoaded', scheduleRelocate);
+
+        function mobileGoBack() {
+            if (document.referrer) {
+                window.history.back();
+                return;
+            }
+            window.location.href = "{{ url('/home') }}";
+        }
     </script>
     @yield('user-script')
 </body>

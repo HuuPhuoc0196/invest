@@ -217,8 +217,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function syncScroll() {
         if (!cloneWrap) return;
         const containerRect = container.getBoundingClientRect();
+        const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar (LayoutAdmin)
         cloneWrap.style.left = containerRect.left + 'px';
         cloneWrap.style.width = containerRect.width + 'px';
+        cloneWrap.style.top = topOffset + 'px';
         cloneTable.style.marginLeft = -container.scrollLeft + 'px';
     }
 
@@ -226,10 +228,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!cloneWrap) return;
         const tableRect = table.getBoundingClientRect();
         const theadHeight = thead.offsetHeight;
+        const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar (LayoutAdmin)
 
-        // Show clone when original header scrolls above viewport
-        // Hide when table bottom is above viewport
-        if (tableRect.top < 0 && tableRect.bottom > theadHeight) {
+        // Show clone when original header scrolls above the sticky offset (below topbar on mobile)
+        if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
             cloneWrap.style.display = 'block';
             syncScroll();
         } else {

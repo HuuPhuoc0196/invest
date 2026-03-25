@@ -28,7 +28,7 @@
         </div>
 
         <div class="form-group">
-            <label for="code">Mã Cổ Phiếu:</label>
+            <label for="code">Mã cổ phiếu:</label>
             <input type="text" id="code" placeholder="VD: FPT">
             <div class="error" id="errorCode">Vui lòng nhập Mã cổ phiếu</div>
         </div>

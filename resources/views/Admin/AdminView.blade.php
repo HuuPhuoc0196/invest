@@ -17,10 +17,6 @@
     <div style="display: flex; gap: 5px;">
         <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
         <a href="{{ url('/admin/stocks') }}" class="button-link">📊 Quản lý cổ phiếu</a>
-    </div>
-    <div style="display: flex; gap: 5px;">
-    </div>
-    <div style="display: flex; gap: 5px;">
         <a href="{{ url('/admin/logs') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs Hosting</a>
         <a href="{{ url('/admin/logsVPS') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs VPS</a>
         <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
@@ -103,7 +99,7 @@
         <table id="stock-table">
             <thead class="sticky-header">
                 <tr>
-                    <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã cổ phiếu <span class="sort-icon">⇅</span></th>
+                    <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã CK <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="stocks_vn" onclick="sortByColumn('stocks_vn')">Thuộc VN <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="recommended_buy_price" onclick="sortByColumn('recommended_buy_price')">Giá mua tốt <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="current_price" onclick="sortByColumn('current_price')">Giá hiện tại <span class="sort-icon">⇅</span></th>
@@ -230,7 +226,9 @@
                     cloneWrap = document.createElement('div');
                     cloneWrap.className = 'sticky-clone';
                     cloneTable = document.createElement('table');
-                    cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:#34495e;margin:0;table-layout:fixed;';
+                    // Use auto layout so header column widths follow the real table content,
+                    // avoiding compressed columns when the table is wider than the viewport.
+                    cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:#34495e;margin:0;table-layout:auto;';
                     const cloneThead = thead.cloneNode(true);
                     // Re-bind sort click events on cloned th
                     cloneThead.querySelectorAll('th[data-sort-key]').forEach(th => {
@@ -252,7 +250,9 @@
                     if (!cloneTable) return;
                     const origCells = thead.querySelectorAll('th');
                     const cloneCells = cloneTable.querySelectorAll('th');
-                    const tableWidth = stickyTable.getBoundingClientRect().width;
+                    // When table is horizontally scrollable, getBoundingClientRect().width is only the visible area.
+                    // Use scrollWidth so the clone header matches the full column widths.
+                    const tableWidth = stickyTable.scrollWidth;
                     cloneTable.style.width = tableWidth + 'px';
                     origCells.forEach((cell, i) => {
                         if (cloneCells[i]) {
@@ -268,8 +268,10 @@
                 function syncScroll() {
                     if (!cloneWrap) return;
                     const containerRect = stickyContainer.getBoundingClientRect();
+                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
                     cloneWrap.style.left = containerRect.left + 'px';
                     cloneWrap.style.width = containerRect.width + 'px';
+                    cloneWrap.style.top = topOffset + 'px';
                     cloneTable.style.marginLeft = -stickyContainer.scrollLeft + 'px';
                 }
 
@@ -277,7 +279,8 @@
                     if (!cloneWrap) return;
                     const tableRect = stickyTable.getBoundingClientRect();
                     const theadHeight = thead.offsetHeight;
-                    if (tableRect.top < 0 && tableRect.bottom > theadHeight) {
+                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
                         cloneWrap.style.display = 'block';
                         syncScroll();
                     } else {

@@ -3,7 +3,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
-@section('title', 'Thêm Mã Cổ Phiếu')
+@section('title', 'Thêm Mã cổ phiếu')
 
 @section('header-css')
     @vite('resources/css/app.css')
@@ -19,11 +19,11 @@
 @endsection
 
 @section('admin-body-content')
-    <h2>Thêm Mã Cổ Phiếu</h2>
+    <h2>Thêm Mã cổ phiếu</h2>
 
     <div class="form-container">
         <div class="form-group">
-            <label for="code">Mã Cổ Phiếu:</label>
+            <label for="code">Mã cổ phiếu:</label>
             <input type="text" id="code" placeholder="VD: FPT">
             <div class="error" id="errorCode">Vui lòng nhập Mã cổ phiếu</div>
         </div>

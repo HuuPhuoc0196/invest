@@ -18,9 +18,9 @@
 @section('actions-left')
     <div style="display: flex; gap: 5px;">
         <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
-        <a href="{{ url('/admin/stocks/insert') }}" class="button-link">➕ Thêm cổ phiếu</a>
-        <a href="javascript:void(0)" class="button-link" onclick="confirmExportCsv()">📄 Xuất file csv</a>
-        <a href="javascript:void(0)" class="button-link" onclick="openImportModal()">📥 Nhập file csv</a>
+        <a href="{{ url('/admin/stocks/insert') }}" class="button-link admin-stocks-action-hide-iphone">➕ Thêm cổ phiếu</a>
+        <a href="javascript:void(0)" class="button-link admin-stocks-action-hide-iphone" onclick="confirmExportCsv()">📄 Xuất file csv</a>
+        <a href="javascript:void(0)" class="button-link admin-stocks-action-hide-iphone" onclick="openImportModal()">📥 Nhập file csv</a>
     </div>
 @endsection
 
@@ -30,10 +30,17 @@
 @endsection
 
 @section('admin-body-content')
-    <h1>Danh sách mã cổ phiếu</h1>
+    <div class="admin-stocks-page">
+        <div class="iphone-admin-stocks-actions">
+            <a href="{{ url('/admin/stocks/insert') }}" class="button-link">➕ Thêm cổ phiếu</a>
+            <a href="javascript:void(0)" class="button-link" onclick="confirmExportCsv()">📄 Xuất file csv</a>
+            <a href="javascript:void(0)" class="button-link" onclick="openImportModal()">📥 Nhập file csv</a>
+        </div>
+
+        <h1>Danh sách mã cổ phiếu</h1>
 
     <!-- Filter Panel -->
-    <div class="filter-panel">
+        <div class="filter-panel">
         <div class="filter-header" onclick="toggleFilter()">
             <span>🔧 Bộ lọc dữ liệu</span>
             <span id="filterToggleIcon">▼</span>
@@ -91,11 +98,11 @@
         </div>
     </div>
 
-    <div class="table-container">
+        <div class="table-container">
         <table id="stock-table">
             <thead class="sticky-header">
                 <tr>
-                    <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã cổ phiếu <span class="sort-icon">⇅</span></th>
+                    <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã CK <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="stocks_vn" onclick="sortByColumn('stocks_vn')">Thuộc VN <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="recommended_buy_price" onclick="sortByColumn('recommended_buy_price')">Giá mua tốt <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="current_price" onclick="sortByColumn('current_price')">Giá hiện tại <span class="sort-icon">⇅</span></th>
@@ -115,8 +122,8 @@
         </table>
     </div>
 
-    <!-- Modal Import CSV -->
-    <div id="importCsvModal" class="modal-overlay" style="display:none;">
+        <!-- Modal Import CSV -->
+        <div id="importCsvModal" class="modal-overlay" style="display:none;">
         <div class="modal-content">
             <span class="modal-close" onclick="closeImportModal()">&times;</span>
             <h2>Thêm cổ phiếu bằng file CSV</h2>
@@ -136,6 +143,7 @@
                 <button class="btn-cancel" onclick="closeImportModal()">Huỷ</button>
                 <button class="btn-import" onclick="submitImportCsv()">Nhập dữ liệu</button>
             </div>
+        </div>
         </div>
     </div>
 @endsection

@@ -85,7 +85,7 @@
         <table id="stock-table">
             <thead>
                 <tr>
-                    <th class="col-code-sticky">Mã cổ phiếu</th>
+                    <th class="col-code-sticky">Mã CK</th>
                     <th>Khối lượng đặt</th>
                     <th>Giá</th>
                     <th>Giá trị giao dịch</th>
@@ -191,13 +191,16 @@
                     if (!cloneWrap) return;
                     const containerRect = stickyContainer.getBoundingClientRect();
                     const offset = -stickyContainer.scrollLeft + 'px';
+                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
                     cloneWrap.style.left = containerRect.left + 'px';
                     cloneWrap.style.width = containerRect.width + 'px';
+                    cloneWrap.style.top = topOffset + 'px';
                     cloneTable.style.marginLeft = offset;
                     if (totalCloneWrap && totalCloneTable) {
                         totalCloneWrap.style.left = containerRect.left + 'px';
                         totalCloneWrap.style.width = containerRect.width + 'px';
                         totalCloneTable.style.marginLeft = offset;
+                        totalCloneWrap.style.top = (topOffset + thead.offsetHeight) + 'px';
                     }
                 }
 
@@ -205,8 +208,9 @@
                     if (!cloneWrap) return;
                     const tableRect = stickyTable.getBoundingClientRect();
                     const theadHeight = thead.offsetHeight;
+                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
 
-                    if (tableRect.top < 0 && tableRect.bottom > theadHeight) {
+                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
                         cloneWrap.style.display = 'block';
                         syncScroll();
                     } else {
@@ -218,9 +222,13 @@
                         if (totalRow) {
                             const totalRect = totalRow.getBoundingClientRect();
                             const totalHeight = totalRow.offsetHeight;
-                            if (tableRect.top < 0 && totalRect.top <= theadHeight && tableRect.bottom > (theadHeight + totalHeight)) {
+                            if (
+                                tableRect.top < topOffset &&
+                                totalRect.top <= (topOffset + theadHeight) &&
+                                tableRect.bottom > (topOffset + theadHeight + totalHeight)
+                            ) {
                                 totalCloneWrap.style.display = 'block';
-                                totalCloneWrap.style.top = theadHeight + 'px';
+                                totalCloneWrap.style.top = (topOffset + theadHeight) + 'px';
                                 syncScroll();
                             } else {
                                 totalCloneWrap.style.display = 'none';

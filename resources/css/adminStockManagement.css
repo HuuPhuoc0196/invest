@@ -165,16 +165,42 @@ th {
     color: white;
 }
 
+/* Grid lines for primary admin stock tables */
+#stock-table th,
+#stock-table td,
+#invest-table th,
+#invest-table td {
+    border-right: 1px solid #ddd;
+}
+
+/* Remove right border on last column */
+#stock-table th:last-child,
+#stock-table td:last-child,
+#invest-table th:last-child,
+#invest-table td:last-child {
+    border-right: none;
+}
+
 .sticky-header th {
     background-color: #34495e;
     z-index: 1001;
+}
+
+.sticky-clone th,
+.sticky-clone-total td {
+    border-right: 1px solid #ddd;
+}
+
+.sticky-clone th:last-child,
+.sticky-clone-total td:last-child {
+    border-right: none;
 }
 
 .sticky-clone {
     position: fixed;
     top: 0;
     z-index: 1002;
-    overflow: hidden;
+    overflow: hidden; /* giữ header clone nằm gọn trong table-container */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     background-color: #34495e;
 }
@@ -190,11 +216,20 @@ th {
 /* Keep backgrounds visible when sticky overlays other cells */
 #stock-table th.col-code-sticky {
     background-color: #34495e;
+    border-right: none; /* dùng pseudo-element để không bị che khi overlap */
+    position: sticky;
+    box-shadow: none;
+    overflow: visible;
+    background-image: none;
 }
 
 #stock-table td.col-code-sticky {
     background-color: #fff;
-    box-shadow: 2px 0 0 #e5e7eb, 6px 0 10px -8px rgba(0, 0, 0, 0.22);
+    /* Đảm bảo đường kẻ dọc không bị che mất */
+    box-shadow: none;
+    overflow: visible;
+    border-right: none; /* dùng pseudo-element để không bị che khi overlap */
+    background-image: none;
 }
 
 /* Keep colored row states readable with sticky cells */
@@ -219,12 +254,32 @@ th {
     position: sticky;
     left: 0;
     z-index: 1004;
+    border-right: none; /* dùng pseudo-element để không bị che */
+    box-shadow: none;
+    overflow: visible;
+    background-image: none;
+}
+
+/* Vertical separator line for sticky left column (works regardless of mobile/PC) */
+#stock-table th.col-code-sticky::after,
+#stock-table td.col-code-sticky::after,
+.sticky-clone th.col-code-sticky::after,
+.sticky-clone-total td.col-code-sticky::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 1px;
+    background: #ddd;
+    z-index: 1006;
+    pointer-events: none;
 }
 
 /* Subtle sticky separator for touch devices */
 @media (max-width: 768px) {
     #stock-table td.col-code-sticky {
-        box-shadow: 2px 0 0 #dfe4ea, 8px 0 12px -10px rgba(0, 0, 0, 0.28);
+        border-right: none;
     }
 }
 

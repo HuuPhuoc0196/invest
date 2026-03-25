@@ -4,6 +4,10 @@ body {
     padding: 20px;
 }
 
+.mobile-back-button {
+    display: none;
+}
+
 h1 {
     text-align: center;
     color: #2c3e50;
@@ -93,6 +97,11 @@ input[type="date"] {
         padding-top: 74px;
     }
 
+    /* Prevent flicker: hide actions-right until JS relocates it */
+    .actions-right {
+        display: none !important;
+    }
+
     main {
         margin-top: 30px;
     }
@@ -123,15 +132,19 @@ input[type="date"] {
     }
 
     .mobile-menu-toggle {
-        min-width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        background: rgba(19, 53, 86, 0.85);
-        color: #fff;
-        font-size: 22px;
-        line-height: 1;
-        padding: 0;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 40px !important;
+        min-width: 40px !important;
+        height: 40px !important;
+        border-radius: 10px !important;
+        background: rgba(19, 53, 86, 0.85) !important;
+        color: #fff !important;
+        font-size: 22px !important;
+        line-height: 1 !important;
+        padding: 0 !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .mobile-menu-overlay {
@@ -183,16 +196,16 @@ input[type="date"] {
     }
 
     .mobile-menu-close {
-        width: 28px;
-        min-width: 28px;
-        height: 28px;
-        border-radius: 6px;
-        font-size: 18px;
-        padding: 0;
-        line-height: 1;
-        background: #d9e7f5;
-        color: #1f3f5f;
-        box-shadow: none;
+        width: 28px !important;
+        min-width: 28px !important;
+        height: 28px !important;
+        border-radius: 6px !important;
+        font-size: 18px !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+        background: #d9e7f5 !important;
+        color: #1f3f5f !important;
+        box-shadow: none !important;
     }
 
     .mobile-menu-drawer.actions-left {
@@ -285,8 +298,8 @@ input[type="date"] {
     }
 
     .mobile-actions-right-slot .actions-right,
-    main > #actionsRightContent.actions-right {
-        display: flex;
+    main #actionsRightContent.actions-right {
+        display: flex !important;
         width: 100%;
         max-width: 100%;
         gap: 8px;
@@ -303,24 +316,24 @@ input[type="date"] {
         overflow: hidden;
     }
 
-    #actionsRightContent.actions-right {
+    main #actionsRightContent.actions-right {
         margin-top: 20px;
     }
 
     .mobile-actions-right-slot .actions-right input[type="text"],
     .mobile-actions-right-slot .actions-right input[type="date"],
     .mobile-actions-right-slot .actions-right select,
-    main > #actionsRightContent.actions-right input[type="text"],
-    main > #actionsRightContent.actions-right input[type="date"],
-    main > #actionsRightContent.actions-right select {
+    main #actionsRightContent.actions-right input[type="text"],
+    main #actionsRightContent.actions-right input[type="date"],
+    main #actionsRightContent.actions-right select {
         flex: 1 1 170px;
         width: auto;
     }
 
     .mobile-actions-right-slot .actions-right button,
     .mobile-actions-right-slot .actions-right .button-link,
-    main > #actionsRightContent.actions-right button,
-    main > #actionsRightContent.actions-right .button-link {
+    main #actionsRightContent.actions-right button,
+    main #actionsRightContent.actions-right .button-link {
         flex: 0 0 auto;
     }
 
@@ -335,5 +348,60 @@ input[type="date"] {
 
     .mobile-menu-open {
         overflow: hidden;
+    }
+
+    .mobile-back-button {
+        display: inline-flex;
+        position: fixed;
+        top: 8px; /* căn giữa trong mobile-topbar (56px) với nút 40px */
+        left: 12px;
+        z-index: 2801;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .mobile-menu-open .mobile-back-button {
+        pointer-events: none;
+        opacity: 0.75;
+    }
+
+    .has-mobile-back .mobile-topbar-title {
+        padding-left: 50px;
+        box-sizing: border-box;
+    }
+}
+
+/* Mobile actions for admin stocks page (when hamburger menu is visible) */
+.iphone-admin-stocks-actions {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .iphone-admin-stocks-actions {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 0;
+        margin-bottom: 10px;
+        padding: 0 12px;
+        justify-content: center;
+    }
+
+    .iphone-admin-stocks-actions .button-link {
+        flex: 1 1 120px;
+        width: auto;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .admin-stocks-action-hide-iphone {
+        display: none !important;
+    }
+
+    .admin-stocks-page > h1 {
+        margin-top: 8px;
     }
 }

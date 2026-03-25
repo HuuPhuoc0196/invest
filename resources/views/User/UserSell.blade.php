@@ -28,7 +28,7 @@
         </div>
 
         <div class="form-group">
-            <label for="code">Mã Cổ Phiếu:</label>
+            <label for="code">Mã cổ phiếu:</label>
             <select id="code">
                 <option value="">-- Chọn mã cổ phiếu --</option>
             </select>

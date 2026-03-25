@@ -26,7 +26,7 @@
 
     <div class="form-container">
         <div class="form-group">
-            <label for="code">Mã Cổ Phiếu: <span class="required">*</span></label>
+            <label for="code">Mã cổ phiếu: <span class="required">*</span></label>
             <input type="text" id="code" placeholder="VD: FPT">
             <div class="error" id="errorCode">Vui lòng nhập Mã cổ phiếu</div>
         </div>
