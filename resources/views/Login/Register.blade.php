@@ -7,6 +7,7 @@
 
 @section('header-css')
   @vite('resources/css/loginRegister.css')
+  @vite('resources/css/login.css')
   <style>
     .login-btn .btn-spinner {
       display: none;
@@ -29,7 +30,8 @@
 @endsection
 
 @section('body-content')
-  <h2>Đăng ký tài khoản</h2>
+  <div class="login-card">
+  <h2>Đăng ký</h2>
   <form id="registerForm">
     <div class="input-group">
       <label for="name">Tên:</label>
@@ -60,6 +62,7 @@
   <div id="toast" class="toast"></div>
   <div class="link-group">
     <a href="{{ url('/login') }}">← Quay lại đăng nhập</a>
+  </div>
   </div>
 @endsection
 

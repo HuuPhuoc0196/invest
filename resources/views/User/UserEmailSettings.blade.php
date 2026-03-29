@@ -114,12 +114,13 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/home') }}" class="button-link">🏠 Trang chủ</a>
+    @include('partials.user-nav-primary')
 @endsection
 
 @section('user-body-content')
-    <h1>Cài đặt thông báo email</h1>
+    @include('partials.page-title-invest', ['title' => 'Cài đặt thông báo email', 'level' => 1])
 
+    <div class="email-settings-page">
     <div class="section-panel">
         <div class="section-header" onclick="toggleSectionFollow()">
             <span>🔔 Thông báo email cổ phiếu đã theo dõi</span>
@@ -169,6 +170,7 @@
             </div>
         </div>
     </div>
+    </div>
 
     <div id="toast" class="toast"></div>
 @endsection
@@ -184,6 +186,12 @@
         document.addEventListener("DOMContentLoaded", function () {
             renderTableFollow(noticesFollow);
             renderTableSession(sessionClosedItems);
+
+            function headerInset() {
+                return typeof window.getStickyHeaderInset === 'function'
+                    ? window.getStickyHeaderInset()
+                    : (window.innerWidth <= 768 ? 56 : 0);
+            }
 
             // === JS clone-based sticky header for FOLLOW table ===
             const stickyTableFollow = document.getElementById('notice-table-follow');
@@ -237,10 +245,10 @@
                 function syncScrollFollow() {
                     if (!cloneWrapFollow) return;
                     const containerRect = stickyContainerFollow.getBoundingClientRect();
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    const inset = headerInset();
                     cloneWrapFollow.style.left = containerRect.left + 'px';
                     cloneWrapFollow.style.width = containerRect.width + 'px';
-                    cloneWrapFollow.style.top = topOffset + 'px';
+                    cloneWrapFollow.style.top = inset + 'px';
                     cloneTableFollow.style.marginLeft = -stickyContainerFollow.scrollLeft + 'px';
                 }
 
@@ -257,8 +265,8 @@
                     if (!cloneWrapFollow) return;
                     const tableRect = stickyTableFollow.getBoundingClientRect();
                     const theadHeight = theadFollow.offsetHeight;
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
-                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
+                    const inset = headerInset();
+                    if (tableRect.top < inset && tableRect.bottom > (inset + theadHeight)) {
                         cloneWrapFollow.style.display = 'block';
                         syncScrollFollow();
                         syncCheckAllFollow();
@@ -268,9 +276,10 @@
                 }
 
                 createCloneFollow();
-                window.addEventListener('scroll', onScrollFollow);
+                window.addEventListener('scroll', onScrollFollow, { passive: true });
                 window.addEventListener('resize', function() { createCloneFollow(); onScrollFollow(); });
-                stickyContainerFollow.addEventListener('scroll', syncScrollFollow);
+                stickyContainerFollow.addEventListener('scroll', syncScrollFollow, { passive: true });
+                onScrollFollow();
 
                 const observerFollow = new MutationObserver(function() {
                     setTimeout(function() { createCloneFollow(); onScrollFollow(); }, 50);
@@ -330,10 +339,10 @@
                 function syncScrollSession() {
                     if (!cloneWrapSession) return;
                     const containerRect = stickyContainerSession.getBoundingClientRect();
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    const inset = headerInset();
                     cloneWrapSession.style.left = containerRect.left + 'px';
                     cloneWrapSession.style.width = containerRect.width + 'px';
-                    cloneWrapSession.style.top = topOffset + 'px';
+                    cloneWrapSession.style.top = inset + 'px';
                     cloneTableSession.style.marginLeft = -stickyContainerSession.scrollLeft + 'px';
                 }
 
@@ -350,8 +359,8 @@
                     if (!cloneWrapSession) return;
                     const tableRect = stickyTableSession.getBoundingClientRect();
                     const theadHeight = theadSession.offsetHeight;
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
-                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
+                    const inset = headerInset();
+                    if (tableRect.top < inset && tableRect.bottom > (inset + theadHeight)) {
                         cloneWrapSession.style.display = 'block';
                         syncScrollSession();
                         syncCheckAllSession();
@@ -361,9 +370,10 @@
                 }
 
                 createCloneSession();
-                window.addEventListener('scroll', onScrollSession);
+                window.addEventListener('scroll', onScrollSession, { passive: true });
                 window.addEventListener('resize', function() { createCloneSession(); onScrollSession(); });
-                stickyContainerSession.addEventListener('scroll', syncScrollSession);
+                stickyContainerSession.addEventListener('scroll', syncScrollSession, { passive: true });
+                onScrollSession();
 
                 const observerSession = new MutationObserver(function() {
                     setTimeout(function() { createCloneSession(); onScrollSession(); }, 50);

@@ -10,6 +10,12 @@ class UserPortfolio extends Model
     protected $table = 'user_portfolios';
     protected $fillable = ['user_id', 'stock_id', 'buy_price', 'buy_date', 'quantity', 'session_closed_flag'];
 
+    /** Khớp migration: double(15, 2) — dùng string để tránh sai số float PHP */
+    public const BUY_PRICE_MAX = '9999999999999.99';
+
+    /** Khớp migration: bigInteger (signed), đồng bộ giới hạn an toàn với PHP integer */
+    public const QUANTITY_MAX = PHP_INT_MAX;
+
     public static function getProfileUser($userId)
     {
         // 1. Lấy danh sách các mã cổ phiếu mà user đã từng mua

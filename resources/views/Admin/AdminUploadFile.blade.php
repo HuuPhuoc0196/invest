@@ -14,13 +14,11 @@
     @vite('resources/js/app.js')
 @endsection
 
-@section('actions-left')
-    <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
-@endsection
-
 @section('admin-body-content')
-    <h2>Thêm Mã cổ phiếu</h2>
+    @include('partials.page-title-invest', ['title' => 'Thêm Mã cổ phiếu'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
             <label for="file">Chọn file .txt:</label>
@@ -29,7 +27,9 @@
         </div>
         <div id="toast" class="toast"></div>
 
-        <button onclick="submitForm()">Upload</button>
+        <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Upload</button>
+    </div>
+        </div>
     </div>
 @endsection
 
@@ -38,9 +38,27 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         const baseUrl = "{{ url('') }}";
+        const fileInputEl = document.getElementById("file");
+
+        function isUploadFileReady() {
+            const file = fileInputEl.files[0];
+            return !!(file && file.name.toLowerCase().endsWith('.txt'));
+        }
+
+        function updateUploadSubmitButton() {
+            const btn = document.getElementById("btnFormSubmit");
+            if (btn) btn.disabled = !isUploadFileReady();
+        }
+
+        fileInputEl.addEventListener("change", function () {
+            document.querySelectorAll(".error").forEach(el => el.style.display = "none");
+            document.getElementById("errorFile").innerText = "Vui lòng chọn file .txt";
+            updateUploadSubmitButton();
+        });
 
         function resetForm() {
-            document.getElementById("file").value = "";
+            fileInputEl.value = "";
+            updateUploadSubmitButton();
         }
 
         function toastSuccess() {

@@ -1,14 +1,15 @@
-body {
+/* Đăng ký / quên mật khẩu — layout cũ khi không dùng theme */
+body:not(.theme-invest-app) {
     font-family: "Nunito", sans-serif;
     background: #f0f2f5;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
 }
 
-.login-container {
+body:not(.theme-invest-app) .login-container {
     background: #fff;
     padding: 30px 40px;
     border-radius: 12px;
@@ -78,20 +79,62 @@ h2 {
     text-decoration: underline;
 }
 
-/* Hiện toast */
 .toast.show {
     visibility: visible;
     opacity: 1;
 }
 
-/* Màu thành công */
 .toast-success {
     background-color: #28a745;
     margin-top: 20px;
 }
 
-/* Màu lỗi */
 .toast-error {
     background-color: #dc3545;
     margin-top: 20px;
+}
+
+/* Theme: đồng bộ với login.css */
+body.theme-invest-app main.login-layout-main .input-error {
+    color: #fca5a5;
+    font-size: 0.85rem;
+    margin-top: 6px;
+    min-height: 1.1em;
+}
+
+body.theme-invest-app main.login-layout-main .link-group {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--inv-border, rgba(99, 179, 237, 0.12));
+}
+
+body.theme-invest-app main.login-layout-main .link-group a {
+    color: var(--inv-accent, #38bdf8);
+    font-weight: 600;
+}
+
+body.theme-invest-app main.login-layout-main .link-group a:hover {
+    color: #7dd3fc;
+    text-decoration: none;
+}
+
+body.theme-invest-app main.login-layout-main .toast {
+    margin-top: 1rem;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    border: 1px solid transparent;
+}
+
+body.theme-invest-app main.login-layout-main .toast-success {
+    background: rgba(52, 211, 153, 0.12);
+    color: #6ee7b7;
+    border-color: rgba(52, 211, 153, 0.25);
+}
+
+body.theme-invest-app main.login-layout-main .toast-error {
+    background: rgba(248, 113, 113, 0.12);
+    color: #fca5a5;
+    border-color: rgba(248, 113, 113, 0.25);
 }

@@ -14,16 +14,15 @@
     @vite('resources/js/app.js')
 @endsection
 
-@section('actions-left')
-    <div class="action-bar">
-        <a href="{{ url('/admin/stocks') }}" class="button-link">📊 Quản lý cổ phiếu</a>
-        <a href="javascript:void(0)" class="button-link" style="background:#27ae60;" onclick="openSyncStockModal()">🔄 Cập nhật cổ phiếu</a>
-    </div>
+@section('actions-right')
+    <button type="button" class="button-link admin-update-sync-btn" onclick="openSyncStockModal()">🔄 Cập nhật cổ phiếu</button>
 @endsection
 
 @section('admin-body-content')
-    <h2>Cập Nhật Mã cổ phiếu</h2>
+    @include('partials.page-title-invest', ['title' => 'Cập Nhật Mã cổ phiếu'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
             <label for="code">Mã cổ phiếu: <span class="required">*</span></label>
@@ -92,7 +91,9 @@
 
         <div id="toast" class="toast"></div>
 
-        <button onclick="submitUpdateForm()">Cập nhật</button>
+        <button type="button" id="btnFormSubmit" onclick="submitUpdateForm()" disabled>Cập nhật</button>
+    </div>
+        </div>
     </div>
     <!-- Modal confirm sync update stock -->
     <div id="syncStockModal" class="modal-overlay" style="display:none;">

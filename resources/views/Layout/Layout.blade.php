@@ -10,22 +10,43 @@
     <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
     @yield('header-css')
+    @vite('resources/css/theme-invest-app.css')
     @vite('resources/css/footer.css')
+    @vite('resources/css/theme-drawer-shared.css')
     @yield('header-js')
 </head>
-<body @class(['antialiased', 'has-mobile-back' => !request()->routeIs('home') && !request()->is('home', 'user')])>
+<body @class([
+    'antialiased',
+    'theme-invest-app',
+    'layout-user',
+    'has-mobile-back' => !request()->routeIs('home') && !request()->is('home', 'user'),
+])>
     <!-- User Info -->
     @yield('user-info')
 
     <div class="mobile-topbar">
-        <div class="mobile-topbar-title">Quản lý đầu tư cá nhân</div>
+        <div class="mobile-topbar-brand">
+            <a href="{{ url('/home') }}" class="mobile-topbar-logo" aria-label="Trang chủ">
+                <img src="{{ route('site.logo') }}?v={{ file_exists(public_path('icon/investment_logo.svg')) ? filemtime(public_path('icon/investment_logo.svg')) : 0 }}" alt="Logo" width="36" height="36" decoding="async">
+            </a>
+            <div class="mobile-topbar-title">Quản lý đầu tư cá nhân</div>
+        </div>
         <button type="button" class="mobile-menu-toggle" onclick="toggleMobileMenu(true)" aria-label="Mở menu">☰</button>
     </div>
     <div class="mobile-menu-overlay" onclick="toggleMobileMenu(false)"></div>
     <div class="actions">
+        <a href="{{ url('/home') }}" class="site-brand site-brand--desktop" aria-label="Trang chủ — Quản lý đầu tư cá nhân">
+            <img src="{{ route('site.logo') }}?v={{ file_exists(public_path('icon/investment_logo.svg')) ? filemtime(public_path('icon/investment_logo.svg')) : 0 }}" alt="Logo" class="site-brand__img" width="44" height="44" decoding="async">
+            <span class="site-brand__text">Quản lý đầu tư cá nhân</span>
+        </a>
         <div class="actions-left mobile-menu-drawer" id="mobileMenuDrawer" role="dialog" aria-modal="true" aria-label="Menu điều hướng">
             <div class="mobile-menu-header">
-                <span class="mobile-menu-title">Quản lý đầu tư cá nhân</span>
+                <div class="mobile-menu-header-brand">
+                    <a href="{{ url('/home') }}" class="mobile-menu-header-logo" aria-label="Trang chủ">
+                        <img src="{{ route('site.logo') }}?v={{ file_exists(public_path('icon/investment_logo.svg')) ? filemtime(public_path('icon/investment_logo.svg')) : 0 }}" alt="Logo" width="36" height="36" decoding="async">
+                    </a>
+                    <span class="mobile-menu-title">Quản lý đầu tư cá nhân</span>
+                </div>
                 <button type="button" class="mobile-menu-close" onclick="toggleMobileMenu(false)" aria-label="Đóng menu">&times;</button>
             </div>
             @yield('actions-left')
@@ -50,12 +71,7 @@
         @yield('user-body-content')
     </main>
 
-    <footer class="footer">
-        <div>
-            <p>&copy; {{ date('Y') }} Invest manager. All rights reserved.</p>
-            <p>👉 Mọi thắc mắc hoặc liên hệ vui lòng gửi về email: lehuuphuoc0196@gmail.com</p>
-        </div>
-    </footer>
+    @include('partials.footer-invest', ['area' => auth()->check() ? 'user' : 'guest'])
 
     <script>
         function toggleMobileMenu(open) {

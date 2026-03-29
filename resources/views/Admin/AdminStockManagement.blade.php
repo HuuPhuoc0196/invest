@@ -15,15 +15,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
-@section('actions-left')
-    <div style="display: flex; gap: 5px;">
-        <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
-        <a href="{{ url('/admin/stocks/insert') }}" class="button-link admin-stocks-action-hide-iphone">➕ Thêm cổ phiếu</a>
-        <a href="javascript:void(0)" class="button-link admin-stocks-action-hide-iphone" onclick="confirmExportCsv()">📄 Xuất file csv</a>
-        <a href="javascript:void(0)" class="button-link admin-stocks-action-hide-iphone" onclick="openImportModal()">📥 Nhập file csv</a>
-    </div>
-@endsection
-
 @section('actions-right')
     <input type="text" id="searchInput" placeholder="Nhập mã CK...">
     <button onclick="searchStock()">🔍 Tìm kiếm</button>
@@ -37,7 +28,7 @@
             <a href="javascript:void(0)" class="button-link" onclick="openImportModal()">📥 Nhập file csv</a>
         </div>
 
-        <h1>Danh sách mã cổ phiếu</h1>
+        @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu', 'level' => 1])
 
     <!-- Filter Panel -->
         <div class="filter-panel">
@@ -141,7 +132,7 @@
             <div id="importResult" class="import-result" style="display:none;"></div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeImportModal()">Huỷ</button>
-                <button class="btn-import" onclick="submitImportCsv()">Nhập dữ liệu</button>
+                <button type="button" class="btn-import" id="btnImportCsvSubmit" onclick="submitImportCsv()" disabled>Nhập dữ liệu</button>
             </div>
         </div>
         </div>
@@ -289,10 +280,5 @@
             }
         }
 
-        function confirmExportCsv() {
-            if (confirm('Bạn có muốn xuất file CSV không?')) {
-                window.location.href = baseUrl + '/admin/stocks/export-csv';
-            }
-        }
     </script>
 @endsection

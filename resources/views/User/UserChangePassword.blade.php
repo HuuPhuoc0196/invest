@@ -16,12 +16,14 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/user/infoProfile') }}" class="button-link">👤 Thông tin cá nhân</a>
+    @include('partials.user-nav-primary')
 @endsection
 
 @section('user-body-content')
-    <h2>Thay đổi mật khẩu</h2>
+    @include('partials.page-title-invest', ['title' => 'Thay đổi mật khẩu'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
             <label for="password">Mật khẩu:</label>
@@ -46,7 +48,9 @@
 
         <div id="toast" class="toast"></div>
 
-        <button onclick="submitForm()">Cập nhật</button>
+        <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Cập nhật</button>
+    </div>
+        </div>
     </div>
 @endsection
 
@@ -55,7 +59,31 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         const baseUrl = "{{ url('') }}";
-       
+        const btnFormSubmit = document.getElementById('btnFormSubmit');
+
+        function canSubmitChangePasswordForm() {
+            const password = document.getElementById("password").value.trim();
+            const newPassword = document.getElementById("newPassword").value.trim();
+            const reNewPassword = document.getElementById("reNewPassword").value.trim();
+            if (!password || password.length < 6) return false;
+            if (!newPassword || newPassword.length < 6) return false;
+            if (!reNewPassword || reNewPassword !== newPassword) return false;
+            return true;
+        }
+
+        function updateChangePasswordSubmitButton() {
+            if (btnFormSubmit) btnFormSubmit.disabled = !canSubmitChangePasswordForm();
+        }
+
+        ['password', 'newPassword', 'reNewPassword'].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', updateChangePasswordSubmitButton);
+                el.addEventListener('change', updateChangePasswordSubmitButton);
+            }
+        });
+        updateChangePasswordSubmitButton();
+
         function toastSuccess() {
             // Xóa class cũ trước khi thêm class mới
             toast.classList.remove("toast-success", "toast-error");
@@ -83,6 +111,7 @@
             document.getElementById("password").value = "";
             document.getElementById("newPassword").value = "";
             document.getElementById("reNewPassword").value = "";
+            updateChangePasswordSubmitButton();
         }
 
         function submitForm() {

@@ -17,23 +17,10 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/home') }}" class="button-link">🏠 Trang chủ</a>
     @auth
-        <a href="{{ url('/user/profile') }}" class="button-link">💼 Tài sản</a>
-        <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
-        <a href="{{ url('/user/infoProfile') }}" class="button-link">👤 Thông tin cá nhân</a>
-        <a href="{{ url('/user/cashIn') }}" class="button-link">💰 Nạp tiền</a>
-        <a href="{{ url('/user/cashOut') }}" class="button-link">💵 Rút tiền</a>
-        <a href="{{ url('/user/email-settings') }}" class="button-link">📧 Cài đặt thông báo</a>
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-            @csrf
-        </form>
-        <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
-            🚪 Đăng xuất
-        </button>
+        @include('partials.user-nav-primary')
     @else
-        <a href="{{ url('/login') }}" class="button-link">🔑 Đăng nhập</a>
-        <a href="{{ url('/register') }}" class="button-link">📝 Đăng ký</a>
+        @include('partials.guest-nav-actions')
     @endauth
 @endsection
 
@@ -70,12 +57,12 @@
         }
     </style>
 
-    <h1>Danh sách mã cổ phiếu</h1>
+    @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu'])
 
     <!-- Filter Panel -->
     <div class="filter-panel">
         <div class="filter-header" onclick="toggleFilter()">
-            <span>🔧 Bộ lọc dữ liệu</span>
+            <span>✏️ Bộ lọc dữ liệu</span>
             <span id="filterToggleIcon">▼</span>
         </div>
         <div id="filterBody" class="filter-body" style="display:none;">
@@ -132,8 +119,8 @@
     </div>
 
     @auth
-    <div class="filter-actions" style="margin-top: 8px; justify-content: flex-start;">
-        <button type="button" class="btn-filter" id="btnAddFollow" disabled onclick="submitAddFollowBatch()">➕ Thêm theo dõi</button>
+    <div class="home-add-follow-bar filter-actions">
+        <button type="button" class="btn-filter btn-add-follow-home" id="btnAddFollow" disabled onclick="submitAddFollowBatch()">➕ Thêm theo dõi</button>
     </div>
     @endauth
 
@@ -172,6 +159,14 @@
         // Sort state
         let currentSortKey = 'valuation';
         let currentSortDir = 'asc';
+        /** Chỉ lần render đầu tiên (load trang) mới gắn animation hàng — không lặp khi lọc/sắp */
+        let stockTableEnterAnimationPending = true;
+
+        function getSiteHeaderTopOffset() {
+            return typeof window.getStickyHeaderInset === 'function'
+                ? window.getStickyHeaderInset()
+                : (window.innerWidth <= 768 ? 56 : 0);
+        }
 
         function sortByColumn(key) {
             if (currentSortKey === key) {
@@ -283,7 +278,7 @@
                     cloneWrap = document.createElement('div');
                     cloneWrap.className = 'sticky-clone';
                     cloneTable = document.createElement('table');
-                    cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:#34495e;margin:0;table-layout:fixed;';
+                    cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:transparent;margin:0;table-layout:fixed;';
                     const cloneThead = thead.cloneNode(true);
                     // Re-bind sort click events on cloned th
                     cloneThead.querySelectorAll('th[data-sort-key]').forEach(th => {
@@ -321,7 +316,7 @@
                 function syncScroll() {
                     if (!cloneWrap) return;
                     const containerRect = stickyContainer.getBoundingClientRect();
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    const topOffset = getSiteHeaderTopOffset();
                     cloneWrap.style.left = containerRect.left + 'px';
                     cloneWrap.style.width = containerRect.width + 'px';
                     cloneWrap.style.top = topOffset + 'px';
@@ -332,7 +327,7 @@
                     if (!cloneWrap) return;
                     const tableRect = stickyTable.getBoundingClientRect();
                     const theadHeight = thead.offsetHeight;
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    const topOffset = getSiteHeaderTopOffset();
                     if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
                         cloneWrap.style.display = 'block';
                         syncScroll();
@@ -342,9 +337,10 @@
                 }
 
                 createClone();
-                window.addEventListener('scroll', onScroll);
+                window.addEventListener('scroll', onScroll, { passive: true });
                 window.addEventListener('resize', function() { createClone(); onScroll(); });
-                stickyContainer.addEventListener('scroll', syncScroll);
+                stickyContainer.addEventListener('scroll', syncScroll, { passive: true });
+                onScroll();
 
                 // Re-create clone when table re-renders
                 const observer = new MutationObserver(function() {
@@ -408,6 +404,9 @@
                 const isFollowed = userFollowedCodes.includes(stock.code);
                 const row = document.createElement('tr');
                 row.className = getRowClass(buyPrice, currentPrice);
+                if (stockTableEnterAnimationPending) {
+                    row.classList.add('stock-row-enter');
+                }
                 const checkboxAttrs = isFollowed ? ' checked disabled' : '';
                 const selectCell = isLoggedIn
                     ? `<td class="col-select"><label class="cell-label-select"><input type="checkbox" class="follow-checkbox" data-code="${stock.code}"${checkboxAttrs}></label></td>`
@@ -431,6 +430,10 @@
                 `;
                 tbody.appendChild(row);
             });
+
+            if (stockTableEnterAnimationPending) {
+                stockTableEnterAnimationPending = false;
+            }
 
             if (isLoggedIn) {
                 tbody.querySelectorAll('.follow-checkbox').forEach(cb => {

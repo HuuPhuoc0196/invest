@@ -1,3 +1,5 @@
+import './stickyHeaderInset';
+
 function getRisk(rating) {
     switch (Number(rating)) {
         case 1:
@@ -172,6 +174,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const container = document.querySelector('.table-container');
     if (!table || !container) return;
 
+    function headerInset() {
+        return typeof window.getStickyHeaderInset === 'function'
+            ? window.getStickyHeaderInset()
+            : (window.innerWidth <= 768 ? 56 : 0);
+    }
+
     const thead = table.querySelector('thead');
     let cloneTable = null;
     let cloneWrap = null;
@@ -217,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function syncScroll() {
         if (!cloneWrap) return;
         const containerRect = container.getBoundingClientRect();
-        const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar (LayoutAdmin)
+        const topOffset = headerInset();
         cloneWrap.style.left = containerRect.left + 'px';
         cloneWrap.style.width = containerRect.width + 'px';
         cloneWrap.style.top = topOffset + 'px';
@@ -228,10 +236,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!cloneWrap) return;
         const tableRect = table.getBoundingClientRect();
         const theadHeight = thead.offsetHeight;
-        const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar (LayoutAdmin)
+        const inset = headerInset();
 
         // Show clone when original header scrolls above the sticky offset (below topbar on mobile)
-        if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
+        if (tableRect.top < inset && tableRect.bottom > (inset + theadHeight)) {
             cloneWrap.style.display = 'block';
             syncScroll();
         } else {
@@ -240,15 +248,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     createClone();
-    window.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', function() {
         createClone();
         onScroll();
     });
-    container.addEventListener('scroll', syncScroll);
+    container.addEventListener('scroll', syncScroll, { passive: true });
+    onScroll();
 });
 
 // ========== Import CSV Modal ==========
+function updateImportCsvSubmitButton() {
+    const btn = document.getElementById('btnImportCsvSubmit');
+    if (!btn || btn.getAttribute('data-busy') === '1') return;
+    const fileInput = document.getElementById('csvFileInput');
+    const file = fileInput && fileInput.files[0];
+    const ok = !!(file && file.name.toLowerCase().endsWith('.csv'));
+    btn.disabled = !ok;
+}
+
 window.openImportModal = function() {
     document.getElementById('importCsvModal').style.display = 'flex';
     document.getElementById('csvFileInput').value = '';
@@ -258,6 +276,12 @@ window.openImportModal = function() {
     result.style.display = 'none';
     result.className = 'import-result';
     result.innerHTML = '';
+    const btn = document.getElementById('btnImportCsvSubmit');
+    if (btn) {
+        btn.removeAttribute('data-busy');
+        btn.textContent = 'Nhập dữ liệu';
+        btn.disabled = true;
+    }
 };
 
 window.closeImportModal = function() {
@@ -300,21 +324,33 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('importCsvModal').addEventListener('click', function(e) {
         if (e.target === this) closeImportModal();
     });
+
+    if (new URLSearchParams(window.location.search).get('import') === '1') {
+        if (typeof window.openImportModal === 'function') {
+            window.openImportModal();
+            window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+        }
+    }
 });
 
 function handleFileSelect(file) {
     const result = document.getElementById('importResult');
     result.style.display = 'none';
 
-    if (!file) return;
+    if (!file) {
+        updateImportCsvSubmitButton();
+        return;
+    }
     if (!file.name.toLowerCase().endsWith('.csv')) {
         showImportResult('error', '❌ Chỉ chấp nhận file .csv');
+        updateImportCsvSubmitButton();
         return;
     }
 
     document.getElementById('dropZoneText').style.display = 'none';
     document.getElementById('fileInfo').style.display = 'block';
     document.getElementById('fileName').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+    updateImportCsvSubmitButton();
 }
 
 function showImportResult(type, html) {
@@ -361,10 +397,12 @@ window.submitImportCsv = function() {
         formData.append('csv_file', file);
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // Disable button while uploading
-        const btn = document.querySelector('.btn-import');
-        btn.disabled = true;
-        btn.textContent = 'Đang xử lý...';
+        const btn = document.getElementById('btnImportCsvSubmit');
+        if (btn) {
+            btn.setAttribute('data-busy', '1');
+            btn.disabled = true;
+            btn.textContent = 'Đang xử lý...';
+        }
 
         $.ajax({
             url: baseUrl + '/admin/stocks/import-csv',
@@ -374,8 +412,11 @@ window.submitImportCsv = function() {
             processData: false,
             contentType: false,
             success: function(response) {
-                btn.disabled = false;
-                btn.textContent = 'Nhập dữ liệu';
+                if (btn) {
+                    btn.removeAttribute('data-busy');
+                    btn.textContent = 'Nhập dữ liệu';
+                    updateImportCsvSubmitButton();
+                }
                 if (response.status === 'success') {
                     let html = '✅ ' + response.message;
                     if (response.details) {
@@ -389,8 +430,11 @@ window.submitImportCsv = function() {
                 }
             },
             error: function(xhr) {
-                btn.disabled = false;
-                btn.textContent = 'Nhập dữ liệu';
+                if (btn) {
+                    btn.removeAttribute('data-busy');
+                    btn.textContent = 'Nhập dữ liệu';
+                    updateImportCsvSubmitButton();
+                }
                 const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Lỗi không xác định';
                 showImportResult('error', '❌ ' + msg);
             }

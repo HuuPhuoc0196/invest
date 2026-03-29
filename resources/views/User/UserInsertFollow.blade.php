@@ -16,12 +16,14 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
+    @include('partials.user-nav-primary')
 @endsection
 
 @section('user-body-content')
-    <h2>Thêm cổ phiếu theo dõi</h2>
+    @include('partials.page-title-invest', ['title' => 'Thêm cổ phiếu theo dõi'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
             <label for="code">Mã cổ phiếu:</label>
@@ -49,7 +51,9 @@
 
         <div id="toast" class="toast"></div>
 
-        <button id="btnSubmit" onclick="submitForm()" disabled style="opacity: 0.5; cursor: not-allowed;">Thêm</button>
+        <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Thêm</button>
+    </div>
+        </div>
     </div>
 @endsection
 
@@ -63,6 +67,7 @@
         const followPriceSellInput = document.getElementById("followPriceSell");
         const codeInput = document.getElementById("code");
         const btnCheckCode = document.getElementById("btnCheckCode");
+        const btnFormSubmit = document.getElementById("btnFormSubmit");
 
         function isNumber(value) {
             return !isNaN(value) && value.trim() !== '';
@@ -79,34 +84,43 @@
             input.value = formatted;
         }
 
-        followPriceBuyInput.addEventListener("input", () => {
-            formatToVND(followPriceBuyInput);
-        });
+        function canSubmitInsertFollowForm() {
+            const code = codeInput.value.trim();
+            const fpb = parseNumber(followPriceBuyInput.value);
+            const fps = parseNumber(followPriceSellInput.value);
+            if (!code) return false;
+            if (fpb && !isNumber(fpb)) return false;
+            if (fps && !isNumber(fps)) return false;
+            return true;
+        }
 
-        followPriceSellInput.addEventListener("input", () => {
-            formatToVND(followPriceSellInput);
-        });
-
-        // Toggle check button & submit button based on code input
-        const btnSubmit = document.getElementById("btnSubmit");
-        codeInput.addEventListener("input", function() {
-            const hasValue = this.value.trim().length > 0;
-            btnCheckCode.disabled = !hasValue;
-            btnSubmit.disabled = !hasValue;
-            if (hasValue) {
+        function updateInsertFollowSubmitButton() {
+            const hasCode = codeInput.value.trim().length > 0;
+            btnCheckCode.disabled = !hasCode;
+            if (btnFormSubmit) btnFormSubmit.disabled = !canSubmitInsertFollowForm();
+            if (hasCode) {
                 btnCheckCode.style.background = '#3498db';
                 btnCheckCode.style.color = '#fff';
                 btnCheckCode.style.cursor = 'pointer';
-                btnSubmit.style.opacity = '1';
-                btnSubmit.style.cursor = 'pointer';
             } else {
                 btnCheckCode.style.background = '#ccc';
                 btnCheckCode.style.color = '#666';
                 btnCheckCode.style.cursor = 'not-allowed';
-                btnSubmit.style.opacity = '0.5';
-                btnSubmit.style.cursor = 'not-allowed';
             }
+        }
+
+        followPriceBuyInput.addEventListener("input", () => {
+            formatToVND(followPriceBuyInput);
+            updateInsertFollowSubmitButton();
         });
+
+        followPriceSellInput.addEventListener("input", () => {
+            formatToVND(followPriceSellInput);
+            updateInsertFollowSubmitButton();
+        });
+
+        codeInput.addEventListener("input", updateInsertFollowSubmitButton);
+        updateInsertFollowSubmitButton();
 
         function checkStockCode() {
             const code = codeInput.value.trim().toUpperCase();
@@ -133,6 +147,7 @@
                         if (response.data && response.data.recommended_sell_price) {
                             followPriceSellInput.value = formatter.format(response.data.recommended_sell_price);
                         }
+                        updateInsertFollowSubmitButton();
                     } else if (response.status === 'warning') {
                         toast.innerHTML = `⚠️ ${response.message}`;
                         toast.className = 'toast show';
@@ -146,24 +161,35 @@
                             followPriceSellInput.value = formatter.format(response.data.recommended_sell_price);
                         }
                     } else {
-                        toast.innerHTML = `❌ ${response.message}`;
-                        toast.className = 'toast show';
-                        toastError();
+                        const raw = response.message || 'Mã cổ phiếu không tồn tại trong hệ thống.';
+                        const plain = String(raw).replace(/<[^>]*>/g, '');
                         followPriceBuyInput.value = '';
                         followPriceSellInput.value = '';
+                        updateInsertFollowSubmitButton();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Không tìm thấy mã',
+                            text: plain,
+                            confirmButtonText: 'Đóng'
+                        });
                     }
-                    setTimeout(() => {
-                        toast.className = toast.className.replace('show', '');
-                    }, 4000);
+                    if (response.status === 'success' || response.status === 'warning') {
+                        setTimeout(() => {
+                            toast.className = toast.className.replace('show', '');
+                        }, 4000);
+                    }
                 },
                 error: function(xhr) {
-                    const toast = document.getElementById("toast");
-                    toast.innerHTML = '❌ Lỗi kết nối, vui lòng thử lại.';
-                    toast.className = 'toast show';
-                    toastError();
-                    setTimeout(() => {
-                        toast.className = toast.className.replace('show', '');
-                    }, 5000);
+                    let msg = 'Lỗi kết nối, vui lòng thử lại.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        msg = String(xhr.responseJSON.message).replace(/<[^>]*>/g, '');
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: msg,
+                        confirmButtonText: 'Đóng'
+                    });
                 },
                 complete: function() {
                     btnCheckCode.disabled = false;
@@ -182,13 +208,7 @@
             codeInput.value = "";
             followPriceBuyInput.value = "";
             followPriceSellInput.value = "";
-            btnCheckCode.disabled = true;
-            btnCheckCode.style.background = '#ccc';
-            btnCheckCode.style.color = '#666';
-            btnCheckCode.style.cursor = 'not-allowed';
-            btnSubmit.disabled = true;
-            btnSubmit.style.opacity = '0.5';
-            btnSubmit.style.cursor = 'not-allowed';
+            updateInsertFollowSubmitButton();
         }
 
         function toastSuccess() {

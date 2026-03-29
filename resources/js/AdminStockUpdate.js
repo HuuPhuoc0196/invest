@@ -14,12 +14,55 @@ function formatToVND(input) {
     input.value = formatter.format(raw);
 }
 
+function isStockUpdateFormReady() {
+    const codeEl = document.getElementById("code");
+    if (!codeEl) return false;
+    const code = codeEl.value.trim().toUpperCase();
+    const currentPrice = parseNumber(document.getElementById("currentPrice").value);
+    const priceAvg = parseNumber(document.getElementById("priceAvg").value);
+    const buyPrice = parseNumber(document.getElementById("buyPrice").value);
+    const sellPrice = parseNumber(document.getElementById("sellPrice").value);
+    const percentBuy = document.getElementById("percentBuy").value.trim();
+    const percentSell = document.getElementById("percentSell").value.trim();
+    const ratingStocks = document.getElementById("ratingStocks").value.trim();
+    const stocksVn = document.getElementById("stocksVn").value.trim();
+
+    if (!code) return false;
+    if (!currentPrice || !isNumber(currentPrice)) return false;
+    if (priceAvg && !isNumber(priceAvg)) return false;
+    if (buyPrice && !isNumber(buyPrice)) return false;
+    if (sellPrice && !isNumber(sellPrice)) return false;
+    if (percentBuy && isNaN(percentBuy)) return false;
+    if (percentSell && isNaN(percentSell)) return false;
+    if (ratingStocks && isNaN(ratingStocks)) return false;
+    if (stocksVn && isNaN(stocksVn)) return false;
+    return true;
+}
+
+function updateStockUpdateSubmitButton() {
+    const btn = document.getElementById("btnFormSubmit");
+    if (btn) btn.disabled = !isStockUpdateFormReady();
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     // Format price fields on input
     const priceFields = ["currentPrice", "priceAvg", "buyPrice", "sellPrice"];
     priceFields.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener("input", () => formatToVND(el));
+        if (el) {
+            el.addEventListener("input", () => {
+                formatToVND(el);
+                updateStockUpdateSubmitButton();
+            });
+        }
+    });
+
+    ["code", "percentBuy", "percentSell", "risk", "ratingStocks", "stocksVn"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("input", updateStockUpdateSubmitButton);
+            el.addEventListener("change", updateStockUpdateSubmitButton);
+        }
     });
 
     // Pre-populate fields from stockData (passed from Blade)
@@ -56,6 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         document.getElementById("risk").value = stockData.risk_level || 1;
     }
+    updateStockUpdateSubmitButton();
 });
 
 function toastShow(type, message) {

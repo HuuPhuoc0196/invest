@@ -70,8 +70,12 @@ class User extends Controller
     public function infoProfile()
     {
         $userId = auth()->id();
+        $user = UserModel::getUserById($userId);
+        if (!$user) {
+            abort(404);
+        }
         $userPortfolios = UserPortfolio::getPortfolioWithUserBuy($userId);
-        return view('User.UserInfoProfile', compact('userPortfolios'));
+        return view('User.UserInfoProfile', compact('user', 'userPortfolios'));
     }
 
     public function follow()
@@ -228,14 +232,18 @@ class User extends Controller
         $user_id = auth()->id();
         $cashFollow = UserCashFollow::getCashFollow($user_id);
         if ($request->isMethod('post')) {
-            // Có dữ liệu
             try {
-                // Validation dữ liệu
                 $validated = $request->validate([
                     'code' => 'required|string|max:10',
-                    'buy_price' => 'required|numeric|gt:0',
-                    'quantity' => 'required|numeric|gt:0',
+                    'buy_price' => 'required|numeric|gt:0|max:' . UserPortfolio::BUY_PRICE_MAX,
+                    'quantity' => 'required|integer|min:1|max:' . UserPortfolio::QUANTITY_MAX,
                     'buy_date' => 'required|date|before_or_equal:today',
+                ], [
+                    'buy_price.max' => 'Giá mua không hợp lệ!',
+                    'buy_price.numeric' => 'Giá mua không hợp lệ!',
+                    'quantity.max' => 'Khối lượng giao dịch không hợp lệ!',
+                    'quantity.integer' => 'Khối lượng giao dịch không hợp lệ!',
+                    'quantity.min' => 'Khối lượng giao dịch không hợp lệ!',
                 ]);
 
                 $cashBuy = floatval($validated['buy_price']) * floatval($validated['quantity']);
@@ -253,7 +261,7 @@ class User extends Controller
                 if (!$stock) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Vui lòng liên hệ Admin insert Mã cổ phiếu ' . $validated['code'] . '.'
+                        'message' => 'Vui lòng liên hệ Admin thêm mã cổ phiếu ' . $validated['code'] . '.'
                     ]);
                 }
                 // Mapping data vào model
@@ -276,6 +284,11 @@ class User extends Controller
                     'message' => 'Mua thành công.',
                     'data' => $userPortfolio
                 ]);
+            } catch (ValidationException $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => collect($e->errors())->flatten()->first() ?? 'Dữ liệu không hợp lệ.',
+                ], 422);
             } catch (QueryException $e) {
                 return response()->json([
                     'status' => 'error',
@@ -284,7 +297,12 @@ class User extends Controller
             }
         } else {
             $cash = $cashFollow->cash ?? 0;
-            return view('User.UserBuy',compact('cash'));
+
+            return view('User.UserBuy', [
+                'cash' => $cash,
+                'buyPriceMax' => UserPortfolio::BUY_PRICE_MAX,
+                'quantityMax' => UserPortfolio::QUANTITY_MAX,
+            ]);
         }
     }
 
@@ -311,7 +329,7 @@ class User extends Controller
                 if (!$stock) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Vui lòng liên hệ Admin insert Mã cổ phiếu ' . $validated['code'] . '.'
+                        'message' => 'Vui lòng liên hệ Admin thêm mã cổ phiếu ' . $validated['code'] . '.'
                     ]);
                 }
 
@@ -385,7 +403,7 @@ class User extends Controller
                 if (!$stock) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Vui lòng liên hệ Admin insert Mã cổ phiếu ' . $validated['code'] . '.'
+                        'message' => 'Vui lòng liên hệ Admin thêm mã cổ phiếu ' . $validated['code'] . '.'
                     ]);
                 }
 
@@ -524,7 +542,7 @@ class User extends Controller
                 if (!$stock) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Vui lòng liên hệ Admin insert Mã cổ phiếu ' . $validated['code'] . '.'
+                        'message' => 'Vui lòng liên hệ Admin thêm mã cổ phiếu ' . $validated['code'] . '.'
                     ]);
                 }
 
@@ -594,7 +612,7 @@ class User extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Giá theo dõi ' . strtoupper($code) . ' đã được cập nhật.',
+                'message' => 'Mã cổ phiếu ' . strtoupper($code) . ' hợp lệ.',
                 'data' => [
                     'code' => $stock->code,
                     'recommended_buy_price' => $stock->recommended_buy_price,
@@ -606,6 +624,33 @@ class User extends Controller
         return response()->json([
             'status' => 'error',
             'message' => 'Mã cổ phiếu ' . strtoupper($code) . ' không tồn tại trong hệ thống.'
+        ]);
+    }
+
+    /**
+     * Chỉ kiểm tra mã có trong bảng stocks (read-only). Dùng cho mua/bán, không liên quan theo dõi.
+     */
+    public function validateStockCode($code)
+    {
+        $stock = Stock::getByCode(strtoupper($code));
+        if (!$stock) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Mã cổ phiếu ' . strtoupper($code) . ' không tồn tại trong hệ thống.',
+            ]);
+        }
+
+        $upper = strtoupper($code);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Mã cổ phiếu ' . $upper . ' hợp lệ.',
+            'data' => [
+                'code' => $stock->code,
+                'recommended_buy_price' => $stock->recommended_buy_price,
+                'current_price' => $stock->current_price,
+                'recommended_sell_price' => $stock->recommended_sell_price,
+            ],
         ]);
     }
 

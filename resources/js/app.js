@@ -1,4 +1,5 @@
 import './bootstrap';
+import './stickyHeaderInset';
 import Admin from './Admin';
 import User from './User';
 

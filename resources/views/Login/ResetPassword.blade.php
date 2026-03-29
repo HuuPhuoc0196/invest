@@ -7,6 +7,7 @@
 
 @section('header-css')
     @vite('resources/css/loginRegister.css')
+    @vite('resources/css/login.css')
 @endsection
 
 @section('header-js')
@@ -14,17 +15,20 @@
 @endsection
 
 @section('body-content')
+    <div class="login-card">
+    <p class="login-auth-lead">Bảo mật tài khoản</p>
     <h2>Đặt lại mật khẩu</h2>
+    <p class="login-auth-sub">Chọn mật khẩu mới đủ mạnh và dễ nhớ với bạn.</p>
 
     @if(session('error'))
-        <div class="error-message" style="color: red; margin-bottom: 16px;">{{ session('error') }}</div>
+        <div class="session-error" style="padding: 10px; margin-bottom: 12px; border-radius: 8px;">{{ session('error') }}</div>
     @endif
     @if(session('message'))
-        <div class="success-message" style="color: green; margin-bottom: 16px;">{{ session('message') }}</div>
+        <div class="session-message" style="padding: 10px; margin-bottom: 12px; border-radius: 8px;">{{ session('message') }}</div>
     @endif
 
     @if($error ?? null)
-        <div class="error-message" style="color: red; margin-bottom: 16px;">{{ $error }}</div>
+        <div class="session-error" style="padding: 10px; margin-bottom: 12px; border-radius: 8px;">{{ $error }}</div>
         <div class="link-group" style="margin-top: 16px;">
             <a href="{{ url('/forgotPassword') }}">Gửi lại link đặt lại mật khẩu</a><br>
             <a href="{{ url('/login') }}">← Quay lại đăng nhập</a>
@@ -44,13 +48,14 @@
                 <input type="password" id="password_confirmation" name="password_confirmation" required minlength="6" />
                 <div class="input-error" id="passwordConfirmationError"></div>
             </div>
-            <div class="error-message" id="formError" style="display: none; color: red;"></div>
+            <div class="error-message" id="formError" style="display: none;"></div>
             <button type="submit" class="login-btn">Đặt lại mật khẩu</button>
         </form>
         <div class="link-group">
             <a href="{{ url('/login') }}">← Quay lại đăng nhập</a>
         </div>
     @endif
+    </div>
 @endsection
 
 @section('login-script')

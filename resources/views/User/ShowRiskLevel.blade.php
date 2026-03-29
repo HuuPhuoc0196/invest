@@ -13,7 +13,7 @@
 @endsection
 
 @section('body-content')
-    <h1>Quản lý đầu tư thật dể dàng cùng với Invest manager</h1>
+    @include('partials.page-title-invest', ['title' => 'Quản lý đầu tư thật dể dàng cùng với Invest manager', 'level' => 1])
     <p>Mã chứng khoán: <strong id="code"></strong></p>
     <p>Tình trạng: <strong id="risk"></strong></p>
     

@@ -13,28 +13,13 @@
 @endsection
 
 
-@section('actions-left')
-    <div style="display: flex; gap: 5px;">
-        <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
-        <a href="{{ url('/admin/stocks') }}" class="button-link">📊 Quản lý cổ phiếu</a>
-        <a href="{{ url('/admin/logs') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs Hosting</a>
-        <a href="{{ url('/admin/logsVPS') }}" class="button-link" target="_blank" rel="noopener noreferrer">👁️ Logs VPS</a>
-        <button type="button" class="button-link" onclick="document.getElementById('logout-form').submit();">
-            🚪 Đăng xuất
-        </button>
-    </div>
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-        @csrf
-    </form>
-@endsection
-
 @section('actions-right')
     <input type="text" id="searchInput" placeholder="Nhập mã CK...">
     <button onclick="searchStock()">🔍 Tìm kiếm</button>
 @endsection
 
 @section('admin-body-content')
-    <h1>Danh sách mã cổ phiếu</h1>
+    @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu', 'level' => 1])
 
     <!-- Filter Panel -->
     <div class="filter-panel">
@@ -217,6 +202,11 @@
             const stickyTable = document.getElementById('stock-table');
             const stickyContainer = document.querySelector('.table-container');
             if (stickyTable && stickyContainer) {
+                function headerInset() {
+                    return typeof window.getStickyHeaderInset === 'function'
+                        ? window.getStickyHeaderInset()
+                        : (window.innerWidth <= 768 ? 56 : 0);
+                }
                 const thead = stickyTable.querySelector('thead');
                 let cloneWrap = null;
                 let cloneTable = null;
@@ -268,10 +258,10 @@
                 function syncScroll() {
                     if (!cloneWrap) return;
                     const containerRect = stickyContainer.getBoundingClientRect();
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    const inset = headerInset();
                     cloneWrap.style.left = containerRect.left + 'px';
                     cloneWrap.style.width = containerRect.width + 'px';
-                    cloneWrap.style.top = topOffset + 'px';
+                    cloneWrap.style.top = inset + 'px';
                     cloneTable.style.marginLeft = -stickyContainer.scrollLeft + 'px';
                 }
 
@@ -279,8 +269,8 @@
                     if (!cloneWrap) return;
                     const tableRect = stickyTable.getBoundingClientRect();
                     const theadHeight = thead.offsetHeight;
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
-                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
+                    const inset = headerInset();
+                    if (tableRect.top < inset && tableRect.bottom > (inset + theadHeight)) {
                         cloneWrap.style.display = 'block';
                         syncScroll();
                     } else {
@@ -289,9 +279,10 @@
                 }
 
                 createClone();
-                window.addEventListener('scroll', onScroll);
+                window.addEventListener('scroll', onScroll, { passive: true });
                 window.addEventListener('resize', function() { createClone(); onScroll(); });
-                stickyContainer.addEventListener('scroll', syncScroll);
+                stickyContainer.addEventListener('scroll', syncScroll, { passive: true });
+                onScroll();
 
                 // Re-create clone when table re-renders
                 const observer = new MutationObserver(function() {

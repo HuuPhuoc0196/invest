@@ -19,6 +19,7 @@
 @endsection
 
 @section('body-content')
+    <div class="login-card">
     <h2>Đăng nhập</h2>
     @if (session('message'))
         <div class="session-message" style="padding: 10px; margin-bottom: 12px; background: #d4edda; color: #155724; border-radius: 6px;">{{ session('message') }}</div>
@@ -50,6 +51,7 @@
                 khẩu?</button>
         </div>
     </form>
+    </div>
 @endsection
 
 @section('login-script')

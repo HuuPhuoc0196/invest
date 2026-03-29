@@ -11,74 +11,63 @@
     @vite('resources/js/app.js')
 @endsection
 
-@section('user-info')
-    <div class="user-info">
-        {{-- <img src="{{ asset('images/default-avatar.png') }}" alt="User Avatar" class="avatar"> --}}
-        <div class="user-details">
-            <p class="user-name">👤 {{ Auth::user()->name }}</p>
-            <p class="user-email">📧 {{ Auth::user()->email }}</p>
-        </div>
-    </div>
-@endsection
-
 @section('actions-left')
-    <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
-    <a href="{{ url('/user/updateInfoProfile') }}" class="button-link">👤✏️ Cập nhật thông tin cá nhân</a>
-    <a href="{{ url('/user/changePassword') }}" class="button-link">👤⚙️ Thay đổi mật khẩu</a>
+    @include('partials.user-nav-primary')
 @endsection
 
-{{-- @section('user-body-content')
-<h1>Danh sách cổ phiếu</h1>
+@section('user-body-content')
+    @include('partials.page-title-invest', ['title' => 'Thông tin cá nhân', 'level' => 1])
 
-<div class="table-container">
-    <table id="user-info-profile-table">
-        <thead>
-            <tr>
-                <th>Mã cổ phiếu</th>
-                <th>Khối lượng giao dịch</th>
-                <th>Giá trung bình</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody id="userInfoTableBody">
-        </tbody>
-    </table>
-</div>
-<!-- Modal xác nhận xoá -->
-<div id="confirmModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                                                                                            background-color: rgba(0, 0, 0, 0.5); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background: white; padding: 20px; border-radius: 10px; width: 300px; text-align: center;">
-        <p>Bạn có chắc chắn muốn xoá?</p>
-        <button id="confirmYes">Có</button>
-        <button id="confirmNo">Không</button>
+    <div class="profile-detail-wrap">
+        <section class="profile-detail-card" aria-labelledby="profile-account-heading">
+            <h3 id="profile-account-heading" class="profile-detail-card__title">Tài khoản</h3>
+            <dl class="profile-detail-list">
+                <div class="profile-detail-row">
+                    <dt>Họ và tên</dt>
+                    <dd>{{ $user->name }}</dd>
+                </div>
+                <div class="profile-detail-row">
+                    <dt>Email</dt>
+                    <dd>{{ $user->email }}</dd>
+                </div>
+                <div class="profile-detail-row">
+                    <dt>Xác thực email</dt>
+                    <dd>
+                        @if ($user->hasVerifiedEmail())
+                            <span class="profile-badge profile-badge--ok">Đã xác thực</span>
+                        @else
+                            <span class="profile-badge profile-badge--warn">Chưa xác thực</span>
+                        @endif
+                    </dd>
+                </div>
+                <div class="profile-detail-row">
+                    <dt>Vai trò</dt>
+                    <dd>{{ (int) ($user->role ?? 0) === 1 ? 'Quản trị viên' : 'Nhà đầu tư' }}</dd>
+                </div>
+                <div class="profile-detail-row">
+                    <dt>Ngày tham gia</dt>
+                    <dd>{{ $user->created_at->timezone(config('app.timezone'))->format('d/m/Y H:i') }}</dd>
+                </div>
+                <div class="profile-detail-row">
+                    <dt>Cập nhật lần cuối</dt>
+                    <dd>{{ $user->updated_at->timezone(config('app.timezone'))->format('d/m/Y H:i') }}</dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="profile-detail-card" aria-labelledby="profile-portfolio-heading">
+            <h3 id="profile-portfolio-heading" class="profile-detail-card__title">Danh mục đầu tư</h3>
+            <dl class="profile-detail-list">
+                <div class="profile-detail-row">
+                    <dt>Số mã đang nắm giữ</dt>
+                    <dd>{{ count($userPortfolios) }}</dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="profile-detail-card profile-detail-card--actions" aria-label="Thao tác nhanh">
+            <a href="{{ url('/user/updateInfoProfile') }}" class="button-link profile-detail-cta">✏️ Cập nhật thông tin</a>
+            <a href="{{ url('/user/changePassword') }}" class="button-link profile-detail-cta profile-detail-cta--secondary">🔐 Đổi mật khẩu</a>
+        </section>
     </div>
-    @endsection --}}
-
-    @section('user-script')
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script>
-            const baseUrl = "{{ url('') }}";
-            // var userPortfolios = @json($userPortfolios);
-            // let deleteUrl = "";
-
-            // document.addEventListener("DOMContentLoaded", function () {
-            //     user = new User();
-            //     user.renderTableUserInfoProfile(userPortfolios);
-            // });
-
-            // function confirmDelete(code) {
-            //     deleteUrl = `${baseUrl}/user/deleteUserProfileCode/${code}`;
-            //     document.getElementById("confirmModal").style.display = "flex";
-            // }
-
-            // document.getElementById("confirmYes").onclick = function () {
-            //     window.location.href = deleteUrl;
-            // };
-
-            // document.getElementById("confirmNo").onclick = function () {
-            //     document.getElementById("confirmModal").style.display = "none";
-            //     deleteUrl = "";
-            // };
-        </script>
-    @endsection
+@endsection

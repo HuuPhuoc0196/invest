@@ -60,6 +60,41 @@ Route::get('/profile', [Login::class, 'profile'])->name('profile')->middleware('
 
 Route::get('/user/get-risk-level/{code}', [User::class, 'getRiskLevel'])->name('user.getRiskLevel');
 
+// Logo: không dùng file tĩnh public/logo.svg (tránh <?xml bị PHP short_open_tag hiểu nhầm trên XAMPP).
+// Xóa public/logo.svg nếu còn — request /logo.svg luôn vào Laravel và trả đúng image/svg+xml.
+Route::get('/logo.svg', function () {
+    $path = public_path('icon/investment_logo.svg');
+    abort_unless(is_readable($path), 404);
+    return response()->file($path, [
+        'Content-Type' => 'image/svg+xml; charset=utf-8',
+        'Cache-Control' => 'public, max-age=604800',
+        'X-Content-Type-Options' => 'nosniff',
+    ]);
+})->name('site.logo');
+
+// Debug logo (chỉ khi APP_DEBUG=true): mở /invest/public/__debug/logo trên trình duyệt
+Route::get('/__debug/logo', function () {
+    abort_unless(config('app.debug'), 404);
+    $logoStatic = public_path('logo.svg');
+    $icon = public_path('icon/investment_logo.svg');
+    $check = static function (string $path): array {
+        return [
+            'path' => $path,
+            'exists' => file_exists($path),
+            'readable' => is_readable($path),
+            'size' => file_exists($path) ? filesize($path) : null,
+            'starts_with_svg' => is_readable($path) ? str_starts_with(trim((string) file_get_contents($path, false, null, 0, 200)), '<') : null,
+        ];
+    };
+    return response()->json([
+        'app_url' => config('app.url'),
+        'route_site_logo' => route('site.logo'),
+        'static_public_logo_svg_should_not_exist' => $check($logoStatic),
+        'icon_investment_logo_svg' => $check($icon),
+        'hint' => 'Logo được phục vụ bởi route site.logo (Laravel). File nguồn: public/icon/investment_logo.svg. Không đặt public/logo.svg (file tĩnh) để tránh xung đột và lỗi PHP short_open_tag với <?xml.',
+    ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+})->name('debug.logo');
+
 // Trang chủ: cho phép cả guest và user (không bắt buộc login)
 Route::get('/home', [User::class, 'show'])->name('home');
 Route::get('/user', [User::class, 'show']);
@@ -73,7 +108,7 @@ Route::post('/logout', function () {
 
 Route::middleware(['auth', 'admin'])->group(function () {
     // Admin
-    Route::get('/admin', [Admin::class, 'show']);
+    Route::get('/admin', [Admin::class, 'show'])->name('admin.home');
     Route::get('/admin/delete/{code}', [Admin::class, 'delete'])->name('admin.delete');
     Route::match(['get', 'post'], '/admin/insert', [Admin::class, 'insert'])->name('insert');
     Route::match(['get', 'put'], '/admin/update/{code}', [Admin::class, 'update'])->name('admin.update');
@@ -117,6 +152,7 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::match(['get', 'post'], '/user/insertFollow', [User::class, 'insertFollow'])->name('insertFollow');
     Route::post('/user/addFollowBatch', [User::class, 'addFollowBatch'])->name('user.addFollowBatch');
     Route::get('/user/checkStockCode/{code}', [User::class, 'checkStockCode'])->name('user.checkStockCode');
+    Route::get('/user/validate-stock/{code}', [User::class, 'validateStockCode'])->name('user.validateStock');
     Route::match(['get', 'put'], '/user/updateFollow/{code}', [User::class, 'updateFollow'])->name('user.updateFollow');
     Route::match(['get', 'post'],'/user/cashIn', [User::class, 'cashIn'])->name('user.cashIn');
     Route::match(['get', 'post'],'/user/cashOut', [User::class, 'cashOut'])->name('user.cashOut');

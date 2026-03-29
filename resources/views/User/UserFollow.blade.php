@@ -17,8 +17,7 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
-    <a href="{{ url('/user/insertFollow') }}" class="button-link">➕ Thêm mới</a>
+    @include('partials.user-nav-primary')
 @endsection
 
 @section('actions-right')
@@ -27,7 +26,7 @@
 @endsection
 
 @section('user-body-content')
-    <h1>Danh sách mã cổ phiếu theo dõi</h1>
+    @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu theo dõi', 'level' => 1])
 
     <!-- Filter Panel -->
     <div class="filter-panel">
@@ -88,7 +87,7 @@
         </div>
     </div>
 
-    <div style="display:flex;justify-content:flex-end;align-items:center;">
+    <div style="display:flex;justify-content:flex-end;align-items:center;padding-bottom:12px;">
         <button
             id="btnDeleteAllFollow"
             class="btn-delete"
@@ -287,6 +286,11 @@
             const stickyTable = document.getElementById('stock-table');
             const stickyContainer = document.querySelector('.table-container');
             if (stickyTable && stickyContainer) {
+                function headerInset() {
+                    return typeof window.getStickyHeaderInset === 'function'
+                        ? window.getStickyHeaderInset()
+                        : (window.innerWidth <= 768 ? 56 : 0);
+                }
                 const thead = stickyTable.querySelector('thead');
                 let cloneTable = null;
                 let cloneWrap = null;
@@ -326,10 +330,10 @@
                 function syncScroll() {
                     if (!cloneWrap) return;
                     const containerRect = stickyContainer.getBoundingClientRect();
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    const inset = headerInset();
                     cloneWrap.style.left = containerRect.left + 'px';
                     cloneWrap.style.width = containerRect.width + 'px';
-                    cloneWrap.style.top = topOffset + 'px';
+                    cloneWrap.style.top = inset + 'px';
                     cloneTable.style.marginLeft = -stickyContainer.scrollLeft + 'px';
                 }
 
@@ -337,8 +341,8 @@
                     if (!cloneWrap) return;
                     const tableRect = stickyTable.getBoundingClientRect();
                     const theadHeight = thead.offsetHeight;
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
-                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
+                    const inset = headerInset();
+                    if (tableRect.top < inset && tableRect.bottom > (inset + theadHeight)) {
                         cloneWrap.style.display = 'block';
                         syncScroll();
                     } else {
@@ -347,9 +351,10 @@
                 }
 
                 createClone();
-                window.addEventListener('scroll', onScroll);
+                window.addEventListener('scroll', onScroll, { passive: true });
                 window.addEventListener('resize', function() { createClone(); onScroll(); });
-                stickyContainer.addEventListener('scroll', syncScroll);
+                stickyContainer.addEventListener('scroll', syncScroll, { passive: true });
+                onScroll();
             }
         });
 

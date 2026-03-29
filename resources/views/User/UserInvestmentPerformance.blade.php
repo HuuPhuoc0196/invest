@@ -43,6 +43,74 @@
             cursor: grabbing;
             user-select: none;
         }
+
+        /* Thanh lọc theo ngày (main — một hàng) */
+        .inv-perf-filter-wrap {
+            max-width: 1440px;
+            margin: 0 auto 1.25rem;
+            padding: 0 12px;
+            box-sizing: border-box;
+        }
+
+        .inv-perf-filter-bar {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 10px 14px;
+        }
+
+        @media (max-width: 720px) {
+            .inv-perf-filter-bar {
+                flex-wrap: wrap;
+            }
+        }
+
+        .inv-perf-filter-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--inv-muted, #64748b);
+            flex-shrink: 0;
+        }
+
+        .inv-perf-filter-date {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--inv-border, #334155);
+            background: var(--inv-surface2, #1e293b);
+            color: var(--inv-text, #e2e8f0);
+            font-size: 14px;
+            min-height: 42px;
+            box-sizing: border-box;
+        }
+
+        .inv-perf-filter-date:focus {
+            outline: none;
+            border-color: rgba(56, 189, 248, 0.55);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.12);
+        }
+
+        .inv-perf-filter-btn {
+            margin-left: 4px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--inv-accent, #38bdf8) 0%, #0ea5e9 100%);
+            color: #0b0f1a;
+            transition: filter 0.15s ease;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .inv-perf-filter-btn:hover {
+            filter: brightness(1.06);
+        }
+
+        .inv-perf-filter-btn:active {
+            filter: brightness(0.98);
+        }
     </style>
 @endsection
 
@@ -61,16 +129,7 @@
 @endsection   --}}
 
 @section('actions-left')
-    <a href="{{ url('/user/profile') }}" class="button-link">💼 Tài sản</a>
-
-    <!-- phần nhập ngày và nút hiệu suất đầu tư -->
-    <div style="margin-top: 10px;">
-        <label>Từ:</label>
-        <input type="date" id="startDate">
-        <label>Đến:</label>
-        <input type="date" id="endDate">
-        <button onclick="handleInvestmentPerformance()">🔍 Lọc dữ liệu</button>
-    </div>
+    @include('partials.user-nav-primary')
 @endsection
 
 @section('actions-right')
@@ -79,7 +138,17 @@
 @endsection
 
 @section('user-body-content')
-    <h1>Lịch sử giao dịch</h1>
+    @include('partials.page-title-invest', ['title' => 'Lịch sử giao dịch', 'level' => 1])
+
+    <div class="inv-perf-filter-wrap">
+        <div class="inv-perf-filter-bar">
+            <label for="startDate" class="inv-perf-filter-label">Từ:</label>
+            <input type="date" id="startDate" class="inv-perf-filter-date" autocomplete="off">
+            <label for="endDate" class="inv-perf-filter-label">Đến:</label>
+            <input type="date" id="endDate" class="inv-perf-filter-date" autocomplete="off">
+            <button type="button" class="inv-perf-filter-btn" onclick="handleInvestmentPerformance()">🔍 Lọc dữ liệu</button>
+        </div>
+    </div>
 
     <div class="table-container">
         <table id="stock-table">
@@ -187,20 +256,26 @@
                     }
                 }
 
+                function headerInset() {
+                    return typeof window.getStickyHeaderInset === 'function'
+                        ? window.getStickyHeaderInset()
+                        : (window.innerWidth <= 768 ? 56 : 0);
+                }
+
                 function syncScroll() {
                     if (!cloneWrap) return;
                     const containerRect = stickyContainer.getBoundingClientRect();
                     const offset = -stickyContainer.scrollLeft + 'px';
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    const inset = headerInset();
                     cloneWrap.style.left = containerRect.left + 'px';
                     cloneWrap.style.width = containerRect.width + 'px';
-                    cloneWrap.style.top = topOffset + 'px';
+                    cloneWrap.style.top = inset + 'px';
                     cloneTable.style.marginLeft = offset;
                     if (totalCloneWrap && totalCloneTable) {
                         totalCloneWrap.style.left = containerRect.left + 'px';
                         totalCloneWrap.style.width = containerRect.width + 'px';
                         totalCloneTable.style.marginLeft = offset;
-                        totalCloneWrap.style.top = (topOffset + thead.offsetHeight) + 'px';
+                        totalCloneWrap.style.top = (inset + thead.offsetHeight) + 'px';
                     }
                 }
 
@@ -208,9 +283,9 @@
                     if (!cloneWrap) return;
                     const tableRect = stickyTable.getBoundingClientRect();
                     const theadHeight = thead.offsetHeight;
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    const inset = headerInset();
 
-                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
+                    if (tableRect.top < inset && tableRect.bottom > (inset + theadHeight)) {
                         cloneWrap.style.display = 'block';
                         syncScroll();
                     } else {
@@ -223,12 +298,12 @@
                             const totalRect = totalRow.getBoundingClientRect();
                             const totalHeight = totalRow.offsetHeight;
                             if (
-                                tableRect.top < topOffset &&
-                                totalRect.top <= (topOffset + theadHeight) &&
-                                tableRect.bottom > (topOffset + theadHeight + totalHeight)
+                                tableRect.top < inset &&
+                                totalRect.top <= (inset + theadHeight) &&
+                                tableRect.bottom > (inset + theadHeight + totalHeight)
                             ) {
                                 totalCloneWrap.style.display = 'block';
-                                totalCloneWrap.style.top = (topOffset + theadHeight) + 'px';
+                                totalCloneWrap.style.top = (inset + theadHeight) + 'px';
                                 syncScroll();
                             } else {
                                 totalCloneWrap.style.display = 'none';
@@ -238,9 +313,10 @@
                 }
 
                 createClones();
-                window.addEventListener('scroll', onScroll);
+                window.addEventListener('scroll', onScroll, { passive: true });
                 window.addEventListener('resize', function () { createClones(); onScroll(); });
-                stickyContainer.addEventListener('scroll', syncScroll);
+                stickyContainer.addEventListener('scroll', syncScroll, { passive: true });
+                onScroll();
 
                 // Re-create clones after table re-renders
                 const observer = new MutationObserver(function () {

@@ -16,14 +16,16 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/user/profile') }}" class="button-link">💼 Tài sản</a>
+    @include('partials.user-nav-primary')
 @endsection
 
 @section('user-body-content')
-    <h2>Bán Cổ Phiếu</h2>
+    @include('partials.page-title-invest', ['title' => 'Bán Cổ Phiếu'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
-        <div class="form-group">
+        <div class="form-group form-group-cash-row">
             <label class="cash-title">Số dư: <span class="cash"></span></label>
         </div>
 
@@ -58,7 +60,9 @@
 
         <div id="toast" class="toast"></div>
 
-        <button onclick="submitForm()">Bán</button>
+        <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Bán</button>
+    </div>
+        </div>
     </div>
 @endsection
 
@@ -72,13 +76,25 @@
         const sellPriceInput = document.getElementById("sellPrice");
         const quantityInput = document.getElementById("quantity");
         const sellDateInput = document.getElementById('sellDate');
+        const btnFormSubmit = document.getElementById('btnFormSubmit');
         var cash = @json($cash);
         let cashMony = formatter.format(cash);
         $(".cash").text(cashMony);
 
+        function getTodayYmd() {
+            const d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        function setDefaultSellDate() {
+            sellDateInput.value = getTodayYmd();
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             const select = document.getElementById("code");
             const quantityInput = document.getElementById("quantity");
+
+            setDefaultSellDate();
 
             // Đổ option cho select
             userPortfolios.forEach(p => {
@@ -98,7 +114,9 @@
                 } else {
                     quantityInput.value = "";
                 }
+                updateSellSubmitButton();
             });
+            updateSellSubmitButton();
         });
 
 
@@ -118,19 +136,40 @@
             input.value = formatted;
         }
 
+        function canSubmitSellForm() {
+            const code = document.getElementById("code").value.trim().toUpperCase();
+            const sell = parseNumber(sellPriceInput.value);
+            const quantity = parseNumber(quantityInput.value);
+            const sellDate = sellDateInput.value.trim();
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!code || !sell || !isNumber(sell) || !quantity || !isNumber(quantity)) return false;
+            if (sellDate === '' || !dateRegex.test(sellDate) || isNaN(new Date(sellDate).getTime())) return false;
+            return true;
+        }
+
+        function updateSellSubmitButton() {
+            if (btnFormSubmit) btnFormSubmit.disabled = !canSubmitSellForm();
+        }
+
         sellPriceInput.addEventListener("input", () => {
             formatToVND(sellPriceInput);
+            updateSellSubmitButton();
         });
 
         quantityInput.addEventListener("input", () => {
             formatToVND(quantityInput);
+            updateSellSubmitButton();
         });
+
+        sellDateInput.addEventListener("change", updateSellSubmitButton);
+        sellDateInput.addEventListener("input", updateSellSubmitButton);
 
         function resetForm() {
             document.getElementById("code").value = "";
             sellPriceInput.value = "";
             quantityInput.value = "";
-            sellDateInput.value = "";
+            setDefaultSellDate();
+            updateSellSubmitButton();
         }
 
         function sellStocksOnForm(code, quantity) {
@@ -158,6 +197,7 @@
                     select.appendChild(option);
                 }
             });
+            updateSellSubmitButton();
         }
 
         function toastSuccess() {
@@ -252,6 +292,7 @@
                             cash = num1 + cashSell;
                             cashMony = formatter.format(cash);
                             $(".cash").text(cashMony);
+                            updateSellSubmitButton();
                             toastSuccess();
                             setTimeout(() => {
                                 toast.className = toast.className.replace("show", "");

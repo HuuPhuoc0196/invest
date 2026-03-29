@@ -19,3 +19,10 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# SVG trong <img> cần MIME image/svg+xml (một số bản XAMPP gửi sai type)
+<IfModule mod_headers.c>
+    <FilesMatch "\.svg$">
+        Header set Content-Type "image/svg+xml; charset=utf-8"
+    </FilesMatch>
+</IfModule>

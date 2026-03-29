@@ -20,31 +20,9 @@
             flex-shrink: 0;
         }
         .auto-sync-toggle {
-            padding: 4px 12px;
-            border: none;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: 600;
             cursor: pointer;
-            width: 60px;
-            height: 28px;
-            box-sizing: border-box;
-            line-height: 1;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .auto-sync-toggle.auto-sync-on {
-            background-color: #22c55e;
-            color: #fff;
-        }
-        .auto-sync-toggle.auto-sync-on:hover {
-            background-color: #16a34a;
-        }
-        .auto-sync-toggle.auto-sync-off {
-            background-color: #ef4444;
-            color: #fff;
-        }
-        .auto-sync-toggle.auto-sync-off:hover {
-            background-color: #dc2626;
+            border-radius: 8px;
+            transition: background-color 0.2s ease, filter 0.15s ease;
         }
     </style>
 @endsection
@@ -54,12 +32,14 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/user/follow') }}" class="button-link">🔔 Theo dõi</a>
+    @include('partials.user-nav-primary')
 @endsection
 
 @section('user-body-content')
-    <h2>Cập nhật cổ phiếu theo dõi</h2>
+    @include('partials.page-title-invest', ['title' => 'Cập nhật cổ phiếu theo dõi'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
             <label for="code">Mã cổ phiếu:</label>
@@ -88,7 +68,9 @@
 
         <div id="toast" class="toast"></div>
 
-        <button onclick="submitForm()">Cập nhật</button>
+        <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Cập nhật</button>
+    </div>
+        </div>
     </div>
 @endsection
 
@@ -96,6 +78,22 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        const btnFormSubmit = document.getElementById('btnFormSubmit');
+
+        function canSubmitUpdateFollowForm() {
+            const code = document.getElementById("code").value.trim().toUpperCase();
+            const followPriceBuy = parseNumber(document.getElementById("followPriceBuy").value);
+            const followPriceSell = parseNumber(document.getElementById("followPriceSell").value);
+            if (!code) return false;
+            if (!followPriceBuy || !isNumber(followPriceBuy)) return false;
+            if (followPriceSell && !isNumber(followPriceSell)) return false;
+            return true;
+        }
+
+        function updateUpdateFollowSubmitButton() {
+            if (btnFormSubmit) btnFormSubmit.disabled = !canSubmitUpdateFollowForm();
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             const userFollow = @json($userFollow);
             document.getElementById("code").value = userFollow.code || "";
@@ -133,6 +131,7 @@
                     autoSyncToggle.setAttribute("aria-pressed", "false");
                 }
             });
+            updateUpdateFollowSubmitButton();
         });
         const baseUrl = "{{ url('') }}";
         const formatter = new Intl.NumberFormat('vi-VN');
@@ -157,10 +156,12 @@
 
         followPriceBuyInput.addEventListener("input", () => {
             formatToVND(followPriceBuyInput);
+            updateUpdateFollowSubmitButton();
         });
 
         followPriceSellInput.addEventListener("input", () => {
             formatToVND(followPriceSellInput);
+            updateUpdateFollowSubmitButton();
         });
 
         function toastSuccess() {

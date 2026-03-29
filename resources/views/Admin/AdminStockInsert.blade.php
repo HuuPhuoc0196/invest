@@ -15,15 +15,11 @@
     @vite('resources/js/app.js')
 @endsection
 
-@section('actions-left')
-    <div style="display: flex; gap: 5px;">
-        <a href="{{ url('/admin/stocks') }}" class="button-link">📊 Quản lý cổ phiếu</a>
-    </div>
-@endsection
-
 @section('admin-body-content')
-    <h2>Thêm cổ phiếu</h2>
+    @include('partials.page-title-invest', ['title' => 'Thêm cổ phiếu'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
             <label for="code">Mã cổ phiếu: <span class="required">*</span></label>
@@ -92,7 +88,9 @@
 
         <div id="toast" class="toast"></div>
 
-        <button onclick="submitStockForm()">Thêm mới</button>
+        <button type="button" id="btnFormSubmit" onclick="submitStockForm()" disabled>Thêm mới</button>
+    </div>
+        </div>
     </div>
 @endsection
 

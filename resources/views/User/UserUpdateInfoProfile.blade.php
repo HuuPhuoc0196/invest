@@ -16,12 +16,14 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/user/infoProfile') }}" class="button-link">👤 Thông tin cá nhân</a>
+    @include('partials.user-nav-primary')
 @endsection
 
 @section('user-body-content')
-    <h2>Cập nhật thông tin cá nhân</h2>
+    @include('partials.page-title-invest', ['title' => 'Cập nhật thông tin cá nhân'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
             <label for="name">Tên:</label>
@@ -32,7 +34,9 @@
 
         <div id="toast" class="toast"></div>
 
-        <button onclick="submitForm()">Cập nhật</button>
+        <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Cập nhật</button>
+    </div>
+        </div>
     </div>
 @endsection
 
@@ -40,10 +44,25 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        const btnFormSubmit = document.getElementById('btnFormSubmit');
+
+        function canSubmitUpdateNameForm() {
+            const name = document.getElementById("name").value.trim();
+            return name.length >= 2;
+        }
+
+        function updateUpdateNameSubmitButton() {
+            if (btnFormSubmit) btnFormSubmit.disabled = !canSubmitUpdateNameForm();
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             const user = @json($user);
             document.getElementById("name").value = user.name|| "";
+            updateUpdateNameSubmitButton();
         });
+        document.getElementById("name").addEventListener("input", updateUpdateNameSubmitButton);
+        document.getElementById("name").addEventListener("change", updateUpdateNameSubmitButton);
+
         const baseUrl = "{{ url('') }}";
        
         function toastSuccess() {

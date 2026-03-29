@@ -78,7 +78,9 @@ button:hover {
 .toast {
     visibility: hidden;
     min-width: 200px;
-    margin-left: -100px;
+    max-width: min(92vw, 36rem);
+    width: max-content;
+    margin-left: 0;
     background-color: #333;
     color: #fff;
     text-align: center;
@@ -88,7 +90,11 @@ button:hover {
     z-index: 1;
     bottom: 30px;
     left: 50%;
+    transform: translateX(-50%);
     font-size: 17px;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
     transition: opacity 0.5s ease-in-out;
 }
 

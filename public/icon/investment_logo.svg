@@ -1,0 +1,163 @@
+<svg width="580" height="580" viewBox="0 0 580 580" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="bgCircle" cx="40%" cy="40%" r="65%">
+    <stop offset="0%" stop-color="#0F2744"/>
+    <stop offset="100%" stop-color="#071A10"/>
+  </radialGradient>
+  <linearGradient id="shieldOuter" x1="0" y1="0" x2="0.3" y2="1">
+    <stop offset="0%" stop-color="#1E4A8A" stop-opacity="0.5"/>
+    <stop offset="100%" stop-color="#0A2040" stop-opacity="0.5"/>
+  </linearGradient>
+  <linearGradient id="shieldInner" x1="0" y1="0" x2="0.2" y2="1">
+    <stop offset="0%" stop-color="#1A3D7C" stop-opacity="0.75"/>
+    <stop offset="100%" stop-color="#091830" stop-opacity="0.75"/>
+  </linearGradient>
+  <linearGradient id="bar1" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#1E4A8A"/><stop offset="100%" stop-color="#4A8ED4"/></linearGradient>
+  <linearGradient id="bar2" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#1A3D7C"/><stop offset="100%" stop-color="#3A78C8"/></linearGradient>
+  <linearGradient id="bar3" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#152E60"/><stop offset="100%" stop-color="#2E62B0"/></linearGradient>
+  <linearGradient id="bar4" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#0E1E44"/><stop offset="100%" stop-color="#2050A0"/></linearGradient>
+  <linearGradient id="personG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60A5FA"/><stop offset="100%" stop-color="#1D4ED8"/></linearGradient>
+  <linearGradient id="coinSide" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1E4A8A"/><stop offset="100%" stop-color="#0A1E44"/></linearGradient>
+  <linearGradient id="trendLine" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#22C55E" stop-opacity="0.5"/>
+    <stop offset="100%" stop-color="#86EFAC"/>
+  </linearGradient>
+  <linearGradient id="ringG" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#1D4ED8"/>
+    <stop offset="50%" stop-color="#16A34A"/>
+    <stop offset="100%" stop-color="#1D4ED8"/>
+  </linearGradient>
+  <linearGradient id="tagSafe"  x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#14532D"/><stop offset="100%" stop-color="#16A34A"/></linearGradient>
+  <linearGradient id="tagWarn"  x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#78350F"/><stop offset="100%" stop-color="#D97706"/></linearGradient>
+  <linearGradient id="tagLimit" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#7F1D1D"/><stop offset="100%" stop-color="#DC2626"/></linearGradient>
+  <linearGradient id="tagDelist" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#450A0A"/><stop offset="100%" stop-color="#991B1B"/></linearGradient>
+  <marker id="arrowTrend" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <path d="M1 1L9 5L1 9" fill="none" stroke="#86EFAC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Main circle -->
+<circle cx="290" cy="290" r="252" fill="url(#bgCircle)"/>
+<circle cx="290" cy="290" r="252" fill="none" stroke="url(#ringG)" stroke-width="2.5" opacity="0.65"/>
+
+<!-- Grid -->
+<g stroke="#0F2030" stroke-width="0.5" opacity="0.5">
+  <line x1="70"  y1="220" x2="510" y2="220"/>
+  <line x1="70"  y1="280" x2="510" y2="280"/>
+  <line x1="70"  y1="340" x2="510" y2="340"/>
+  <line x1="70"  y1="400" x2="510" y2="400"/>
+  <line x1="180" y1="80"  x2="180" y2="500"/>
+  <line x1="290" y1="80"  x2="290" y2="500"/>
+  <line x1="400" y1="80"  x2="400" y2="500"/>
+</g>
+
+<!-- SHIELD -->
+<path d="M290 148 L426 190 L426 308 Q426 416 290 454 Q154 416 154 308 L154 190 Z"
+      fill="url(#shieldOuter)" stroke="#1E4A8A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M290 162 L406 200 L406 308 Q406 402 290 436 Q174 402 174 308 L174 200 Z"
+      fill="url(#shieldInner)" stroke="#2563EB" stroke-width="2" stroke-linejoin="round"/>
+<path d="M196 208 Q188 252 190 304" fill="none" stroke="#60A5FA" stroke-width="8" stroke-linecap="round" opacity="0.08"/>
+
+<!-- BARS -->
+<rect x="198" y="336" width="34" height="72" rx="7" fill="url(#bar1)"/>
+<rect x="244" y="298" width="34" height="110" rx="7" fill="url(#bar2)"/>
+<rect x="290" y="256" width="34" height="152" rx="7" fill="url(#bar3)"/>
+<rect x="336" y="210" width="34" height="198" rx="7" fill="url(#bar4)"/>
+<rect x="200" y="336" width="7" height="72"  rx="3" fill="#fff" opacity="0.15"/>
+<rect x="246" y="298" width="7" height="110" rx="3" fill="#fff" opacity="0.15"/>
+<rect x="292" y="256" width="7" height="152" rx="3" fill="#fff" opacity="0.15"/>
+<rect x="338" y="210" width="7" height="198" rx="3" fill="#fff" opacity="0.15"/>
+<line x1="185" y1="408" x2="385" y2="408" stroke="#2563EB" stroke-width="1.5" opacity="0.4"/>
+
+<!-- TREND LINE -->
+<polyline points="215,336 261,298 307,256 353,210"
+  fill="none" stroke="url(#trendLine)" stroke-width="2.5"
+  stroke-linecap="round" stroke-linejoin="round"
+  stroke-dasharray="7 4" marker-end="url(#arrowTrend)"/>
+<circle cx="215" cy="336" r="4" fill="#4ADE80" opacity="0.8"/>
+<circle cx="261" cy="298" r="4" fill="#4ADE80" opacity="0.85"/>
+<circle cx="307" cy="256" r="4" fill="#4ADE80" opacity="0.9"/>
+<circle cx="353" cy="210" r="5" fill="#86EFAC"/>
+<circle cx="353" cy="210" r="2.5" fill="#fff"/>
+
+<!-- PERSON -->
+<circle cx="290" cy="178" r="26" fill="url(#personG)"/>
+<ellipse cx="282" cy="168" rx="9" ry="10" fill="#fff" opacity="0.15"/>
+<path d="M260,208 Q264,199 290,197 Q316,199 320,208 L326,250 Q306,258 290,260 Q274,258 254,250 Z"
+      fill="url(#personG)" opacity="0.95"/>
+
+<!-- COINS -->
+<ellipse cx="424" cy="244" rx="26" ry="9" fill="#0A1E44" opacity="0.6"/>
+<rect x="398" y="226" width="52" height="18" rx="3" fill="url(#coinSide)"/>
+<ellipse cx="424" cy="226" rx="26" ry="9" fill="#3A6AB0"/>
+<ellipse cx="424" cy="210" rx="26" ry="9" fill="#0A1E44" opacity="0.5"/>
+<rect x="398" y="192" width="52" height="18" rx="3" fill="url(#coinSide)"/>
+<ellipse cx="424" cy="192" rx="26" ry="9" fill="#4A7EC0"/>
+<ellipse cx="424" cy="176" rx="26" ry="9" fill="#0A1E44" opacity="0.4"/>
+<rect x="398" y="158" width="52" height="18" rx="3" fill="url(#coinSide)"/>
+<ellipse cx="424" cy="158" rx="26" ry="9" fill="#7DD3FC"/>
+<text x="424" y="162" text-anchor="middle" dominant-baseline="central"
+      font-family="Georgia,serif" font-size="13" font-weight="700" fill="#0A1E44">$</text>
+
+<!-- DONUT -->
+<g transform="translate(152,392)">
+  <circle r="38" fill="#0A1E3C" opacity="0.7" stroke="#1E4A8A" stroke-width="1.5"/>
+  <path d="M0,-30 A30,30 0 0,1 26,15 L15,9 A17,17 0 0,0 0,-17 Z" fill="#2563EB"/>
+  <path d="M26,15 A30,30 0 0,1 -26,14 L-15,8 A17,17 0 0,0 15,9 Z" fill="#3B82F6"/>
+  <path d="M-26,14 A30,30 0 0,1 0,-30 L0,-17 A17,17 0 0,0 -15,8 Z" fill="#7DD3FC"/>
+  <circle r="17" fill="#0A1628"/>
+  <circle r="5" fill="#38BDF8" opacity="0.9"/>
+</g>
+
+<!-- GROWTH ICON -->
+<circle cx="154" cy="216" r="24" fill="#0A1E3C" stroke="#22C55E" stroke-width="1.5" opacity="0.95"/>
+<rect x="143" y="224" width="6" height="10" rx="1.5" fill="#22C55E" opacity="0.5"/>
+<rect x="151" y="218" width="6" height="16" rx="1.5" fill="#22C55E" opacity="0.75"/>
+<rect x="159" y="212" width="6" height="22" rx="1.5" fill="#22C55E"/>
+<line x1="143" y1="224" x2="163" y2="208" stroke="#86EFAC" stroke-width="2" stroke-linecap="round"/>
+<polygon points="157,205 165,207 163,215" fill="#86EFAC"/>
+
+<!-- MAIL -->
+<g transform="translate(248,424)">
+  <rect width="84" height="64" rx="10" fill="#0D1E38" stroke="#F59E0B" stroke-width="2"/>
+  <rect x="10" y="12" width="64" height="40" rx="4" fill="#0A192E" stroke="#F59E0B" stroke-width="2"/>
+  <polygon points="10,12 74,12 42,34" fill="#1A3A5C" stroke="#F59E0B" stroke-width="2" stroke-linejoin="round"/>
+  <line x1="10" y1="52" x2="30" y2="34" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <line x1="74" y1="52" x2="54" y2="34" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <circle cx="70" cy="14" r="10" fill="#DC2626" stroke="#0D1E38" stroke-width="2"/>
+  <text x="70" y="18" text-anchor="middle" dominant-baseline="central"
+        font-family="sans-serif" font-size="11" font-weight="800" fill="#fff">!</text>
+</g>
+
+<!-- BADGE 1 -->
+<g transform="translate(46,280)">
+  <rect width="122" height="70" rx="9" fill="#060E1C" stroke="#22C55E" stroke-width="1.5"/>
+  <rect width="4" height="70" rx="2" fill="#22C55E"/>
+  <text x="12" y="18" font-family="sans-serif" font-size="8" fill="#4ADE80">Danh gia co phieu</text>
+  <text x="12" y="44" font-family="sans-serif" font-size="22" font-weight="700" fill="#22C55E">+24.6%</text>
+  <text x="12" y="61" font-family="sans-serif" font-size="7.5" fill="#86EFAC" opacity="0.6">so voi gia tri thuc</text>
+  <rect x="92" y="22" width="6" height="16" rx="1.5" fill="#22C55E" opacity="0.35"/>
+  <rect x="100" y="16" width="6" height="22" rx="1.5" fill="#22C55E" opacity="0.6"/>
+  <rect x="108" y="10" width="6" height="28" rx="1.5" fill="#22C55E" opacity="0.85"/>
+</g>
+<line x1="168" y1="315" x2="174" y2="300" stroke="#22C55E" stroke-width="0.8" stroke-dasharray="4 3" opacity="0.5"/>
+
+<!-- BADGE 2 -->
+<g transform="translate(412,218)">
+  <rect width="112" height="122" rx="9" fill="#060E1C" stroke="#38BDF8" stroke-width="1.5"/>
+  <rect x="108" width="4" height="122" rx="2" fill="#38BDF8"/>
+  <text x="10" y="15" font-family="sans-serif" font-size="8" fill="#7DD3FC" font-weight="600">Trang thai</text>
+  <rect x="10" y="22" width="80" height="18" rx="9" fill="url(#tagSafe)"/>
+  <text x="50" y="31" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="8.5" font-weight="700" fill="#dcfce7">An toan</text>
+  <rect x="10" y="45" width="80" height="18" rx="9" fill="url(#tagWarn)"/>
+  <text x="50" y="54" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="8.5" font-weight="700" fill="#fef3c7">Canh bao</text>
+  <rect x="10" y="68" width="86" height="18" rx="9" fill="url(#tagLimit)"/>
+  <text x="53" y="77" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="8.5" font-weight="700" fill="#fecaca">Han che GD</text>
+  <rect x="10" y="91" width="92" height="19" rx="9" fill="url(#tagDelist)" stroke="#DC2626" stroke-width="1"/>
+  <text x="56" y="101" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="8" font-weight="700" fill="#ef4444">Huy niem yet</text>
+</g>
+<line x1="412" y1="279" x2="406" y2="265" stroke="#38BDF8" stroke-width="0.8" stroke-dasharray="4 3" opacity="0.4"/>
+
+<!-- Crop -->
+<circle cx="290" cy="290" r="252" fill="none" stroke="#071510" stroke-width="7" opacity="0.5"/>
+</svg>

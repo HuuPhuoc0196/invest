@@ -1,20 +1,176 @@
-body {
+/* Trang đăng nhập — fallback khi không dùng theme */
+body:not(.theme-invest-app) {
     font-family: "Nunito", sans-serif;
     background: #f5f6fa;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
 }
 
+main.login-layout-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
 .login-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 24px 16px;
+    box-sizing: border-box;
+}
+
+body:not(.theme-invest-app) .login-container {
+    min-height: 0;
+}
+
+/* —— Theme Invest — auth card —— */
+body.theme-invest-app main.login-layout-main .login-container {
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 20px;
+    padding-bottom: 32px;
+}
+
+body.theme-invest-app main.login-layout-main .login-card {
+    background: linear-gradient(165deg, rgba(26, 34, 53, 0.95) 0%, rgba(17, 24, 39, 0.88) 100%);
+    border: 1px solid var(--inv-border, rgba(99, 179, 237, 0.12));
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    padding: 1.75rem 1.75rem 2rem;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+body.theme-invest-app main.login-layout-main .login-auth-lead {
+    margin: 0 0 0.35rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--inv-accent, #38bdf8);
+    text-align: center;
+}
+
+body.theme-invest-app main.login-layout-main .login-card h2 {
+    margin: 0 0 1.25rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--inv-text, #e2e8f0);
+    text-align: center;
+}
+
+body.theme-invest-app main.login-layout-main .login-card h2 + .login-auth-sub {
+    margin-top: -0.5rem;
+}
+
+body.theme-invest-app main.login-layout-main .login-auth-sub {
+    margin: 0 0 1.25rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--inv-muted, #64748b);
+    text-align: center;
+}
+
+body.theme-invest-app main.login-layout-main .input-group label {
+    color: var(--inv-text, #e2e8f0);
+}
+
+body.theme-invest-app main.login-layout-main .input-group input {
+    background: var(--inv-surface2, #1a2235);
+    border: 1px solid var(--inv-border, rgba(99, 179, 237, 0.12));
+    color: var(--inv-text, #e2e8f0);
+    border-radius: 8px;
+}
+
+body.theme-invest-app main.login-layout-main .input-group input::placeholder {
+    color: var(--inv-muted, #64748b);
+}
+
+body.theme-invest-app main.login-layout-main .input-group input:focus {
+    outline: none;
+    border-color: rgba(56, 189, 248, 0.55);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.15);
+}
+
+body.theme-invest-app main.login-layout-main .login-btn {
+    background: linear-gradient(135deg, var(--inv-accent, #38bdf8) 0%, #0ea5e9 100%);
+    color: #0b0f1a;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 12px 16px;
+    border: none;
+    transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+body.theme-invest-app main.login-layout-main .login-btn:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+body.theme-invest-app main.login-layout-main .login-btn:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
+body.theme-invest-app main.login-layout-main .secondary-btn {
+    background: var(--inv-surface2, #1a2235);
+    border: 1px solid var(--inv-border, rgba(99, 179, 237, 0.12));
+    color: var(--inv-text, #e2e8f0);
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+body.theme-invest-app main.login-layout-main .secondary-btn:hover {
+    border-color: rgba(56, 189, 248, 0.4);
+    color: var(--inv-accent, #38bdf8);
+    background: rgba(56, 189, 248, 0.08);
+}
+
+body.theme-invest-app main.login-layout-main .session-message,
+body.theme-invest-app main.login-layout-main .session-error {
+    border-radius: 8px !important;
+    font-size: 0.9rem;
+}
+
+body.theme-invest-app main.login-layout-main .session-message {
+    background: rgba(52, 211, 153, 0.12) !important;
+    color: #6ee7b7 !important;
+    border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+body.theme-invest-app main.login-layout-main .session-error {
+    background: rgba(248, 113, 113, 0.12) !important;
+    color: #fca5a5 !important;
+    border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+body.theme-invest-app main.login-layout-main #errorMessage {
+    color: #fca5a5 !important;
+}
+
+body.theme-invest-app main.login-layout-main .login-card .error-message {
+    color: #fca5a5;
+}
+
+body.theme-invest-app main.login-layout-main #formError {
+    color: #fca5a5 !important;
+}
+
+/* Non-theme card */
+.login-card {
     background: white;
     padding: 2rem 3rem;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 320px;
+    width: 100%;
+    max-width: 320px;
+    box-sizing: border-box;
 }
 
 h2 {

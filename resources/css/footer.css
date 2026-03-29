@@ -1,26 +1,181 @@
-.footer {
-    background-color: #222; /* nền tối */
+/* —— Footer cơ bản (login & fallback) —— */
+.footer:not(.ft-invest) {
+    background-color: #222;
     color: #eee;
     padding: 20px 15px;
     text-align: center;
     font-size: 14px;
     margin-top: 30px;
 }
-/* .footer a {
-    color: #4da6ff; 
-    text-decoration: none;
+
+/* —— Footer template invest (PC + responsive) —— */
+.footer.ft-invest {
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
+    padding: 0;
+    text-align: initial;
+    background: #0f172a;
+    border-top: 1px solid #1e293b;
+    color: #64748b;
 }
-.footer a:hover {
-    text-decoration: underline;
+
+.ft-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 2.5rem;
+    padding: 2.5rem 1.25rem 2rem;
+    border-bottom: 1px solid #1e293b;
+    max-width: 1440px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
-@media (min-width: 600px) {
-    .footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        text-align: left;
+
+@media (max-width: 1024px) {
+    .ft-top {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.75rem;
     }
-} */
+}
+
+@media (max-width: 560px) {
+    .ft-top {
+        grid-template-columns: 1fr;
+        padding: 1.75rem 1rem 1.5rem;
+    }
+}
+
+.ft-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.ft-logo-ico {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    overflow: hidden;
+    line-height: 0;
+}
+
+.ft-logo-ico img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    display: block;
+}
+
+.ft-logo-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e2e8f0;
+    line-height: 1.25;
+}
+
+.ft-desc {
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.65;
+    margin: 0 0 16px;
+    max-width: 280px;
+}
+
+.ft-contact-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.ft-email,
+.ft-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #38bdf8;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 7px;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    background: rgba(56, 189, 248, 0.05);
+    transition: background 0.15s ease;
+}
+
+.ft-email:hover,
+.ft-phone:hover {
+    background: rgba(56, 189, 248, 0.1);
+    color: #7dd3fc;
+}
+
+.ft-email-ico,
+.ft-phone-ico {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.ft-col-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 14px;
+}
+
+.ft-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.ft-links a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #475569;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.ft-links a:hover {
+    color: #e2e8f0;
+}
+
+.ft-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 1.25rem;
+    max-width: 1440px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.ft-copy {
+    margin: 0;
+    font-size: 12px;
+    color: #475569;
+}
+
+.ft-copy span {
+    color: #38bdf8;
+    font-weight: 600;
+}
 
 .user-info {
     display: flex;
@@ -28,21 +183,14 @@
     padding: 10px 20px;
     background: #f4f6f8;
     border-bottom: 1px solid #ddd;
-    position: sticky; /* luôn dính trên cùng */
+    position: sticky;
     top: 0;
     z-index: 1000;
 }
 
-/* .user-info .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-} */
-
 .user-details p {
-    color: #2c3e50; /* đổi màu chữ */
-    font-size: 14px; /* chỉnh kích thước chữ */
+    color: #2c3e50;
+    font-size: 14px;
     margin: 5px 0;
 }
 

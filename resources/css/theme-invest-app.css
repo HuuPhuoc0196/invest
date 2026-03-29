@@ -1,0 +1,1825 @@
+/**
+ * Giao diện tối đầu tư — Layout người dùng + admin. Khi body.theme-invest-app.
+ */
+@import url("https://fonts.bunny.net/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap");
+
+body.theme-invest-app {
+    --inv-bg: #0b0f1a;
+    --inv-surface: #111827;
+    --inv-surface2: #1a2235;
+    --inv-border: rgba(99, 179, 237, 0.12);
+    --inv-accent: #38bdf8;
+    --inv-accent2: #818cf8;
+    --inv-text: #e2e8f0;
+    --inv-muted: #64748b;
+    --inv-up: #34d399;
+    --inv-down: #f87171;
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    background: var(--inv-bg);
+    color: var(--inv-text);
+    padding-top: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 769px) {
+    body.theme-invest-app {
+        padding: 0 20px 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    body.theme-invest-app {
+        padding-top: 74px;
+    }
+}
+
+body.theme-invest-app main {
+    position: relative;
+    z-index: 1;
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+    box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+    body.theme-invest-app main {
+        padding: 32px 8px 32px;
+    }
+}
+
+/* Trang đăng nhập / đăng ký — main full width, form căn giữa */
+body.theme-invest-app main.login-layout-main {
+    max-width: none;
+    width: 100%;
+}
+
+/* —— PC header bar ——
+   Hàng 1: [logo + title] | [tìm kiếm] — Hàng 2: menu full width, phân cách bằng border-top */
+@media (min-width: 769px) {
+    body.theme-invest-app .actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: auto auto;
+        column-gap: 12px;
+        row-gap: 0;
+        position: sticky;
+        top: 0;
+        z-index: 1100;
+        margin: 0 -20px 0;
+        padding: 10px 24px 12px;
+        min-height: auto;
+        height: auto;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 0;
+        background: rgba(11, 15, 26, 0.88);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--inv-border);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    body.theme-invest-app .site-brand--desktop {
+        grid-column: 1;
+        grid-row: 1;
+        color: var(--inv-text);
+        margin-right: 0;
+        min-width: 0;
+    }
+
+    body.theme-invest-app .site-brand__text {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+
+    body.theme-invest-app .actions-left {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        display: flex;
+        flex: unset;
+        flex-wrap: nowrap !important;
+        gap: 6px;
+        align-items: center;
+        justify-content: flex-start;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 10px 0 0;
+        margin-top: 10px;
+        box-sizing: border-box;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(56, 189, 248, 0.4) transparent;
+    }
+
+    body.theme-invest-app .actions-left::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    body.theme-invest-app .actions-left::-webkit-scrollbar-thumb {
+        background: rgba(56, 189, 248, 0.35);
+        border-radius: 4px;
+    }
+
+    body.theme-invest-app .actions-left.mobile-menu-drawer {
+        position: static;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        transform: none;
+        box-shadow: none;
+        background: transparent;
+        padding: 0;
+        padding-top: 12px;
+        margin: 0;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    body.theme-invest-app .actions-left .mobile-menu-header {
+        display: none !important;
+    }
+
+    /* Admin + User: hàng menu 1 + hàng 2 submenu xếp dọc trong drawer PC */
+    body.theme-invest-app:is(.layout-admin, .layout-user) .actions-left.mobile-menu-drawer {
+        flex-direction: column;
+        align-items: stretch;
+        overflow-x: visible;
+        overflow-y: visible;
+    }
+
+    body.theme-invest-app.layout-admin .admin-nav-primary,
+    body.theme-invest-app.layout-user .user-nav-primary {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* PC: hàng 1 link trái | Đăng xuất phải; hàng 2 submenu full width (admin CP / user Tài sản·Theo dõi) */
+    body.theme-invest-app.layout-admin .admin-nav-primary__inner,
+    body.theme-invest-app.layout-user .user-nav-primary__inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: auto auto;
+        column-gap: 8px;
+        row-gap: 8px;
+        align-items: start;
+    }
+
+    body.theme-invest-app.layout-admin .admin-nav-primary__mid,
+    body.theme-invest-app.layout-user .user-nav-primary__mid {
+        display: contents;
+    }
+
+    body.theme-invest-app.layout-admin .admin-nav-primary__cluster,
+    body.theme-invest-app.layout-user .user-nav-primary__cluster {
+        grid-column: 1;
+        grid-row: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        align-content: flex-start;
+        min-width: 0;
+    }
+
+    body.theme-invest-app.layout-admin .admin-nav-primary__stock-branch,
+    body.theme-invest-app.layout-user .user-nav-primary__asset-branch,
+    body.theme-invest-app.layout-user .user-nav-primary__follow-branch {
+        display: contents;
+    }
+
+    body.theme-invest-app.layout-admin .admin-nav-primary__inner > button.user-nav-link--logout,
+    body.theme-invest-app.layout-user .user-nav-primary__inner > button.user-nav-link--logout {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: start;
+        justify-self: end;
+    }
+
+    body.theme-invest-app.layout-admin .admin-nav-primary__cluster .admin-nav-stocks-sub,
+    body.theme-invest-app.layout-user .user-nav-primary__cluster .user-nav-asset-sub {
+        order: 10;
+        flex-basis: 100%;
+        width: 100%;
+        margin-left: 0;
+        max-width: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        padding-top: 8px;
+        margin-top: 0;
+        border-top: 1px solid var(--inv-border);
+        box-sizing: border-box;
+    }
+
+    body.theme-invest-app.layout-user .user-nav-primary__cluster .user-nav-follow-sub {
+        order: 11;
+        flex-basis: 100%;
+        width: 100%;
+        margin-left: 0;
+        max-width: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        padding-top: 8px;
+        margin-top: 0;
+        border-top: 1px solid var(--inv-border);
+        box-sizing: border-box;
+    }
+
+    body.theme-invest-app .actions-left .button-link,
+    body.theme-invest-app .actions-left button.button-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex: 0 0 auto;
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        border: 1px solid var(--inv-border) !important;
+        background: transparent !important;
+        color: var(--inv-muted) !important;
+        box-shadow: none !important;
+        white-space: nowrap;
+    }
+
+    body.theme-invest-app .actions-left .button-link:hover,
+    body.theme-invest-app .actions-left button.button-link:hover {
+        color: var(--inv-accent) !important;
+        border-color: var(--inv-accent) !important;
+    }
+
+    body.theme-invest-app .actions-left .user-nav-link--active:not(.user-nav-link--logout) {
+        color: var(--inv-accent) !important;
+        border-color: rgba(56, 189, 248, 0.55) !important;
+        background: rgba(56, 189, 248, 0.14) !important;
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.25);
+    }
+
+    body.theme-invest-app .actions-left .user-nav-link--active:not(.user-nav-link--logout):hover {
+        background: rgba(56, 189, 248, 0.2) !important;
+        border-color: var(--inv-accent) !important;
+    }
+
+    body.theme-invest-app .actions-left .user-nav-link--logout:hover {
+        border-color: rgba(248, 113, 113, 0.5) !important;
+        color: #fca5a5 !important;
+        background: rgba(248, 113, 113, 0.1) !important;
+    }
+
+    /* Menu khách — Trang chủ giống Đăng ký (surface) | trạng thái active riêng */
+    body.theme-invest-app .actions-left .user-nav-link--guest:not(.user-nav-link--guest-login):not(.user-nav-link--guest-register):not(.user-nav-link--guest-home):not(.user-nav-link--active) {
+        color: var(--inv-muted) !important;
+        border-color: var(--inv-border) !important;
+        background: transparent !important;
+    }
+
+    body.theme-invest-app .actions-left .user-nav-link--guest-login:not(.user-nav-link--active),
+    body.theme-invest-app .actions-left .user-nav-link--guest-register:not(.user-nav-link--active),
+    body.theme-invest-app .actions-left .user-nav-link--guest-home:not(.user-nav-link--active) {
+        color: var(--inv-text) !important;
+        border-color: var(--inv-border) !important;
+        background: var(--inv-surface) !important;
+    }
+
+    body.theme-invest-app .actions-left .user-nav-link--guest-login:not(.user-nav-link--active):hover,
+    body.theme-invest-app .actions-left .user-nav-link--guest-register:not(.user-nav-link--active):hover,
+    body.theme-invest-app .actions-left .user-nav-link--guest-home:not(.user-nav-link--active):hover {
+        color: var(--inv-accent) !important;
+        border-color: rgba(56, 189, 248, 0.45) !important;
+        background: rgba(56, 189, 248, 0.1) !important;
+    }
+
+    /* Search */
+    body.theme-invest-app #actionsRightContent {
+        grid-column: 2;
+        grid-row: 1;
+        display: flex !important;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+        margin-left: 0;
+        min-width: 0;
+        justify-self: end;
+    }
+
+    body.theme-invest-app #actionsRightContent input[type="text"] {
+        width: 200px;
+        max-width: 28vw;
+        padding: 8px 12px !important;
+        background: var(--inv-surface) !important;
+        border: 1px solid var(--inv-border) !important;
+        border-radius: 8px !important;
+        color: var(--inv-text) !important;
+        font-size: 13px !important;
+        font-family: inherit;
+    }
+
+    body.theme-invest-app #actionsRightContent input[type="text"]::placeholder {
+        color: var(--inv-muted);
+    }
+
+    body.theme-invest-app #actionsRightContent input[type="text"]:focus {
+        outline: none;
+        border-color: var(--inv-accent) !important;
+    }
+
+    body.theme-invest-app #actionsRightContent button {
+        padding: 8px 16px !important;
+        background: var(--inv-accent) !important;
+        color: #0b0f1a !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        font-family: inherit;
+    }
+
+    body.theme-invest-app #actionsRightContent button:hover {
+        background: #7dd3fc !important;
+    }
+
+    body.theme-invest-app #actionsRightContent button.admin-update-sync-btn {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+        color: #fff !important;
+    }
+
+    body.theme-invest-app #actionsRightContent button.admin-update-sync-btn:hover {
+        filter: brightness(1.08);
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+    }
+}
+
+/* Mobile: bỏ hộp .actions khỏi flow — không kéo dài main (drawer vẫn position:fixed) */
+@media (max-width: 768px) {
+    body.theme-invest-app .actions {
+        display: contents;
+    }
+
+    /*
+     * Admin + User drawer mobile: ghim [Đăng xuất] đáy — header cố định, menu cuộn, không scroll ngang
+     */
+    body.theme-invest-app:is(.layout-admin, .layout-user) .mobile-menu-drawer.actions-left {
+        height: 100vh !important;
+        max-height: 100dvh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        overflow: hidden !important;
+        padding-bottom: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    body.theme-invest-app:is(.layout-admin, .layout-user) .mobile-menu-drawer.actions-left .mobile-menu-header {
+        flex-shrink: 0 !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__inner,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__inner {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        flex-wrap: nowrap !important;
+        overflow-x: hidden !important;
+        max-width: 100% !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__mid,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__mid {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__cluster,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__cluster {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__cluster > .button-link,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__cluster > .button-link {
+        max-width: 100% !important;
+        white-space: normal !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__stock-branch,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__asset-branch,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__follow-branch {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 6px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__stock-branch > .button-link,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__asset-branch > .button-link,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__follow-branch > .button-link {
+        max-width: 100% !important;
+        white-space: normal !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__inner > button.user-nav-link--logout,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__inner > button.user-nav-link--logout {
+        flex-shrink: 0 !important;
+        margin-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* Menu con: thụt 12px; cột; chữ căn giữa */
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-stocks-sub,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-asset-sub,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-follow-sub {
+        flex-basis: auto;
+        width: calc(100% - 12px);
+        max-width: calc(100% - 12px);
+        margin: 2px 0 8px 12px;
+        padding: 8px 8px 8px 10px;
+        border-top: none;
+        border-left: 2px solid rgba(56, 189, 248, 0.45);
+        border-radius: 0 10px 10px 0;
+        background: rgba(56, 189, 248, 0.08);
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-stocks-sub > .button-link,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-asset-sub > .button-link,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-follow-sub > .button-link {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        font-size: 13px !important;
+        line-height: 1.35;
+        padding: 12px 14px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        box-sizing: border-box;
+        white-space: normal !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--inv-border) !important;
+        background: var(--inv-surface2) !important;
+        color: var(--inv-text) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-stocks-sub > .button-link.user-nav-link--active,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-asset-sub > .button-link.user-nav-link--active,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-follow-sub > .button-link.user-nav-link--active {
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.35) 0%, rgba(37, 99, 235, 0.22) 100%) !important;
+        border-color: rgba(56, 189, 248, 0.5) !important;
+        color: #f0f9ff !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-stocks-sub > .button-link:hover,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-asset-sub > .button-link:hover,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-follow-sub > .button-link:hover {
+        border-color: rgba(56, 189, 248, 0.45) !important;
+        filter: brightness(1.06);
+    }
+
+    /* Trang /admin/stocks — 3 nút một hàng dưới topbar (mobile) */
+    body.theme-invest-app.layout-admin .admin-stocks-page .iphone-admin-stocks-actions {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: stretch !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin-bottom: 16px !important;
+        box-sizing: border-box !important;
+    }
+
+    body.theme-invest-app.layout-admin .admin-stocks-page .iphone-admin-stocks-actions .button-link {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: auto !important;
+        max-width: none !important;
+        min-height: 44px;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 8px 6px !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        border-radius: 10px !important;
+        box-sizing: border-box !important;
+        text-decoration: none !important;
+        white-space: nowrap !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background: linear-gradient(180deg, var(--inv-surface2) 0%, rgba(26, 34, 53, 0.95) 100%) !important;
+        border: 1px solid rgba(99, 179, 237, 0.2) !important;
+        color: var(--inv-text) !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    body.theme-invest-app.layout-admin .admin-stocks-page .iphone-admin-stocks-actions .button-link:hover {
+        filter: brightness(1.08);
+        border-color: rgba(56, 189, 248, 0.45) !important;
+    }
+}
+
+/* Mobile topbar: dùng theme-drawer-shared (global). Chỉ tinh chỉnh nhẹ nếu cần. */
+
+/* —— Page title —— (trang chủ + toàn bộ trang app; .page-header-home = alias cũ) */
+body.theme-invest-app .page-header-invest,
+body.theme-invest-app .page-header-home {
+    margin-bottom: 28px;
+    text-align: center;
+    padding: 20px 16px 22px;
+    border-radius: 14px;
+    border: 1px solid var(--inv-border);
+    background: linear-gradient(165deg, rgba(26, 34, 53, 0.9) 0%, rgba(17, 24, 39, 0.65) 100%);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+body.theme-invest-app .page-header-invest .page-title-invest,
+body.theme-invest-app .page-header-home .page-title-home {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1.25;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 35%, var(--inv-accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(0 2px 14px rgba(56, 189, 248, 0.22));
+}
+
+@media (min-width: 769px) {
+    body.theme-invest-app .page-header-invest .page-title-invest,
+    body.theme-invest-app .page-header-home .page-title-home {
+        font-size: 32px;
+    }
+}
+
+/* —— Khối nội dung hẹp (info profile, form cập nhật, mua/bán, admin form…) —— */
+body.theme-invest-app .profile-detail-wrap,
+body.theme-invest-app .invest-narrow-wrap {
+    max-width: 720px;
+    margin: 0 auto 40px;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
+/* Form trong invest-narrow-wrap (adminInsert.css gốc full-width / nền sáng) */
+body.theme-invest-app .invest-narrow-wrap .form-container {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    max-width: none;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container:hover {
+    transform: none;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group {
+    margin-bottom: 18px;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group label {
+    color: var(--inv-muted);
+    font-weight: 600;
+}
+
+body.theme-invest-app .invest-narrow-wrap .cash-title {
+    color: var(--inv-text);
+    text-align: left;
+    font-size: 1rem;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group.form-group-cash-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group.form-group-cash-row .cash-title {
+    text-align: right;
+    width: 100%;
+}
+
+body.theme-invest-app .invest-narrow-wrap .cash {
+    color: var(--inv-up);
+    font-weight: 700;
+}
+
+/* Mã CK + nút Kiểm tra (mua / theo dõi) */
+body.theme-invest-app .invest-narrow-wrap .code-input-with-check {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+body.theme-invest-app .invest-narrow-wrap .code-input-with-check input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+}
+
+body.theme-invest-app .invest-narrow-wrap .btn-check-stock-code {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: not-allowed;
+    background: var(--inv-border);
+    color: var(--inv-muted);
+    transition: background 0.2s, color 0.2s;
+}
+
+body.theme-invest-app .invest-narrow-wrap .btn-check-stock-code:not(:disabled) {
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--inv-accent) 0%, #0ea5e9 100%);
+    color: #0b0f1a;
+}
+
+body.theme-invest-app .invest-narrow-wrap .btn-check-stock-code:not(:disabled):hover {
+    filter: brightness(1.06);
+}
+
+body.theme-invest-app .invest-narrow-wrap input[type="text"],
+body.theme-invest-app .invest-narrow-wrap input[type="password"],
+body.theme-invest-app .invest-narrow-wrap input[type="number"],
+body.theme-invest-app .invest-narrow-wrap input[type="date"],
+body.theme-invest-app .invest-narrow-wrap input[type="email"],
+body.theme-invest-app .invest-narrow-wrap select,
+body.theme-invest-app .invest-narrow-wrap textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: 1px solid var(--inv-border);
+    border-radius: 10px;
+    background: var(--inv-surface2);
+    color: var(--inv-text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+body.theme-invest-app .invest-narrow-wrap input:focus,
+body.theme-invest-app .invest-narrow-wrap select:focus,
+body.theme-invest-app .invest-narrow-wrap textarea:focus {
+    outline: none;
+    border-color: rgba(56, 189, 248, 0.55);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.12);
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container > button {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--inv-accent) 0%, #0ea5e9 100%);
+    color: #0b0f1a;
+    transition: filter 0.15s;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container > button:hover {
+    filter: brightness(1.06);
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container > button:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    filter: grayscale(0.2);
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container > button:disabled:hover {
+    filter: grayscale(0.2);
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group button {
+    width: auto;
+    min-width: 0;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group button[type="button"] {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    background: var(--inv-surface);
+    color: var(--inv-accent);
+    border: 1px solid var(--inv-border);
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group button[type="button"]:hover:not(:disabled) {
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(56, 189, 248, 0.08);
+}
+
+/* Tự động đồng bộ — Bật (xanh) / Tắt (đỏ), chữ căn giữa (override rule form-group button phía trên) */
+body.theme-invest-app .invest-narrow-wrap .form-group button.auto-sync-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    min-width: 4.5rem;
+    height: 2rem;
+    padding: 0;
+    line-height: 1;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    border: none !important;
+    box-sizing: border-box;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group button.auto-sync-toggle.auto-sync-on {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+    color: #fff !important;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group button.auto-sync-toggle.auto-sync-on:hover:not(:disabled) {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+    color: #fff !important;
+    filter: none;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group button.auto-sync-toggle.auto-sync-off {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: #fff !important;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-group button.auto-sync-toggle.auto-sync-off:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    color: #fff !important;
+    filter: none;
+}
+
+body.theme-invest-app .invest-narrow-wrap .error {
+    color: #fca5a5;
+}
+
+body.theme-invest-app .invest-narrow-wrap input[type="file"] {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 14px;
+    border: 1px dashed var(--inv-border);
+    border-radius: 10px;
+    background: var(--inv-surface2);
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app .invest-narrow-wrap .required {
+    color: var(--inv-down);
+}
+
+body.theme-invest-app .profile-detail-card {
+    background: linear-gradient(165deg, rgba(26, 34, 53, 0.95) 0%, rgba(17, 24, 39, 0.82) 100%);
+    border: 1px solid var(--inv-border);
+    border-radius: 14px;
+    padding: 22px 24px 26px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+body.theme-invest-app .profile-detail-card__title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--inv-accent);
+    margin: 0 0 18px;
+}
+
+body.theme-invest-app .profile-detail-list {
+    margin: 0;
+    padding: 0;
+}
+
+body.theme-invest-app .profile-detail-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 160px) 1fr;
+    gap: 8px 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--inv-border);
+    align-items: start;
+}
+
+body.theme-invest-app .profile-detail-row:first-of-type {
+    padding-top: 0;
+}
+
+body.theme-invest-app .profile-detail-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+body.theme-invest-app .profile-detail-row dt {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app .profile-detail-row dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--inv-text);
+    word-break: break-word;
+}
+
+body.theme-invest-app .profile-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+body.theme-invest-app .profile-badge--ok {
+    background: rgba(52, 211, 153, 0.12);
+    color: #6ee7b7;
+    border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+body.theme-invest-app .profile-badge--warn {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fcd34d;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+body.theme-invest-app .profile-detail-card--actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    padding: 18px 22px;
+}
+
+body.theme-invest-app .profile-detail-card--actions .button-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 12px 18px !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    border: 1px solid var(--inv-border) !important;
+    background: var(--inv-surface2) !important;
+    color: var(--inv-text) !important;
+    box-shadow: none !important;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+body.theme-invest-app .profile-detail-card--actions .button-link:hover {
+    border-color: rgba(56, 189, 248, 0.45) !important;
+    color: var(--inv-accent) !important;
+    background: rgba(56, 189, 248, 0.1) !important;
+}
+
+body.theme-invest-app .profile-detail-card--actions .profile-detail-cta--secondary {
+    background: transparent !important;
+}
+
+@media (max-width: 768px) {
+    body.theme-invest-app .profile-detail-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    body.theme-invest-app .profile-detail-card--actions {
+        flex-direction: column;
+    }
+
+    body.theme-invest-app .profile-detail-card--actions .button-link {
+        width: 100%;
+    }
+}
+
+/* —— Filter —— */
+body.theme-invest-app .filter-panel {
+    background: var(--inv-surface);
+    border: 1px solid var(--inv-border);
+    border-radius: 12px;
+    box-shadow: none;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+body.theme-invest-app .filter-header {
+    padding: 14px 20px;
+    background: transparent;
+    color: var(--inv-text);
+    border-bottom: 1px solid var(--inv-border);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+body.theme-invest-app .filter-header:hover {
+    background: rgba(26, 34, 53, 0.6);
+}
+
+body.theme-invest-app .filter-body {
+    background: rgba(15, 23, 42, 0.5);
+    padding: 16px 20px;
+}
+
+body.theme-invest-app .filter-group label {
+    color: var(--inv-muted);
+    font-weight: 600;
+}
+
+body.theme-invest-app .filter-group select,
+body.theme-invest-app .filter-group input {
+    background: var(--inv-surface2);
+    border: 1px solid var(--inv-border);
+    color: var(--inv-text);
+    border-radius: 8px;
+}
+
+body.theme-invest-app .filter-group select:focus,
+body.theme-invest-app .filter-group input:focus {
+    border-color: var(--inv-accent);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+body.theme-invest-app .filter-range span {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app .btn-filter {
+    background: var(--inv-accent) !important;
+    color: #0b0f1a !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+}
+
+body.theme-invest-app .btn-filter:hover {
+    background: #7dd3fc !important;
+}
+
+body.theme-invest-app .btn-filter-reset {
+    background: var(--inv-surface2) !important;
+    color: var(--inv-text) !important;
+    border: 1px solid var(--inv-border) !important;
+}
+
+body.theme-invest-app .btn-filter-reset:hover {
+    background: rgba(56, 189, 248, 0.12) !important;
+    border-color: rgba(56, 189, 248, 0.45) !important;
+    color: var(--inv-accent) !important;
+}
+
+body.theme-invest-app .home-add-follow-bar {
+    margin: 0 0 20px !important;
+    justify-content: flex-start !important;
+}
+
+body.theme-invest-app .btn-add-follow-home {
+    background: linear-gradient(135deg, var(--inv-accent), var(--inv-accent2)) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+body.theme-invest-app .btn-add-follow-home:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7dd3fc, #a5b4fc) !important;
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
+}
+
+body.theme-invest-app .btn-add-follow-home:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* —— Table container —— */
+body.theme-invest-app .table-container {
+    border-radius: 12px;
+    border: 1px solid var(--inv-border);
+    overflow: auto;
+    background: var(--inv-surface);
+}
+
+/* Clone header/total (UserInvestmentPerformance JS) — trên PC .actions sticky z-index 1100 */
+body.theme-invest-app .sticky-clone,
+body.theme-invest-app .sticky-clone-total {
+    z-index: 1200 !important;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) {
+    margin-top: 0;
+    background: transparent;
+    box-shadow: none;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) thead tr {
+    background: var(--inv-surface2);
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) th {
+    background: var(--inv-surface2) !important;
+    color: var(--inv-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--inv-border);
+    border-right: 1px solid var(--inv-border);
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) th.col-code-sticky {
+    background-color: var(--inv-surface2) !important;
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) td {
+    border-bottom: 1px solid var(--inv-border);
+    border-right: 1px solid var(--inv-border);
+    color: var(--inv-text);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 13px;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) td.col-code-sticky,
+body.theme-invest-app :is(#stock-table, #invest-table) td.col-select {
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-weight: 700;
+}
+
+/* Giữ màu nền hàng theo cổ — độ tương phản trên nền tối */
+body.theme-invest-app :is(#stock-table, #invest-table) tr.yellow {
+    background-color: rgba(250, 225, 70, 0.12);
+    color: #fde047;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) tr.green {
+    background-color: rgba(52, 211, 153, 0.12);
+    color: #6ee7b7;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) tr.purple {
+    background-color: rgba(192, 132, 252, 0.14);
+    color: #e9d5ff;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) tr.red {
+    background-color: rgba(248, 113, 113, 0.15);
+    color: #fca5a5;
+}
+
+/* Nền đặc (không rgba/inherit) để ô sticky Mã CK che hết nội dung cột bên phải khi cuộn ngang */
+body.theme-invest-app :is(#stock-table, #invest-table) tr.yellow td.col-code-sticky {
+    background-color: #252318;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) tr.green td.col-code-sticky {
+    background-color: #18231f;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) tr.purple td.col-code-sticky {
+    background-color: #1f1a26;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) tr.red td.col-code-sticky {
+    background-color: #231a1c;
+}
+
+/* Hàng không class màu (vd % định giá > 10% tăng giá — không yellow/green/...) */
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr:not(.yellow):not(.green):not(.purple):not(.red) td.col-code-sticky,
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr:not(.yellow):not(.green):not(.purple):not(.red) td.col-select {
+    background-color: var(--inv-surface) !important;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) tr.yellow td.col-select,
+body.theme-invest-app :is(#stock-table, #invest-table) tr.green td.col-select,
+body.theme-invest-app :is(#stock-table, #invest-table) tr.purple td.col-select,
+body.theme-invest-app :is(#stock-table, #invest-table) tr.red td.col-select {
+    background-color: inherit !important;
+}
+
+/*
+ * Cuộn ngang: chỉ Mã CK sticky (left: 0). Chọn không sticky.
+ * Các th khác (sticky-header z-index 1001) phải THẤP HƠN th.col-code-sticky (1020) để không đè Mã CK khi cuộn ngang.
+ * tbody td.col-code-sticky phải < 1000 để thead vẫn nằm trên tbody khi cuộn dọc trong khung bảng.
+ */
+body.theme-invest-app :is(#stock-table, #invest-table) thead.sticky-header th:not(.col-code-sticky) {
+    z-index: 1000 !important;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) th.col-select,
+body.theme-invest-app :is(#stock-table, #invest-table) td.col-select {
+    position: relative;
+    z-index: 3;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) th.col-code-sticky,
+body.theme-invest-app :is(#stock-table, #invest-table) td.col-code-sticky {
+    position: sticky !important;
+    left: 0 !important;
+    top: auto;
+    box-shadow: 8px 0 18px -4px rgba(0, 0, 0, 0.55);
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) thead.sticky-header th.col-code-sticky {
+    z-index: 1020 !important;
+    top: 0 !important;
+    box-shadow: 8px 0 18px -4px rgba(0, 0, 0, 0.45);
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) td.col-code-sticky {
+    z-index: 50 !important;
+    background-clip: padding-box;
+}
+
+/* Ô bên phải (không gồm Chọn) luôn dưới lớp Mã CK khi chồng lên */
+body.theme-invest-app :is(#stock-table, #invest-table) tbody td:not(.col-code-sticky):not(.col-select) {
+    position: relative;
+    z-index: 1;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) th.col-select {
+    background: var(--inv-surface2) !important;
+}
+
+body.theme-invest-app .sticky-clone th.col-select {
+    position: relative;
+    left: auto !important;
+    z-index: 1;
+    box-shadow: none;
+}
+
+body.theme-invest-app .sticky-clone thead th:not(.col-code-sticky) {
+    z-index: 1000 !important;
+}
+
+body.theme-invest-app .sticky-clone th.col-code-sticky {
+    position: sticky !important;
+    left: 0 !important;
+    top: 0 !important;
+    z-index: 1020 !important;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) th.col-code-sticky::after,
+body.theme-invest-app :is(#stock-table, #invest-table) td.col-code-sticky::after,
+body.theme-invest-app .sticky-clone th.col-code-sticky::after {
+    background: var(--inv-border);
+}
+
+body.theme-invest-app .sticky-clone {
+    z-index: 1050 !important;
+    background-color: var(--inv-surface2) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+body.theme-invest-app .sticky-clone th {
+    background: var(--inv-surface2) !important;
+    color: var(--inv-muted) !important;
+    border-color: var(--inv-border) !important;
+}
+
+/* Dòng tổng + clone (UserProfile — tránh nền trắng) */
+body.theme-invest-app :is(#stock-table, #invest-table) tr.total-row td {
+    background-color: var(--inv-surface2) !important;
+    border-top: 2px solid var(--inv-border) !important;
+    color: var(--inv-text);
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) tr.total-row td.col-code-sticky {
+    background-color: var(--inv-surface2) !important;
+}
+
+body.theme-invest-app .sticky-clone-total {
+    z-index: 1040 !important;
+    background-color: var(--inv-surface2) !important;
+    border-top: 2px solid var(--inv-border) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+body.theme-invest-app .sticky-clone-total td {
+    background-color: var(--inv-surface2) !important;
+    color: var(--inv-text);
+}
+
+body.theme-invest-app .sticky-clone-total td.col-code-sticky {
+    background-color: var(--inv-surface2) !important;
+}
+
+/* —— Trang cài đặt email (user/email-settings) — panel + bảng theo theme tối —— */
+body.theme-invest-app .email-settings-page {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+body.theme-invest-app .email-settings-page .section-panel {
+    background: var(--inv-surface) !important;
+    border: 1px solid var(--inv-border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: none !important;
+    overflow: hidden;
+}
+
+body.theme-invest-app .email-settings-page .section-header {
+    background: var(--inv-surface2) !important;
+    color: var(--inv-text) !important;
+    border-radius: 0 !important;
+    border-bottom: 1px solid var(--inv-border);
+}
+
+body.theme-invest-app .email-settings-page .section-header:hover {
+    background: rgba(56, 189, 248, 0.1) !important;
+}
+
+body.theme-invest-app .email-settings-page .section-body {
+    background: var(--inv-surface) !important;
+    color: var(--inv-text) !important;
+    padding: 20px;
+}
+
+body.theme-invest-app .email-settings-page .save-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+body.theme-invest-app .email-settings-page .btn-save {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 10px;
+    font-weight: 700;
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+
+body.theme-invest-app .email-settings-page .btn-save:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+body.theme-invest-app .email-settings-page .btn-save:disabled {
+    opacity: 0.45 !important;
+    cursor: not-allowed;
+}
+
+body.theme-invest-app .email-settings-page .table-container {
+    border-radius: 10px;
+    border: 1px solid var(--inv-border);
+    overflow: auto;
+    background: var(--inv-surface2);
+    -webkit-overflow-scrolling: touch;
+}
+
+body.theme-invest-app .email-settings-page #notice-table-follow,
+body.theme-invest-app .email-settings-page #notice-table-session {
+    margin-top: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    min-width: 600px;
+}
+
+body.theme-invest-app .email-settings-page #notice-table-follow th,
+body.theme-invest-app .email-settings-page #notice-table-session th {
+    background: var(--inv-surface2) !important;
+    color: var(--inv-muted) !important;
+    border-bottom: 1px solid var(--inv-border) !important;
+    border-right: 1px solid var(--inv-border) !important;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+body.theme-invest-app .email-settings-page #notice-table-follow td,
+body.theme-invest-app .email-settings-page #notice-table-session td {
+    background-color: var(--inv-surface) !important;
+    color: var(--inv-text) !important;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 13px;
+}
+
+body.theme-invest-app .email-settings-page :is(#notice-table-follow, #notice-table-session) tbody td {
+    border: 1px solid var(--inv-border) !important;
+    box-sizing: border-box;
+}
+
+body.theme-invest-app .email-settings-page #notice-table-follow td a,
+body.theme-invest-app .email-settings-page #notice-table-session td a {
+    color: var(--inv-accent) !important;
+}
+
+body.theme-invest-app .email-settings-page #notice-table-follow td a:hover,
+body.theme-invest-app .email-settings-page #notice-table-session td a:hover {
+    text-decoration: underline;
+}
+
+body.theme-invest-app .email-settings-page input[type="checkbox"] {
+    accent-color: var(--inv-accent);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/*
+ * Hover cả hàng — mọi bảng dữ liệu chính (user + admin + email notice).
+ * Cùng id với block style #stock-table / #invest-table phía trên.
+ */
+body.theme-invest-app
+    :is(#stock-table, #invest-table, #notice-table-follow, #notice-table-session)
+    tbody
+    tr:not(.total-row)
+    td {
+    transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+/* Bảng notice: ô có viền trong suốt để đổi màu viền khi hover (tránh nhảy layout) */
+body.theme-invest-app :is(#notice-table-follow, #notice-table-session) tbody td {
+    border: 1px solid transparent;
+    box-sizing: border-box;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table, #notice-table-follow, #notice-table-session)
+    tbody
+    tr:not(.total-row):hover
+    td {
+    border-top-color: rgba(56, 189, 248, 0.55) !important;
+    border-bottom-color: rgba(56, 189, 248, 0.55) !important;
+    border-right-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table, #notice-table-follow, #notice-table-session)
+    tbody
+    tr:not(.total-row):hover
+    td:first-child {
+    border-left: 1px solid rgba(56, 189, 248, 0.55) !important;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table, #notice-table-follow, #notice-table-session)
+    tbody
+    tr:not(.total-row):hover
+    td:last-child {
+    border-right: 1px solid rgba(56, 189, 248, 0.55) !important;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Hàng trung tính — nền sáng hơn một chút */
+body.theme-invest-app
+    :is(#stock-table, #invest-table, #notice-table-follow, #notice-table-session)
+    tbody
+    tr:not(.total-row):not(.yellow):not(.green):not(.purple):not(.red):hover
+    td {
+    background-color: rgba(56, 189, 248, 0.1) !important;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table, #notice-table-follow, #notice-table-session)
+    tbody
+    tr:not(.total-row):not(.yellow):not(.green):not(.purple):not(.red):hover
+    td.col-code-sticky {
+    background-color: #1c2738 !important;
+}
+
+/* Giữ nhận diện màu cổ — làm đậm overlay khi hover */
+body.theme-invest-app
+    :is(#stock-table, #invest-table)
+    tbody
+    tr.yellow:not(.total-row):hover
+    td {
+    background-color: rgba(250, 225, 70, 0.22) !important;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table)
+    tbody
+    tr.yellow:not(.total-row):hover
+    td.col-code-sticky {
+    background-color: #35321c !important;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table)
+    tbody
+    tr.green:not(.total-row):hover
+    td {
+    background-color: rgba(52, 211, 153, 0.22) !important;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table)
+    tbody
+    tr.green:not(.total-row):hover
+    td.col-code-sticky {
+    background-color: #1e2e26 !important;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table)
+    tbody
+    tr.purple:not(.total-row):hover
+    td {
+    background-color: rgba(192, 132, 252, 0.26) !important;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table)
+    tbody
+    tr.purple:not(.total-row):hover
+    td.col-code-sticky {
+    background-color: #2a2434 !important;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table)
+    tbody
+    tr.red:not(.total-row):hover
+    td {
+    background-color: rgba(248, 113, 113, 0.26) !important;
+}
+
+body.theme-invest-app
+    :is(#stock-table, #invest-table)
+    tbody
+    tr.red:not(.total-row):hover
+    td.col-code-sticky {
+    background-color: #322225 !important;
+}
+
+body.theme-invest-app .rating-badge {
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+/* —— Mobile: ô tìm kiếm (actions-right được relocate vào main) —— */
+@media (max-width: 768px) {
+    body.theme-invest-app main #actionsRightContent {
+        display: flex !important;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 0 16px !important;
+        padding: 0 !important;
+        box-sizing: border-box;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    body.theme-invest-app main #actionsRightContent input[type="text"] {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 10px 14px !important;
+        background: var(--inv-surface) !important;
+        border: 1px solid var(--inv-border) !important;
+        border-radius: 10px !important;
+        color: var(--inv-text) !important;
+        font-size: 13px !important;
+    }
+
+    body.theme-invest-app main #actionsRightContent button {
+        flex: 0 0 auto;
+        padding: 10px 14px !important;
+        background: var(--inv-accent) !important;
+        color: #0b0f1a !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        font-size: 13px !important;
+    }
+}
+
+body.theme-invest-app .rating-high {
+    background-color: rgba(52, 211, 153, 0.2) !important;
+    color: #6ee7b7 !important;
+}
+
+body.theme-invest-app .rating-medium {
+    background-color: rgba(251, 191, 36, 0.15) !important;
+    color: #fcd34d !important;
+}
+
+body.theme-invest-app .rating-low {
+    background-color: rgba(248, 113, 113, 0.18) !important;
+    color: #fca5a5 !important;
+}
+
+/* —— Footer (template ft-invest — chi tiết trong footer.css) —— */
+body.theme-invest-app .footer.ft-invest {
+    flex-shrink: 0;
+    background: #0f172a;
+    border-top-color: #1e293b;
+}
+
+body.theme-invest-app .footer.ft-invest .ft-logo-name {
+    color: var(--inv-text);
+}
+
+body.theme-invest-app .footer.ft-invest .ft-desc {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app .footer.ft-invest .ft-col-title {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app .footer.ft-invest .ft-links a {
+    color: #64748b;
+}
+
+body.theme-invest-app .footer.ft-invest .ft-links a:hover {
+    color: var(--inv-text);
+}
+
+body.theme-invest-app .footer.ft-invest .ft-copy {
+    color: #64748b;
+}
+
+body.theme-invest-app .footer.ft-invest .ft-copy span {
+    color: var(--inv-accent);
+}
+
+/* —— Row enter animation (first load only — class từ JS) —— */
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter {
+    opacity: 0;
+    animation: inv-row-enter 0.45s ease forwards;
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:nth-child(1) {
+    animation-delay: 0.05s;
+}
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:nth-child(2) {
+    animation-delay: 0.1s;
+}
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:nth-child(3) {
+    animation-delay: 0.15s;
+}
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:nth-child(4) {
+    animation-delay: 0.2s;
+}
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:nth-child(5) {
+    animation-delay: 0.25s;
+}
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:nth-child(6) {
+    animation-delay: 0.3s;
+}
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:nth-child(7) {
+    animation-delay: 0.35s;
+}
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:nth-child(8) {
+    animation-delay: 0.4s;
+}
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:nth-child(9) {
+    animation-delay: 0.45s;
+}
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:nth-child(10) {
+    animation-delay: 0.5s;
+}
+
+@keyframes inv-row-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+/* —— Modal nhập CSV (admin/stocks — AdminStockManagement) —— */
+body.theme-invest-app #importCsvModal.modal-overlay {
+    background: rgba(11, 15, 26, 0.75);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 10000;
+}
+
+body.theme-invest-app #importCsvModal .modal-content {
+    background: var(--inv-surface2);
+    border: 1px solid var(--inv-border);
+    border-radius: 14px;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #importCsvModal .modal-close {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #importCsvModal .modal-close:hover {
+    color: #fca5a5;
+}
+
+body.theme-invest-app #importCsvModal .modal-content h2 {
+    color: var(--inv-text);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+body.theme-invest-app #importCsvModal .drop-zone {
+    background: var(--inv-surface);
+    border: 2px dashed var(--inv-border);
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #importCsvModal .drop-zone:hover {
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(56, 189, 248, 0.07);
+}
+
+body.theme-invest-app #importCsvModal .drop-zone.drag-over {
+    border-color: var(--inv-up);
+    background: rgba(52, 211, 153, 0.14);
+}
+
+body.theme-invest-app #importCsvModal .drop-zone p {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #importCsvModal #fileName {
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #importCsvModal .import-result {
+    border: 1px solid var(--inv-border);
+    background: var(--inv-surface);
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #importCsvModal .import-result.result-success {
+    background: rgba(52, 211, 153, 0.12);
+    color: #6ee7b7;
+    border-color: rgba(52, 211, 153, 0.4);
+}
+
+body.theme-invest-app #importCsvModal .import-result.result-error {
+    background: rgba(248, 113, 113, 0.12);
+    color: #fca5a5;
+    border-color: rgba(248, 113, 113, 0.4);
+}
+
+body.theme-invest-app #importCsvModal .modal-actions {
+    margin-top: 4px;
+}
+
+body.theme-invest-app #importCsvModal .btn-cancel {
+    background: var(--inv-surface);
+    color: var(--inv-text);
+    border: 1px solid var(--inv-border);
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+body.theme-invest-app #importCsvModal .btn-cancel:hover {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+body.theme-invest-app #importCsvModal .btn-import {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 700;
+    border: none;
+}
+
+body.theme-invest-app #importCsvModal .btn-import:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+body.theme-invest-app #importCsvModal .btn-import:disabled {
+    background: var(--inv-surface);
+    color: var(--inv-muted);
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* Toast (adminInsert.css): căn giữa viewport, z-index trên header/drawer */
+body.theme-invest-app main .toast {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    margin-left: 0 !important;
+    max-width: min(94vw, 32rem) !important;
+    width: max-content !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    z-index: 20000 !important;
+}
+
+/* —— SweetAlert2: canh giữa màn hình + z-index trên drawer / overlay mobile —— */
+body.theme-invest-app .swal2-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.75rem !important;
+    box-sizing: border-box !important;
+    z-index: 20000 !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    min-height: 100dvh !important;
+}
+
+body.theme-invest-app .swal2-popup {
+    margin: 0 auto !important;
+    text-align: center;
+}
+
+body.theme-invest-app .swal2-title,
+body.theme-invest-app .swal2-html-container {
+    text-align: center !important;
+}
+
+body.theme-invest-app .swal2-actions {
+    justify-content: center !important;
+    width: 100%;
+}
+
+body.theme-invest-app .swal2-icon {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}

@@ -7,6 +7,7 @@
 
 @section('header-css')
     @vite('resources/css/loginRegister.css')
+    @vite('resources/css/login.css')
     <style>
         .login-btn .btn-spinner {
             display: none;
@@ -29,7 +30,9 @@
 @endsection
 
 @section('body-content')
+    <div class="login-card">
     <h2>Quên mật khẩu</h2>
+    <p class="login-auth-sub">Nhập email đã đăng ký — chúng tôi sẽ gửi link đặt lại mật khẩu.</p>
     <form id="forgotForm">
       <div class="input-group">
         <label for="email">Nhập email để khôi phục:</label>
@@ -45,6 +48,7 @@
     <div id="toast" class="toast"></div>
     <div class="link-group">
       <a href="{{ url('/login') }}">← Quay lại đăng nhập</a>
+    </div>
     </div>
 @endsection
 

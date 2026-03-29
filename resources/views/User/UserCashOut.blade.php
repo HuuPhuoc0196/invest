@@ -16,15 +16,17 @@
 @endsection
 
 @section('actions-left')
-    <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
+    @include('partials.user-nav-primary')
 @endsection
 
 @section('user-body-content')
-    <h2>Rút tiền</h2>
+    @include('partials.page-title-invest', ['title' => 'Rút tiền'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
 
-        <div class="form-group">
+        <div class="form-group form-group-cash-row">
             <label class="cash-title">Số dư: <span class="cash"></span></label>
         </div>
 
@@ -38,13 +40,15 @@
         <div class="form-group">
             <label for="cashDate">Ngày rút:</label>
             <input type="date" id="cashDate">
-            <div class="error" id="errorCashDate">Vui lòng nhập Ngày nạp</div>
+            <div class="error" id="errorCashDate">Vui lòng nhập Ngày rút</div>
             <div class="error" id="errorCashDateType">Vui lòng nhập ngày hợp lệ</div>
         </div>
 
         <div id="toast" class="toast"></div>
 
-        <button onclick="submitForm()">Rút tiền</button>
+        <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Rút tiền</button>
+    </div>
+        </div>
     </div>
 @endsection
 
@@ -56,10 +60,24 @@
         const formatter = new Intl.NumberFormat('vi-VN');
         const cashOutInput = document.getElementById("cashOut");
         const cashDateInput = document.getElementById('cashDate');
+        const btnFormSubmit = document.getElementById('btnFormSubmit');
+        const toastEl = document.getElementById('toast');
         var cash = @json($cash);
         let cashMony = formatter.format(cash);
         $(".cash").text(cashMony);
         $('#cashOut').attr('placeholder', cashMony);
+
+        function getTodayYmd() {
+            const d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        function setDefaultCashDate() {
+            cashDateInput.value = getTodayYmd();
+        }
+
+        setDefaultCashDate();
+        updateCashOutSubmitButton();
 
         function isNumber(value) {
             return !isNaN(value) && value.trim() !== '';
@@ -77,13 +95,32 @@
             input.value = formatted;
         }
 
+        function canSubmitCashOutForm() {
+            const cashOut = parseNumber(cashOutInput.value);
+            const cashDate = cashDateInput.value.trim();
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!isNumber(cashOut)) return false;
+            if (Number(cashOut) > Number(cash)) return false;
+            if (cashDate === '' || !dateRegex.test(cashDate) || isNaN(new Date(cashDate).getTime())) return false;
+            return true;
+        }
+
+        function updateCashOutSubmitButton() {
+            if (btnFormSubmit) btnFormSubmit.disabled = !canSubmitCashOutForm();
+        }
+
         cashOutInput.addEventListener("input", () => {
             formatToVND(cashOutInput);
+            updateCashOutSubmitButton();
         });
+
+        cashDateInput.addEventListener("change", updateCashOutSubmitButton);
+        cashDateInput.addEventListener("input", updateCashOutSubmitButton);
 
         function resetForm() {
             cashOutInput.value = "";
-            cashDateInput.value = "";
+            setDefaultCashDate();
+            updateCashOutSubmitButton();
         }
 
         function toastSuccess() {
@@ -152,40 +189,38 @@
                     data: JSON.stringify(data),
                     success: function (response) {
                         if (response.status == "success") {
-                            const toast = document.getElementById("toast");
-                            toast.innerHTML = `✅ Đã rút thành công số tiền: <b>${cashOutInput.value}</b><br>`;
-                            toast.className = "toast show";
+                            toastEl.innerHTML = `✅ Đã rút thành công số tiền: <b>${cashOutInput.value}</b><br>`;
+                            toastEl.className = "toast show";
                             let num1 = parseFloat(cash);
                             let num2 = parseFloat(cashOutInput.value.replace(/\./g, '').replace(/,/g, ''));
                             cash = num1 - num2;
                             cashMony = formatter.format(cash);
                             $(".cash").text(cashMony);
                             $('#cashOut').attr('placeholder', cashMony);
+                            updateCashOutSubmitButton();
                             toastSuccess();
                             setTimeout(() => {
-                                toast.className = toast.className.replace("show", "");
+                                toastEl.className = toastEl.className.replace("show", "");
                             }, 3000);
 
                             // Reset form
                             resetForm();
                         } else {
-                            const toast = document.getElementById("toast");
-                            toast.innerHTML = `❌` + response.message;
-                            toast.className = "toast show";
+                            toastEl.innerHTML = `❌` + response.message;
+                            toastEl.className = "toast show";
                             toastError();
                             setTimeout(() => {
-                                toast.className = toast.className.replace("show", "");
+                                toastEl.className = toastEl.className.replace("show", "");
                             }, 5000);
                         }
                     },
                     error: function (xhr) {
                         console.log(xhr);
-                        const toast = document.getElementById("toast");
-                        toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;
-                        toast.className = "toast show";
+                        toastEl.innerHTML = '❌ Lỗi: ' + (xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi');
+                        toastEl.className = "toast show";
                         toastError();
                         setTimeout(() => {
-                            toast.className = toast.className.replace("show", "");
+                            toastEl.className = toastEl.className.replace("show", "");
                         }, 5000);
                     }
                 });

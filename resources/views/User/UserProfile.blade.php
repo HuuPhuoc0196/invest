@@ -19,22 +19,8 @@
             overflow: hidden;
             pointer-events: none;
         }
-        .sticky-clone {
-            background-color: #34495e;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-        }
-        .sticky-clone-total {
-            background-color: #f8f9fa;
-            border-top: 2px solid #34495e;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
         .sticky-clone-total td {
-            background-color: #f8f9fa;
             font-weight: bold;
-        }
-        .total-row td {
-            background-color: #f8f9fa;
-            border-top: 2px solid #34495e;
         }
         main {
             cursor: grab;
@@ -61,10 +47,7 @@
 @endsection --}}
 
 @section('actions-left')
-    <a href="{{ url('/') }}" class="button-link">🏠 Trang chủ</a>
-    <a href="{{ url('/user/buy') }}" class="button-link">➕ Mua cổ phiếu</a>
-    <a href="{{ url('/user/sell') }}" class="button-link">❌ Bán cổ phiếu</a>
-    <a href="{{ url('/user/investment-performance') }}" class="button-link">📈 Hiệu quả đầu tư</a>
+    @include('partials.user-nav-primary')
 @endsection
 
 @section('actions-right')
@@ -73,11 +56,11 @@
 @endsection
 
 @section('user-body-content')
-    <h1>Danh sách mã cổ phiếu đang giữ</h1>
+    @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu đang giữ', 'level' => 1])
 
     <div class="table-container">
         <table id="stock-table" class="table-wide">
-            <thead>
+            <thead class="sticky-header">
                 <tr>
                     <th class="col-code-sticky">Mã CK</th>
                     <th>Khối lượng nắm giữ</th>
@@ -93,7 +76,7 @@
             </tbody>
         </table>
         <table id="invest-table" class="table-wide">
-            <thead>
+            <thead class="sticky-header">
                 <tr>
                     <th class="col-code-sticky">Danh mục</th>
                     <th>Vốn đầu tư</th>
@@ -125,6 +108,11 @@
             const stickyTable = document.getElementById('stock-table');
             const stickyContainer = document.querySelector('.table-container');
             if (stickyTable && stickyContainer) {
+                function headerInset() {
+                    return typeof window.getStickyHeaderInset === 'function'
+                        ? window.getStickyHeaderInset()
+                        : (window.innerWidth <= 768 ? 56 : 0);
+                }
                 const thead = stickyTable.querySelector('thead');
                 let cloneWrap = null;
                 let cloneTable = null;
@@ -151,7 +139,7 @@
                         totalCloneWrap = document.createElement('div');
                         totalCloneWrap.className = 'sticky-clone-total';
                         totalCloneTable = document.createElement('table');
-                        totalCloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:#f8f9fa;margin:0;table-layout:fixed;';
+                        totalCloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:transparent;margin:0;table-layout:fixed;';
                         const cloneTbody = document.createElement('tbody');
                         cloneTbody.appendChild(totalRow.cloneNode(true));
                         totalCloneTable.appendChild(cloneTbody);
@@ -204,16 +192,16 @@
                     if (!cloneWrap) return;
                     const containerRect = stickyContainer.getBoundingClientRect();
                     const offset = -stickyContainer.scrollLeft + 'px';
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    const inset = headerInset();
                     cloneWrap.style.left = containerRect.left + 'px';
                     cloneWrap.style.width = containerRect.width + 'px';
-                    cloneWrap.style.top = topOffset + 'px';
+                    cloneWrap.style.top = inset + 'px';
                     cloneTable.style.marginLeft = offset;
                     if (totalCloneWrap && totalCloneTable) {
                         totalCloneWrap.style.left = containerRect.left + 'px';
                         totalCloneWrap.style.width = containerRect.width + 'px';
                         totalCloneTable.style.marginLeft = offset;
-                        totalCloneWrap.style.top = (topOffset + thead.offsetHeight) + 'px';
+                        totalCloneWrap.style.top = (inset + thead.offsetHeight) + 'px';
                     }
                 }
 
@@ -221,10 +209,10 @@
                     if (!cloneWrap) return;
                     const tableRect = stickyTable.getBoundingClientRect();
                     const theadHeight = thead.offsetHeight;
-                    const topOffset = window.innerWidth <= 768 ? 56 : 0; // mobile topbar height
+                    const inset = headerInset();
 
                     // Show/hide header clone
-                    if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
+                    if (tableRect.top < inset && tableRect.bottom > (inset + theadHeight)) {
                         cloneWrap.style.display = 'block';
                         syncScroll();
                     } else {
@@ -238,12 +226,12 @@
                             const totalRect = totalRow.getBoundingClientRect();
                             const totalHeight = totalRow.offsetHeight;
                             if (
-                                tableRect.top < topOffset &&
-                                totalRect.top <= (topOffset + theadHeight) &&
-                                tableRect.bottom > (topOffset + theadHeight + totalHeight)
+                                tableRect.top < inset &&
+                                totalRect.top <= (inset + theadHeight) &&
+                                tableRect.bottom > (inset + theadHeight + totalHeight)
                             ) {
                                 totalCloneWrap.style.display = 'block';
-                                totalCloneWrap.style.top = (topOffset + theadHeight) + 'px';
+                                totalCloneWrap.style.top = (inset + theadHeight) + 'px';
                                 syncScroll();
                             } else {
                                 totalCloneWrap.style.display = 'none';
@@ -253,9 +241,10 @@
                 }
 
                 createClones();
-                window.addEventListener('scroll', onScroll);
+                window.addEventListener('scroll', onScroll, { passive: true });
                 window.addEventListener('resize', function () { createClones(); onScroll(); });
-                stickyContainer.addEventListener('scroll', syncScroll);
+                stickyContainer.addEventListener('scroll', syncScroll, { passive: true });
+                onScroll();
             }
 
             // === Drag-to-scroll on main ===

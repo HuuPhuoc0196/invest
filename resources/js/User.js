@@ -245,7 +245,8 @@ export default class User{
         data.forEach(stock => {
             const price = stock.buy_price !== undefined && stock.buy_price !== null ? stock.buy_price : stock.sell_price;
             const date = stock.buy_date !== undefined && stock.buy_date !== null ? stock.buy_date : stock.sell_date;
-            const type =  stock.buy_price !== undefined && stock.buy_price !== null ? "Buy" : "Sell";
+            const type = stock.buy_price !== undefined && stock.buy_price !== null ? "Buy" : "Sell";
+            const typeLabel = type === "Buy" ? "Mua" : "Bán";
 
             const quantity = parseInt(stock.quantity);
             const currentPrice = parseFloat(stock.current_price);
@@ -283,7 +284,7 @@ export default class User{
                 <td>${Number(price).toLocaleString('vi-VN')}</td>
                 <td>${Number(stock.quantity * price).toLocaleString('vi-VN')}</td>
                 <td>${date}</td>
-                <td><div class="${type}">${type}</div></td>
+                <td><div class="${type}">${typeLabel}</div></td>
             `;
             tbody.appendChild(row);
         });

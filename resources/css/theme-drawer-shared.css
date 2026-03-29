@@ -1,0 +1,171 @@
+/**
+ * Drawer / overlay mobile — dùng chung Layout + LayoutAdmin (redesign menu).
+ */
+:root {
+    --drawer-bg: #111827;
+    --drawer-border: rgba(99, 179, 237, 0.12);
+    --drawer-accent: #38bdf8;
+    --drawer-accent2: #818cf8;
+    --drawer-text: #e2e8f0;
+    --drawer-muted: #64748b;
+    --drawer-surface2: #1a2235;
+}
+
+.mobile-menu-overlay {
+    transition: opacity 0.2s ease, backdrop-filter 0.2s ease;
+}
+
+.mobile-menu-open .mobile-menu-overlay {
+    background: rgba(11, 15, 26, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+@media (max-width: 768px) {
+    /* Topbar tối — đồng bộ với drawer (Layout + LayoutAdmin) */
+    .mobile-topbar {
+        background: rgba(11, 15, 26, 0.92) !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--drawer-border);
+        color: var(--drawer-text) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .mobile-topbar-title {
+        color: var(--drawer-text) !important;
+    }
+
+    .mobile-menu-drawer {
+        background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+        border-left: 1px solid var(--drawer-border);
+        box-shadow: -20px 0 60px rgba(0, 0, 0, 0.55);
+    }
+
+    /* Ưu tiên hơn app.css (gradient xanh cũ) */
+    .mobile-menu-drawer.actions-left .mobile-menu-header {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px !important;
+        padding: 18px 16px !important;
+        margin-bottom: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+        border-bottom: 1px solid var(--drawer-border) !important;
+        background: rgba(17, 24, 39, 0.98) !important;
+        box-shadow: none !important;
+    }
+
+    .mobile-menu-drawer.actions-left .mobile-menu-header .mobile-menu-header-brand {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+
+    .mobile-menu-drawer.actions-left .mobile-menu-header .mobile-menu-header-logo {
+        flex-shrink: 0 !important;
+    }
+
+    .mobile-menu-drawer.actions-left .mobile-menu-header .mobile-menu-title {
+        width: auto !important;
+        flex: 1 1 auto !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        color: var(--drawer-text) !important;
+        max-width: none;
+    }
+
+    .mobile-menu-drawer.actions-left .mobile-menu-header .mobile-menu-close {
+        width: 32px !important;
+        min-width: 32px !important;
+        height: 32px !important;
+        border-radius: 8px !important;
+        background: var(--drawer-surface2) !important;
+        border: 1px solid var(--drawer-border) !important;
+        color: var(--drawer-muted) !important;
+        font-size: 16px !important;
+        line-height: 1 !important;
+        box-shadow: none !important;
+    }
+
+    .mobile-menu-drawer.actions-left .mobile-menu-header .mobile-menu-close:hover {
+        color: var(--drawer-text) !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    .mobile-menu-drawer.actions-left {
+        padding: 12px 12px 20px;
+        gap: 8px;
+    }
+
+    .mobile-menu-drawer.actions-left .button-link,
+    .mobile-menu-drawer.actions-left button.button-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px !important;
+        border-radius: 12px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+        border: 1px solid transparent !important;
+        background: transparent !important;
+        color: var(--drawer-text) !important;
+        box-shadow: none !important;
+        width: 100%;
+        box-sizing: border-box;
+        justify-content: flex-start;
+        transition: border-color 0.15s, background 0.15s;
+    }
+
+    .mobile-menu-drawer.actions-left .button-link:hover {
+        border-color: var(--drawer-border) !important;
+        background: var(--drawer-surface2) !important;
+        color: var(--drawer-text) !important;
+    }
+
+    .mobile-menu-drawer.actions-left .user-nav-link--active:not(.user-nav-link--logout) {
+        border-color: rgba(56, 189, 248, 0.45) !important;
+        background: rgba(56, 189, 248, 0.12) !important;
+        color: var(--drawer-text) !important;
+        box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.2);
+    }
+
+    .mobile-menu-drawer.actions-left .user-nav-link--guest:not(.user-nav-link--guest-login):not(.user-nav-link--guest-register):not(.user-nav-link--guest-home):not(.user-nav-link--active) {
+        color: var(--drawer-muted) !important;
+        border-color: var(--drawer-border) !important;
+        background: transparent !important;
+    }
+
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-login:not(.user-nav-link--active),
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-register:not(.user-nav-link--active),
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-home:not(.user-nav-link--active) {
+        color: var(--drawer-text) !important;
+        background: var(--drawer-surface2) !important;
+        border-color: var(--drawer-border) !important;
+    }
+
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-login:not(.user-nav-link--active):hover,
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-register:not(.user-nav-link--active):hover,
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-home:not(.user-nav-link--active):hover {
+        color: var(--drawer-accent) !important;
+        border-color: rgba(56, 189, 248, 0.4) !important;
+        background: rgba(56, 189, 248, 0.1) !important;
+    }
+
+    .mobile-menu-toggle {
+        background: var(--drawer-bg) !important;
+        border: 1px solid var(--drawer-border) !important;
+        color: var(--drawer-accent) !important;
+        border-radius: 10px !important;
+    }
+
+    .mobile-menu-open .mobile-menu-toggle {
+        background: rgba(56, 189, 248, 0.15) !important;
+        border-color: var(--drawer-accent) !important;
+    }
+}

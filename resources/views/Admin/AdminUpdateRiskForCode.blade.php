@@ -14,20 +14,20 @@
     @vite('resources/js/app.js')
 @endsection
 
-@section('actions-left')
-    <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
-@endsection
-
 @section('admin-body-content')
-    <h2>Cập nhật rủi ro cổ phiếu</h2>
+    @include('partials.page-title-invest', ['title' => 'Cập nhật rủi ro cổ phiếu'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
             <label for="code">Mã cổ phiếu:</label>
             <input type="text" id="code" placeholder="VD: FPT">
             <div class="error" id="errorCode">Vui lòng nhập Mã cổ phiếu</div>
         </div>
-        <button onclick="submitForm()">Cập nhật</button>
+        <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Cập nhật</button>
+    </div>
+        </div>
     </div>
     <div id="toast" class="toast"></div>
 @endsection
@@ -38,8 +38,20 @@
     <script>
         const baseUrl = "{{ url('') }}";
 
+        function isUpdateRiskFormReady() {
+            return document.getElementById("code").value.trim().length > 0;
+        }
+
+        function updateUpdateRiskSubmitButton() {
+            const btn = document.getElementById("btnFormSubmit");
+            if (btn) btn.disabled = !isUpdateRiskFormReady();
+        }
+
+        document.getElementById("code").addEventListener("input", updateUpdateRiskSubmitButton);
+
         function resetForm() {
             document.getElementById("code").value = "";
+            updateUpdateRiskSubmitButton();
         }
 
         function toastSuccess() {

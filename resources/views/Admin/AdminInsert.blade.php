@@ -14,13 +14,11 @@
     @vite('resources/js/app.js')
 @endsection
 
-@section('actions-left')
-    <a href="{{ url('/admin') }}" class="button-link">🏠 Trang chủ</a>
-@endsection
-
 @section('admin-body-content')
-    <h2>Thêm Mã cổ phiếu</h2>
+    @include('partials.page-title-invest', ['title' => 'Thêm Mã cổ phiếu'])
 
+    <div class="invest-narrow-wrap">
+        <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
             <label for="code">Mã cổ phiếu:</label>
@@ -53,7 +51,9 @@
         </div>
         <div id="toast" class="toast"></div>
 
-        <button onclick="submitForm()">Thêm mới</button>
+        <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Thêm mới</button>
+    </div>
+        </div>
     </div>
 @endsection
 
@@ -82,19 +82,40 @@
             input.value = formatted;
         }
 
+        function isAdminInsertFormReady() {
+            const code = document.getElementById("code").value.trim().toUpperCase();
+            const buy = parseNumber(buyPriceInput.value);
+            const current = parseNumber(currentPriceInput.value);
+            if (!code) return false;
+            if (!buy || !isNumber(buy)) return false;
+            if (!current || !isNumber(current)) return false;
+            return true;
+        }
+
+        function updateAdminInsertSubmitButton() {
+            const btn = document.getElementById("btnFormSubmit");
+            if (btn) btn.disabled = !isAdminInsertFormReady();
+        }
+
         buyPriceInput.addEventListener("input", () => {
             formatToVND(buyPriceInput);
+            updateAdminInsertSubmitButton();
         });
 
         currentPriceInput.addEventListener("input", () => {
             formatToVND(currentPriceInput);
+            updateAdminInsertSubmitButton();
         });
+
+        document.getElementById("code").addEventListener("input", updateAdminInsertSubmitButton);
+        document.getElementById("risk").addEventListener("change", updateAdminInsertSubmitButton);
 
         function resetForm() {
             document.getElementById("code").value = "";
             buyPriceInput.value = "";
             currentPriceInput.value = "";
             document.getElementById("risk").value = "1";
+            updateAdminInsertSubmitButton();
         }
 
         function toastSuccess() {
@@ -197,5 +218,7 @@
                 });
             }
         }
+
+        updateAdminInsertSubmitButton();
     </script>
 @endsection

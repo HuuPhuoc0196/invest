@@ -4,7 +4,9 @@ import laravel from 'laravel-vite-plugin';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 
+            input: ['resources/css/app.css',
+                'resources/css/theme-invest-app.css',
+                'resources/css/theme-drawer-shared.css',
                 'resources/css/adminInsert.css',
                 'resources/css/adminView.css',
                 'resources/css/adminStockManagement.css',
