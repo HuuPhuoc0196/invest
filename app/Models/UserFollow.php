@@ -39,6 +39,21 @@ class UserFollow extends Model
             ->delete() > 0;
     }
 
+    public static function deleteByCodesAndUser(array $codes, int $userId): int
+    {
+        if (empty($codes)) {
+            return 0;
+        }
+        $upperCodes = array_map('strtoupper', $codes);
+        $stockIds = Stock::whereIn('code', $upperCodes)->pluck('id')->toArray();
+        if (empty($stockIds)) {
+            return 0;
+        }
+        return self::whereIn('stock_id', $stockIds)
+            ->where('user_id', $userId)
+            ->delete();
+    }
+
     public static function deleteAllByUserId(int $userId): int
     {
         return self::where('user_id', $userId)->delete();
@@ -60,6 +75,16 @@ class UserFollow extends Model
             ->where('user_id', $userId)
             ->select('stocks.code', 'user_follows.follow_price_buy', 'user_follows.follow_price_sell', 'user_follows.auto_sync')
             ->first();
+    }
+
+    /**
+     * Cập nhật notice_flag cho một record follow cụ thể của user.
+     */
+    public static function updateNoticeFlag(int $id, int $userId, int $flag): int
+    {
+        return self::where('id', $id)
+            ->where('user_id', $userId)
+            ->update(['notice_flag' => $flag]);
     }
 
     /**

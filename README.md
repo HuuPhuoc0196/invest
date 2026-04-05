@@ -7,6 +7,11 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Project documentation (Invest)
+
+- [Blade layouts & SEO checklist](docs/blade-seo.md) — chọn `Layout.Layout` / `LayoutLogin` / `LayoutAdmin`, meta và robots, cập nhật sitemap khi thêm trang công khai.
+- **Cron / API:** trong `.env` đặt `CRON_API_SECRET` (giá trị ngẫu nhiên dài). Mọi request tới `/api/admin/*` (trừ `/api/user` Sanctum) phải gửi header `X-Cron-Secret: <secret>` hoặc `Authorization: Bearer <secret>`.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

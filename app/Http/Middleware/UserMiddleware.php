@@ -11,7 +11,7 @@ class UserMiddleware
     public function handle(Request $request, Closure $next)
     {
         if (!Auth::check()) {
-            return redirect('/login');
+            return redirect()->route('login');
         }
 
         // Cho phép nếu role === 0 (user), ngược lại thì redirect về /admin

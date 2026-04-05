@@ -1,0 +1,140 @@
+/* Moved from UserProfile.blade.php <style> block */
+.table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.sticky-clone,
+.sticky-clone-total {
+    position: fixed;
+    top: 0;
+    z-index: 1002;
+    overflow: hidden;
+    pointer-events: none;
+}
+.sticky-clone-total td {
+    font-weight: bold;
+}
+main {
+    cursor: grab;
+}
+main.dragging {
+    cursor: grabbing;
+    user-select: none;
+}
+
+/* —— Asset action bar (Mua / Bán / Hiệu quả) —— */
+.asset-action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.asset-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: filter 0.15s, box-shadow 0.15s, transform 0.1s;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+}
+
+.asset-action-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.asset-action-btn:active {
+    transform: translateY(0);
+    filter: brightness(0.95);
+}
+
+/* Mua — xanh lá */
+.asset-action-btn--buy {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    border-color: rgba(52, 211, 153, 0.3);
+    color: #ffffff;
+    box-shadow: 0 2px 12px rgba(22, 163, 74, 0.3);
+}
+
+.asset-action-btn--buy:hover {
+    box-shadow: 0 4px 18px rgba(22, 163, 74, 0.45);
+    color: #ffffff;
+}
+
+/* Bán — đỏ */
+.asset-action-btn--sell {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    border-color: rgba(248, 113, 113, 0.3);
+    color: #ffffff;
+    box-shadow: 0 2px 12px rgba(220, 38, 38, 0.3);
+}
+
+.asset-action-btn--sell:hover {
+    box-shadow: 0 4px 18px rgba(220, 38, 38, 0.45);
+    color: #ffffff;
+}
+
+/* Hiệu quả — cyan-purple (kept for legacy, no longer used on profile) */
+.asset-action-btn--perf {
+    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    border-color: rgba(99, 102, 241, 0.3);
+    color: #ffffff;
+    box-shadow: 0 2px 12px rgba(14, 165, 233, 0.3);
+}
+
+.asset-action-btn--perf:hover {
+    box-shadow: 0 4px 18px rgba(14, 165, 233, 0.45);
+    color: #ffffff;
+}
+
+/* Nạp tiền — teal */
+.asset-action-btn--cash-in {
+    background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+    border-color: rgba(20, 184, 166, 0.3);
+    color: #ffffff;
+    box-shadow: 0 2px 12px rgba(13, 148, 136, 0.3);
+}
+
+.asset-action-btn--cash-in:hover {
+    box-shadow: 0 4px 18px rgba(13, 148, 136, 0.45);
+    color: #ffffff;
+}
+
+/* Rút tiền — amber */
+.asset-action-btn--cash-out {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    border-color: rgba(251, 191, 36, 0.3);
+    color: #ffffff;
+    box-shadow: 0 2px 12px rgba(217, 119, 6, 0.3);
+}
+
+.asset-action-btn--cash-out:hover {
+    box-shadow: 0 4px 18px rgba(217, 119, 6, 0.45);
+    color: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .asset-action-bar {
+        gap: 8px;
+    }
+
+    .asset-action-btn {
+        flex: 1 1 calc(50% - 4px);
+        justify-content: center;
+        padding: 11px 12px;
+    }
+}
+
+/* PC: push Nạp/Rút to the right side */
+@media (min-width: 769px) {
+    .asset-action-btn--cash-in {
+        margin-left: auto;
+    }
+}

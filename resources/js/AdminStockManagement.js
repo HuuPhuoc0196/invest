@@ -47,6 +47,7 @@ function getRatingBadge(rating) {
 }
 
 window.renderStockTable = function(data) {
+    const baseUrl = (window.__pageData && window.__pageData.baseUrl) ? window.__pageData.baseUrl : '';
     const tbody = document.getElementById('stockTableBody');
     tbody.innerHTML = '';
 
@@ -122,9 +123,21 @@ window.renderStockTable = function(data) {
 };
 
 window.confirmDelete = function(code) {
-    if (confirm('Bạn có chắc chắn muốn xóa mã ' + code + '?')) {
-        location.href = baseUrl + '/admin/delete/' + code;
+    const baseUrl = (window.__pageData && window.__pageData.baseUrl) ? window.__pageData.baseUrl : '';
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    if (!confirm('Bạn có chắc chắn muốn xóa mã ' + code + '?')) {
+        return;
     }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = baseUrl + '/admin/delete/' + encodeURIComponent(code);
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = '_token';
+    input.value = token;
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
 };
 
 // Drag to scroll horizontally within table container
@@ -405,7 +418,7 @@ window.submitImportCsv = function() {
         }
 
         $.ajax({
-            url: baseUrl + '/admin/stocks/import-csv',
+            url: (window.__pageData && window.__pageData.baseUrl ? window.__pageData.baseUrl : '') + '/admin/stocks/import-csv',
             type: 'POST',
             headers: { 'X-CSRF-TOKEN': token },
             data: formData,

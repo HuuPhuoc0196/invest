@@ -1,4 +1,4 @@
-@extends('Layout.LayoutAdmin')
+﻿@extends('Layout.LayoutAdmin')
 @section('csrf-token')
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
@@ -33,103 +33,10 @@
 @endsection
 
 @section('admin-script')
-   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        const baseUrl = "{{ url('') }}";
-
-        function isUpdateRiskFormReady() {
-            return document.getElementById("code").value.trim().length > 0;
-        }
-
-        function updateUpdateRiskSubmitButton() {
-            const btn = document.getElementById("btnFormSubmit");
-            if (btn) btn.disabled = !isUpdateRiskFormReady();
-        }
-
-        document.getElementById("code").addEventListener("input", updateUpdateRiskSubmitButton);
-
-        function resetForm() {
-            document.getElementById("code").value = "";
-            updateUpdateRiskSubmitButton();
-        }
-
-        function toastSuccess() {
-            // Xóa class cũ trước khi thêm class mới
-            toast.classList.remove("toast-success", "toast-error");
-            toast.classList.add("toast-success");
-            toast.classList.add("toast", "show");
-        }
-
-        function toastError() {
-            // Xóa class cũ trước khi thêm class mới
-            toast.classList.remove("toast-success", "toast-error");
-            toast.classList.add("toast-error");
-            toast.classList.add("toast", "show");
-        }
-
-        function submitForm() {
-            const code = document.getElementById("code").value.trim().toUpperCase();
-            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-            let isValid = true;
-
-            document.querySelectorAll(".error").forEach(el => el.style.display = "none");
-
-            // Validate mã CK
-            if (!code) {
-                document.getElementById("errorCode").style.display = "block";
-                isValid = false;
-            }
-
-            // Nếu hợp lệ
-            if (isValid) {
-                // Gửi AJAX đến server hoặc lưu vào DB ở đây nếu cần
-                const data = {
-                    code: code
-                };
-                $.ajax({
-                    url: baseUrl + '/admin/updateRiskForCode',
-                    type: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token
-                    },
-                    data: JSON.stringify(data),
-                    success: function(response) {
-                        if (response.status == "success") {
-                            const toast = document.getElementById("toast");
-                            toast.innerHTML = `✅ Đã cập nhật mức độ rủi ro cho cổ phiếu: <b>${code}</b><br>`;
-                            toast.className = "toast show";
-                            toastSuccess();
-                            setTimeout(() => {
-                                toast.className = toast.className.replace("show", "");
-                            }, 3000);
-
-                            // Reset form
-                            resetForm();
-                        } else {
-                            const toast = document.getElementById("toast");
-                            toast.innerHTML = `❌` + response.message;
-                            toast.className = "toast show";
-                            toastError();
-                            setTimeout(() => {
-                                toast.className = toast.className.replace("show", "");
-                            }, 5000);
-                        }
-                    },
-                    error: function(xhr) {
-                        console.log(xhr);
-                        const toast = document.getElementById("toast");
-                        toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;
-                        toast.className = "toast show";
-                        toastError();
-                        setTimeout(() => {
-                            toast.className = toast.className.replace("show", "");
-                        }, 5000);
-                    }
-                });
-            }
-        }
+        window.__pageData = { baseUrl: "{{ url('') }}" };
     </script>
+    @vite('resources/js/pages/admin-update-risk.js')
 @endsection

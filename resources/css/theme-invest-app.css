@@ -3,11 +3,17 @@
  */
 @import url("https://fonts.bunny.net/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap");
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
 body.theme-invest-app {
-    --inv-bg: #0b0f1a;
-    --inv-surface: #111827;
-    --inv-surface2: #1a2235;
-    --inv-border: rgba(99, 179, 237, 0.12);
+    --inv-bg: #0f172a;
+    --inv-surface: #1e293b;
+    --inv-surface2: #2a3a52;
+    --inv-border: rgba(99, 179, 237, 0.14);
     --inv-accent: #38bdf8;
     --inv-accent2: #818cf8;
     --inv-text: #e2e8f0;
@@ -17,7 +23,7 @@ body.theme-invest-app {
     font-family: "Be Vietnam Pro", system-ui, sans-serif;
     background: var(--inv-bg);
     color: var(--inv-text);
-    padding-top: 0;
+    padding: 0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -25,19 +31,18 @@ body.theme-invest-app {
 
 @media (min-width: 769px) {
     body.theme-invest-app {
-        padding: 0 20px 24px;
+        padding: 0;
     }
 }
 
 @media (max-width: 768px) {
     body.theme-invest-app {
-        padding-top: 74px;
+        padding: 74px 0 0;
     }
 }
 
 body.theme-invest-app main {
     position: relative;
-    z-index: 1;
     flex: 1 0 auto;
     width: 100%;
     max-width: 1400px;
@@ -48,7 +53,13 @@ body.theme-invest-app main {
 
 @media (min-width: 769px) {
     body.theme-invest-app main {
-        padding: 32px 8px 32px;
+        padding: 32px 28px 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    body.theme-invest-app main {
+        padding: 0 8px 0;
     }
 }
 
@@ -70,18 +81,35 @@ body.theme-invest-app main.login-layout-main {
         position: sticky;
         top: 0;
         z-index: 1100;
-        margin: 0 -20px 0;
-        padding: 10px 24px 12px;
+        margin: 0;
+        padding: 10px 28px 12px;
         min-height: auto;
         height: auto;
         align-items: center;
         flex-wrap: nowrap;
         gap: 0;
-        background: rgba(11, 15, 26, 0.88);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-bottom: 1px solid var(--inv-border);
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+        background: rgba(11, 15, 26, 0.92);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-bottom: none;
+        box-shadow: 0 4px 28px rgba(0, 0, 0, 0.35);
+        isolation: isolate;
+    }
+
+    /* Glowing accent line thay cho border-bottom */
+    body.theme-invest-app .actions::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg,
+            rgba(56, 189, 248, 0.55) 0%,
+            rgba(99, 179, 237, 0.65) 25%,
+            rgba(129, 140, 248, 0.65) 60%,
+            rgba(56, 189, 248, 0.55) 100%);
+        box-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
     }
 
     body.theme-invest-app .site-brand--desktop {
@@ -92,10 +120,23 @@ body.theme-invest-app main.login-layout-main {
         min-width: 0;
     }
 
+    body.theme-invest-app .site-brand__img {
+        filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.5));
+        transition: filter 0.3s ease;
+    }
+
+    body.theme-invest-app .site-brand--desktop:hover .site-brand__img {
+        filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.8));
+    }
+
     body.theme-invest-app .site-brand__text {
         font-size: 14px;
         font-weight: 700;
         letter-spacing: 0.02em;
+        background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     body.theme-invest-app .actions-left {
@@ -300,6 +341,7 @@ body.theme-invest-app main.login-layout-main {
         background: rgba(56, 189, 248, 0.1) !important;
     }
 
+
     /* Search */
     body.theme-invest-app #actionsRightContent {
         grid-column: 2;
@@ -324,6 +366,10 @@ body.theme-invest-app main.login-layout-main {
         color: var(--inv-text) !important;
         font-size: 13px !important;
         font-family: inherit;
+        box-sizing: border-box !important;
+        -webkit-appearance: none;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
     }
 
     body.theme-invest-app #actionsRightContent input[type="text"]::placeholder {
@@ -331,8 +377,11 @@ body.theme-invest-app main.login-layout-main {
     }
 
     body.theme-invest-app #actionsRightContent input[type="text"]:focus {
-        outline: none;
-        border-color: var(--inv-accent) !important;
+        outline: none !important;
+        border-color: rgba(56, 189, 248, 0.65) !important;
+        box-shadow:
+            0 0 0 1px rgba(56, 189, 248, 0.45),
+            0 0 0 4px rgba(56, 189, 248, 0.12);
     }
 
     body.theme-invest-app #actionsRightContent button {
@@ -358,6 +407,67 @@ body.theme-invest-app main.login-layout-main {
     body.theme-invest-app #actionsRightContent button.admin-update-sync-btn:hover {
         filter: brightness(1.08);
         background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+    }
+}
+
+/* ── Mobile: dark-theme the actions-right search/filter container ──────────── */
+@media (max-width: 768px) {
+    /* overflow: hidden trên wrapper (app.css) làm lệch viền bo góc khi focus (đặc biệt WebKit mobile) */
+    body.theme-invest-app .mobile-actions-right-slot .actions-right,
+    body.theme-invest-app main #actionsRightContent.actions-right {
+        background: var(--inv-surface);
+        border-color: var(--inv-border);
+        box-shadow: none;
+        overflow: visible !important;
+    }
+
+    body.theme-invest-app .mobile-actions-right-slot .actions-right input[type="text"],
+    body.theme-invest-app .mobile-actions-right-slot .actions-right input[type="date"],
+    body.theme-invest-app .mobile-actions-right-slot .actions-right select,
+    body.theme-invest-app main #actionsRightContent.actions-right input[type="text"],
+    body.theme-invest-app main #actionsRightContent.actions-right input[type="date"],
+    body.theme-invest-app main #actionsRightContent.actions-right select {
+        background: var(--inv-surface2) !important;
+        border: 1px solid var(--inv-border) !important;
+        border-radius: 10px !important;
+        color: var(--inv-text) !important;
+        font-size: 13px !important;
+        font-family: inherit;
+        padding: 8px 12px !important;
+        box-sizing: border-box !important;
+        -webkit-appearance: none;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.theme-invest-app .mobile-actions-right-slot .actions-right input[type="text"]::placeholder,
+    body.theme-invest-app main #actionsRightContent.actions-right input[type="text"]::placeholder {
+        color: var(--inv-muted);
+    }
+
+    body.theme-invest-app .mobile-actions-right-slot .actions-right input[type="text"]:focus,
+    body.theme-invest-app main #actionsRightContent.actions-right input[type="text"]:focus,
+    body.theme-invest-app .mobile-actions-right-slot .actions-right input[type="date"]:focus,
+    body.theme-invest-app main #actionsRightContent.actions-right input[type="date"]:focus,
+    body.theme-invest-app .mobile-actions-right-slot .actions-right select:focus,
+    body.theme-invest-app main #actionsRightContent.actions-right select:focus {
+        outline: none !important;
+        border-color: rgba(56, 189, 248, 0.65) !important;
+        box-shadow:
+            0 0 0 1px rgba(56, 189, 248, 0.45),
+            0 0 0 4px rgba(56, 189, 248, 0.12);
+    }
+
+    body.theme-invest-app .mobile-actions-right-slot .actions-right button,
+    body.theme-invest-app main #actionsRightContent.actions-right button {
+        padding: 8px 16px !important;
+        background: var(--inv-accent) !important;
+        color: #0b0f1a !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        font-family: inherit;
     }
 }
 
@@ -394,6 +504,7 @@ body.theme-invest-app main.login-layout-main {
         flex-direction: column !important;
         overflow: hidden !important;
         overflow-x: hidden !important;
+        padding: 8px;
     }
 
     body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__inner,
@@ -463,6 +574,47 @@ body.theme-invest-app main.login-layout-main {
     body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__inner > button.user-nav-link--logout {
         flex-shrink: 0 !important;
         margin-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+        background: var(--drawer-surface2) !important;
+        border-color: var(--drawer-border) !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__inner > button.user-nav-link--logout:hover,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__inner > button.user-nav-link--logout:hover {
+        border-color: rgba(248, 113, 113, 0.5) !important;
+        background: rgba(248, 113, 113, 0.1) !important;
+    }
+
+    /* Solid tile mặc định — đồng nhất với guest buttons */
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__cluster > .button-link:not(.user-nav-link--active),
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__cluster > .button-link:not(.user-nav-link--active),
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__stock-branch > .button-link:not(.user-nav-link--active),
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__asset-branch > .button-link:not(.user-nav-link--active),
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__follow-branch > .button-link:not(.user-nav-link--active) {
+        background: var(--drawer-surface2) !important;
+        border-color: var(--drawer-border) !important;
+    }
+
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__cluster > .button-link:not(.user-nav-link--active):hover,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__cluster > .button-link:not(.user-nav-link--active):hover,
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__stock-branch > .button-link:not(.user-nav-link--active):hover,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__asset-branch > .button-link:not(.user-nav-link--active):hover,
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__follow-branch > .button-link:not(.user-nav-link--active):hover {
+        color: var(--inv-accent) !important;
+        border-color: rgba(56, 189, 248, 0.4) !important;
+        background: rgba(56, 189, 248, 0.1) !important;
+    }
+
+    /* Active state mobile drawer — rõ như PC: cyan text, bg + border đậm, glow */
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__cluster > .button-link.user-nav-link--active:not(.user-nav-link--logout),
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__cluster > .button-link.user-nav-link--active:not(.user-nav-link--logout),
+    body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-primary__stock-branch > .button-link.user-nav-link--active:not(.user-nav-link--logout),
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__asset-branch > .button-link.user-nav-link--active:not(.user-nav-link--logout),
+    body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-primary__follow-branch > .button-link.user-nav-link--active:not(.user-nav-link--logout) {
+        color: var(--inv-accent) !important;
+        background: rgba(56, 189, 248, 0.18) !important;
+        border-color: rgba(56, 189, 248, 0.65) !important;
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.3) !important;
+        font-weight: 700 !important;
     }
 
     /* Menu con: thụt 12px; cột; chữ căn giữa */
@@ -521,7 +673,6 @@ body.theme-invest-app main.login-layout-main {
     body.theme-invest-app.layout-admin .mobile-menu-drawer.actions-left .admin-nav-stocks-sub > .button-link:hover,
     body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-asset-sub > .button-link:hover,
     body.theme-invest-app.layout-user .mobile-menu-drawer.actions-left .user-nav-follow-sub > .button-link:hover {
-        border-color: rgba(56, 189, 248, 0.45) !important;
         filter: brightness(1.06);
     }
 
@@ -558,7 +709,7 @@ body.theme-invest-app main.login-layout-main {
         white-space: nowrap !important;
         overflow: hidden;
         text-overflow: ellipsis;
-        background: linear-gradient(180deg, var(--inv-surface2) 0%, rgba(26, 34, 53, 0.95) 100%) !important;
+        background: linear-gradient(180deg, var(--inv-surface2) 0%, rgba(42, 58, 82, 0.95) 100%) !important;
         border: 1px solid rgba(99, 179, 237, 0.2) !important;
         color: var(--inv-text) !important;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
@@ -580,7 +731,7 @@ body.theme-invest-app .page-header-home {
     padding: 20px 16px 22px;
     border-radius: 14px;
     border: 1px solid var(--inv-border);
-    background: linear-gradient(165deg, rgba(26, 34, 53, 0.9) 0%, rgba(17, 24, 39, 0.65) 100%);
+    background: linear-gradient(165deg, rgba(42, 58, 82, 0.9) 0%, rgba(30, 41, 59, 0.65) 100%);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
@@ -591,12 +742,8 @@ body.theme-invest-app .page-header-home .page-title-home {
     letter-spacing: -0.02em;
     margin: 0;
     line-height: 1.25;
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 35%, var(--inv-accent) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    filter: drop-shadow(0 2px 14px rgba(56, 189, 248, 0.22));
+    color: #ffffff;
+    text-shadow: 0 2px 16px rgba(56, 189, 248, 0.25);
 }
 
 @media (min-width: 769px) {
@@ -825,7 +972,7 @@ body.theme-invest-app .invest-narrow-wrap .required {
 }
 
 body.theme-invest-app .profile-detail-card {
-    background: linear-gradient(165deg, rgba(26, 34, 53, 0.95) 0%, rgba(17, 24, 39, 0.82) 100%);
+    background: linear-gradient(165deg, rgba(42, 58, 82, 0.95) 0%, rgba(30, 41, 59, 0.82) 100%);
     border: 1px solid var(--inv-border);
     border-radius: 14px;
     padding: 22px 24px 26px;
@@ -954,6 +1101,98 @@ body.theme-invest-app .profile-detail-card--actions .profile-detail-cta--seconda
     }
 }
 
+/* —— Table top bar: search + action buttons above table —— */
+body.theme-invest-app .table-top-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+@media (min-width: 769px) {
+    body.theme-invest-app .table-top-bar {
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+
+    body.theme-invest-app .table-top-bar .table-search-inline {
+        margin-left: auto;
+    }
+}
+
+body.theme-invest-app .table-search-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    body.theme-invest-app .table-search-inline {
+        width: 100%;
+    }
+}
+
+body.theme-invest-app .table-search-inline input[type="text"] {
+    padding: 8px 12px;
+    background: var(--inv-surface);
+    border: 1px solid var(--inv-border);
+    border-radius: 8px;
+    color: var(--inv-text);
+    font-size: 13px;
+    font-family: inherit;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 769px) {
+    body.theme-invest-app .table-search-inline input[type="text"] {
+        width: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+    body.theme-invest-app .table-search-inline {
+        overflow: visible;
+    }
+
+    body.theme-invest-app .table-search-inline input[type="text"] {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+}
+
+body.theme-invest-app .table-search-inline input[type="text"]::placeholder {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app .table-search-inline input[type="text"]:focus {
+    outline: none !important;
+    border-color: rgba(56, 189, 248, 0.65);
+    box-shadow:
+        0 0 0 1px rgba(56, 189, 248, 0.45),
+        0 0 0 4px rgba(56, 189, 248, 0.12);
+}
+
+body.theme-invest-app .table-search-inline button {
+    padding: 8px 16px;
+    background: var(--inv-accent);
+    color: #0b0f1a;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+body.theme-invest-app .table-search-inline button:hover {
+    background: #7dd3fc;
+}
+
 /* —— Filter —— */
 body.theme-invest-app .filter-panel {
     background: var(--inv-surface);
@@ -970,20 +1209,20 @@ body.theme-invest-app .filter-header {
     color: var(--inv-text);
     border-bottom: 1px solid var(--inv-border);
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 body.theme-invest-app .filter-header:hover {
-    background: rgba(26, 34, 53, 0.6);
+    background: rgba(42, 58, 82, 0.6);
 }
 
 body.theme-invest-app .filter-body {
-    background: rgba(15, 23, 42, 0.5);
+    background: rgba(30, 41, 59, 0.55);
     padding: 16px 20px;
 }
 
 body.theme-invest-app .filter-group label {
-    color: var(--inv-muted);
+    color: var(--inv-text);
     font-weight: 600;
 }
 
@@ -993,13 +1232,19 @@ body.theme-invest-app .filter-group input {
     border: 1px solid var(--inv-border);
     color: var(--inv-text);
     border-radius: 8px;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body.theme-invest-app .filter-group select:focus,
 body.theme-invest-app .filter-group input:focus {
-    border-color: var(--inv-accent);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    outline: none !important;
+    border-color: rgba(56, 189, 248, 0.65);
+    box-shadow:
+        0 0 0 1px rgba(56, 189, 248, 0.45),
+        0 0 0 4px rgba(56, 189, 248, 0.12);
 }
 
 body.theme-invest-app .filter-range span {
@@ -1073,27 +1318,28 @@ body.theme-invest-app :is(#stock-table, #invest-table) {
 }
 
 body.theme-invest-app :is(#stock-table, #invest-table) thead tr {
-    background: var(--inv-surface2);
+    background: linear-gradient(180deg, #0b1e3d 0%, #112748 100%);
 }
 
 body.theme-invest-app :is(#stock-table, #invest-table) th {
-    background: var(--inv-surface2) !important;
-    color: var(--inv-muted);
+    background: linear-gradient(180deg, #0b1e3d 0%, #112748 100%) !important;
+    color: #e2e8f0;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    border-bottom: 1px solid var(--inv-border);
-    border-right: 1px solid var(--inv-border);
+    border-bottom: 2px solid rgba(56, 189, 248, 0.35);
+    border-right: 1px solid rgba(56, 189, 248, 0.12);
     font-family: "Be Vietnam Pro", sans-serif;
 }
 
 body.theme-invest-app :is(#stock-table, #invest-table) th.col-code-sticky {
-    background-color: var(--inv-surface2) !important;
-    color: var(--inv-muted);
+    background: linear-gradient(180deg, #0b1e3d 0%, #112748 100%) !important;
+    color: #e2e8f0;
 }
 
 body.theme-invest-app :is(#stock-table, #invest-table) td {
+    border-top: 1px solid transparent;
     border-bottom: 1px solid var(--inv-border);
     border-right: 1px solid var(--inv-border);
     color: var(--inv-text);
@@ -1107,24 +1353,29 @@ body.theme-invest-app :is(#stock-table, #invest-table) td.col-select {
     font-weight: 700;
 }
 
-/* Giữ màu nền hàng theo cổ — độ tương phản trên nền tối */
+/* Default tbody rows — nền tối hơn để nổi bật trên surface sáng hơn */
+body.theme-invest-app :is(#stock-table, #invest-table) tbody tr:not(.yellow):not(.green):not(.purple):not(.red):not(.total-row) {
+    background-color: var(--inv-bg);
+}
+
+/* Giữ màu nền hàng theo cổ — tăng opacity để đậm hơn trên nền tối */
 body.theme-invest-app :is(#stock-table, #invest-table) tr.yellow {
-    background-color: rgba(250, 225, 70, 0.12);
+    background-color: rgba(250, 225, 70, 0.18);
     color: #fde047;
 }
 
 body.theme-invest-app :is(#stock-table, #invest-table) tr.green {
-    background-color: rgba(52, 211, 153, 0.12);
+    background-color: rgba(52, 211, 153, 0.18);
     color: #6ee7b7;
 }
 
 body.theme-invest-app :is(#stock-table, #invest-table) tr.purple {
-    background-color: rgba(192, 132, 252, 0.14);
+    background-color: rgba(192, 132, 252, 0.20);
     color: #e9d5ff;
 }
 
 body.theme-invest-app :is(#stock-table, #invest-table) tr.red {
-    background-color: rgba(248, 113, 113, 0.15);
+    background-color: rgba(248, 113, 113, 0.22);
     color: #fca5a5;
 }
 
@@ -1145,10 +1396,10 @@ body.theme-invest-app :is(#stock-table, #invest-table) tr.red td.col-code-sticky
     background-color: #231a1c;
 }
 
-/* Hàng không class màu (vd % định giá > 10% tăng giá — không yellow/green/...) */
+/* Hàng không class màu — sticky col và select phải dùng nền đặc (đồng bộ với row) */
 body.theme-invest-app :is(#stock-table, #invest-table) tbody tr:not(.yellow):not(.green):not(.purple):not(.red) td.col-code-sticky,
 body.theme-invest-app :is(#stock-table, #invest-table) tbody tr:not(.yellow):not(.green):not(.purple):not(.red) td.col-select {
-    background-color: var(--inv-surface) !important;
+    background-color: var(--inv-bg) !important;
 }
 
 body.theme-invest-app :is(#stock-table, #invest-table) tr.yellow td.col-select,
@@ -1199,7 +1450,7 @@ body.theme-invest-app :is(#stock-table, #invest-table) tbody td:not(.col-code-st
 }
 
 body.theme-invest-app :is(#stock-table, #invest-table) th.col-select {
-    background: var(--inv-surface2) !important;
+    background: linear-gradient(180deg, #0b1e3d 0%, #112748 100%) !important;
 }
 
 body.theme-invest-app .sticky-clone th.col-select {
@@ -1228,14 +1479,21 @@ body.theme-invest-app .sticky-clone th.col-code-sticky::after {
 
 body.theme-invest-app .sticky-clone {
     z-index: 1050 !important;
-    background-color: var(--inv-surface2) !important;
+    background: linear-gradient(180deg, #0b1e3d 0%, #112748 100%) !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
+/* Một số trang đặt pointer-events: none lên .sticky-clone — vẫn cho click sort / Chọn */
+body.theme-invest-app .sticky-clone th[data-sort-key],
+body.theme-invest-app .sticky-clone th.th-select-all {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
 body.theme-invest-app .sticky-clone th {
-    background: var(--inv-surface2) !important;
-    color: var(--inv-muted) !important;
-    border-color: var(--inv-border) !important;
+    background: linear-gradient(180deg, #0b1e3d 0%, #112748 100%) !important;
+    color: #e2e8f0 !important;
+    border-color: rgba(56, 189, 248, 0.15) !important;
 }
 
 /* Dòng tổng + clone (UserProfile — tránh nền trắng) */
@@ -1247,6 +1505,18 @@ body.theme-invest-app :is(#stock-table, #invest-table) tr.total-row td {
 
 body.theme-invest-app :is(#stock-table, #invest-table) tr.total-row td.col-code-sticky {
     background-color: var(--inv-surface2) !important;
+}
+
+/* Dòng Hiệu suất — nền tối hơn + viền cyan để phân biệt với dòng Tổng */
+body.theme-invest-app :is(#stock-table, #invest-table) tr.perf-row td {
+    background: linear-gradient(90deg, rgba(56,189,248,0.10) 0%, #0f1f38 55%) !important;
+    border-top: 2px dashed rgba(56,189,248,0.55) !important;
+    color: var(--inv-text);
+}
+
+body.theme-invest-app :is(#stock-table, #invest-table) tr.perf-row td.col-code-sticky {
+    background: linear-gradient(90deg, rgba(56,189,248,0.14) 0%, #0f1f38 80%) !important;
+    border-left: 3px solid var(--inv-accent) !important;
 }
 
 body.theme-invest-app .sticky-clone-total {
@@ -1345,10 +1615,10 @@ body.theme-invest-app .email-settings-page #notice-table-session {
 
 body.theme-invest-app .email-settings-page #notice-table-follow th,
 body.theme-invest-app .email-settings-page #notice-table-session th {
-    background: var(--inv-surface2) !important;
-    color: var(--inv-muted) !important;
-    border-bottom: 1px solid var(--inv-border) !important;
-    border-right: 1px solid var(--inv-border) !important;
+    background: linear-gradient(180deg, #0b1e3d 0%, #112748 100%) !important;
+    color: #e2e8f0 !important;
+    border-bottom: 2px solid rgba(56, 189, 248, 0.35) !important;
+    border-right: 1px solid rgba(56, 189, 248, 0.12) !important;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -1358,7 +1628,7 @@ body.theme-invest-app .email-settings-page #notice-table-session th {
 
 body.theme-invest-app .email-settings-page #notice-table-follow td,
 body.theme-invest-app .email-settings-page #notice-table-session td {
-    background-color: var(--inv-surface) !important;
+    background-color: var(--inv-bg) !important;
     color: var(--inv-text) !important;
     font-family: "JetBrains Mono", ui-monospace, monospace;
     font-size: 13px;
@@ -1412,7 +1682,6 @@ body.theme-invest-app
     td {
     border-top-color: rgba(56, 189, 248, 0.55) !important;
     border-bottom-color: rgba(56, 189, 248, 0.55) !important;
-    border-right-color: rgba(56, 189, 248, 0.4) !important;
 }
 
 body.theme-invest-app
@@ -1449,7 +1718,7 @@ body.theme-invest-app
     tbody
     tr:not(.total-row):not(.yellow):not(.green):not(.purple):not(.red):hover
     td.col-code-sticky {
-    background-color: #1c2738 !important;
+    background-color: #142135 !important;
 }
 
 /* Giữ nhận diện màu cổ — làm đậm overlay khi hover */
@@ -1548,6 +1817,18 @@ body.theme-invest-app .rating-badge {
         border-radius: 10px !important;
         color: var(--inv-text) !important;
         font-size: 13px !important;
+        box-sizing: border-box !important;
+        -webkit-appearance: none;
+        appearance: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body.theme-invest-app main #actionsRightContent input[type="text"]:focus {
+        outline: none !important;
+        border-color: rgba(56, 189, 248, 0.65) !important;
+        box-shadow:
+            0 0 0 1px rgba(56, 189, 248, 0.45),
+            0 0 0 4px rgba(56, 189, 248, 0.12);
     }
 
     body.theme-invest-app main #actionsRightContent button {
@@ -1580,7 +1861,7 @@ body.theme-invest-app .rating-low {
 /* —— Footer (template ft-invest — chi tiết trong footer.css) —— */
 body.theme-invest-app .footer.ft-invest {
     flex-shrink: 0;
-    background: #0f172a;
+    background: rgba(11, 15, 26, 0.92);
     border-top-color: #1e293b;
 }
 
@@ -1669,7 +1950,7 @@ body.theme-invest-app :is(#stock-table, #invest-table) tbody tr.stock-row-enter:
 
 /* —— Modal nhập CSV (admin/stocks — AdminStockManagement) —— */
 body.theme-invest-app #importCsvModal.modal-overlay {
-    background: rgba(11, 15, 26, 0.75);
+    background: rgba(15, 23, 42, 0.72);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     z-index: 10000;
@@ -1807,10 +2088,23 @@ body.theme-invest-app .swal2-container {
 body.theme-invest-app .swal2-popup {
     margin: 0 auto !important;
     text-align: center;
+    background: #1e293b !important;
+    border: 1px solid rgba(99, 179, 237, 0.2) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.6) !important;
+    color: #e2e8f0 !important;
 }
 
-body.theme-invest-app .swal2-title,
+body.theme-invest-app .swal2-title {
+    color: #e2e8f0 !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+}
+
 body.theme-invest-app .swal2-html-container {
+    color: #94a3b8 !important;
+    font-size: 14px !important;
     text-align: center !important;
 }
 
@@ -1822,4 +2116,311 @@ body.theme-invest-app .swal2-actions {
 body.theme-invest-app .swal2-icon {
     margin-left: auto !important;
     margin-right: auto !important;
+}
+
+body.theme-invest-app .swal2-confirm {
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%) !important;
+    color: #0b0f1a !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    padding: 10px 28px !important;
+    font-size: 14px !important;
+    box-shadow: none !important;
+}
+
+body.theme-invest-app .swal2-confirm:hover {
+    filter: brightness(1.08) !important;
+}
+
+body.theme-invest-app .swal2-cancel {
+    background: #2a3a52 !important;
+    color: #e2e8f0 !important;
+    border: 1px solid rgba(99, 179, 237, 0.18) !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    padding: 10px 28px !important;
+    font-size: 14px !important;
+}
+
+body.theme-invest-app .swal2-icon.swal2-error {
+    border-color: rgba(248, 113, 113, 0.5) !important;
+    color: #fca5a5 !important;
+}
+
+body.theme-invest-app .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+    background-color: #fca5a5 !important;
+}
+
+body.theme-invest-app .swal2-icon.swal2-success {
+    border-color: rgba(52, 211, 153, 0.5) !important;
+    color: #6ee7b7 !important;
+}
+
+body.theme-invest-app .swal2-icon.swal2-success [class^='swal2-success-line'] {
+    background-color: #6ee7b7 !important;
+}
+
+body.theme-invest-app .swal2-icon.swal2-success .swal2-success-ring {
+    border-color: rgba(52, 211, 153, 0.35) !important;
+}
+
+body.theme-invest-app .swal2-icon.swal2-warning {
+    border-color: rgba(251, 191, 36, 0.5) !important;
+    color: #fcd34d !important;
+}
+
+body.theme-invest-app .swal2-close {
+    color: #64748b !important;
+}
+
+body.theme-invest-app .swal2-close:hover {
+    color: #fca5a5 !important;
+}
+
+/* ============================================================
+   Form dark-theme overrides — áp dụng cho mọi page dùng
+   .invest-narrow-wrap .form-container (buy, sell, cash-in,
+   cash-out, change-password, insert-follow, update-follow…)
+   ============================================================ */
+body.theme-invest-app .invest-narrow-wrap .form-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--inv-text);
+    letter-spacing: 0.02em;
+}
+
+body.theme-invest-app .invest-narrow-wrap .cash-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--inv-text);
+}
+
+body.theme-invest-app .invest-narrow-wrap .cash {
+    color: var(--inv-up);
+    font-weight: 700;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container input[type="text"],
+body.theme-invest-app .invest-narrow-wrap .form-container input[type="date"],
+body.theme-invest-app .invest-narrow-wrap .form-container input[type="number"],
+body.theme-invest-app .invest-narrow-wrap .form-container input[type="password"],
+body.theme-invest-app .invest-narrow-wrap .form-container input[type="email"],
+body.theme-invest-app .invest-narrow-wrap .form-container select,
+body.theme-invest-app .invest-narrow-wrap .form-container textarea {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 14px;
+    border: 1px solid var(--inv-border);
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.6);
+    color: var(--inv-text);
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container input[type="text"]:focus,
+body.theme-invest-app .invest-narrow-wrap .form-container input[type="date"]:focus,
+body.theme-invest-app .invest-narrow-wrap .form-container input[type="number"]:focus,
+body.theme-invest-app .invest-narrow-wrap .form-container input[type="password"]:focus,
+body.theme-invest-app .invest-narrow-wrap .form-container input[type="email"]:focus,
+body.theme-invest-app .invest-narrow-wrap .form-container select:focus,
+body.theme-invest-app .invest-narrow-wrap .form-container textarea:focus {
+    outline: none;
+    border-color: rgba(56, 189, 248, 0.55);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    background: rgba(15, 23, 42, 0.85);
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container input::placeholder,
+body.theme-invest-app .invest-narrow-wrap .form-container textarea::placeholder {
+    color: var(--inv-muted);
+    opacity: 0.7;
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container .error {
+    color: #fca5a5;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* ============================================================
+   Generic back button — hiện trên cả PC lẫn mobile
+   Dùng cho sub-pages (buy, sell, investment-performance,
+   insertFollow, updateFollow, updateInfoProfile, changePassword…)
+   ============================================================ */
+.back-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid rgba(99, 179, 237, 0.2);
+    background: var(--inv-surface2);
+    color: var(--inv-text);
+    transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+    white-space: nowrap;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.back-btn:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(56, 189, 248, 0.08);
+    color: var(--inv-accent);
+    transform: translateY(-1px);
+}
+
+/* Mobile: back buttons collapse to a circle showing only ← */
+@media (max-width: 768px) {
+    .back-btn,
+    .buy-back-btn,
+    .sell-back-btn {
+        font-size: 0 !important;
+        width: 40px;
+        min-width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 10px;
+        justify-content: center;
+        gap: 0;
+    }
+
+    .back-btn::before,
+    .buy-back-btn::before,
+    .sell-back-btn::before {
+        content: '←';
+        font-size: 18px;
+    }
+}
+
+/* ============================================================
+   Mobile-only back button — chỉ hiện trên mobile (≤768px)
+   ============================================================ */
+.mobile-only-back-bar {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-only-back-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+}
+
+.mobile-only-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid rgba(99, 179, 237, 0.2);
+    background: var(--inv-surface2);
+    color: var(--inv-text);
+    transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+    white-space: nowrap;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.mobile-only-back-btn:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(56, 189, 248, 0.08);
+    color: var(--inv-accent);
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   Notify modal — dùng chung cho tất cả trang (home, buy, sell,
+   cashIn, cashOut, v.v.)
+   ============================================================ */
+.home-notify-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-notify-modal[aria-hidden="false"] {
+    display: flex;
+}
+
+.home-notify-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 14, 26, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.home-notify-modal__box {
+    position: relative;
+    z-index: 1;
+    background: #1e293b;
+    border: 1px solid rgba(99, 179, 237, 0.18);
+    border-radius: 16px;
+    padding: 32px 28px 24px;
+    max-width: min(90vw, 360px);
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.home-notify-modal__icon {
+    font-size: 2.4rem;
+    line-height: 1;
+}
+
+.home-notify-modal__msg {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: #e2e8f0;
+}
+
+.home-notify-modal--success .home-notify-modal__box {
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+.home-notify-modal--error .home-notify-modal__box {
+    border-color: rgba(248, 113, 113, 0.35);
+}
+
+.home-notify-modal__close {
+    margin-top: 4px;
+    padding: 9px 28px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    color: #0b0f1a;
+    transition: filter 0.15s;
+}
+
+.home-notify-modal__close:hover {
+    filter: brightness(1.08);
 }

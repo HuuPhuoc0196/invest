@@ -23,10 +23,6 @@ h2 {
     margin-bottom: 20px;
 }
 
-.input-group {
-    margin-bottom: 15px;
-}
-
 .input-group label {
     display: block;
     margin-bottom: 6px;
@@ -66,7 +62,6 @@ h2 {
 
 .link-group {
     text-align: center;
-    margin-top: 20px;
 }
 
 .link-group a {
@@ -98,14 +93,21 @@ h2 {
 body.theme-invest-app main.login-layout-main .input-error {
     color: #fca5a5;
     font-size: 0.85rem;
-    margin-top: 6px;
-    min-height: 1.1em;
+    margin-top: 4px;
+    min-height: 0;
 }
 
 body.theme-invest-app main.login-layout-main .link-group {
-    margin-top: 1.25rem;
-    padding-top: 1rem;
+    margin-top: 0.65rem;
+    padding-top: 0.875rem;
     border-top: 1px solid var(--inv-border, rgba(99, 179, 237, 0.12));
+}
+
+@media (max-width: 480px) {
+    body.theme-invest-app main.login-layout-main .link-group {
+        margin-top: 1rem;
+        padding-top: 0.875rem;
+    }
 }
 
 body.theme-invest-app main.login-layout-main .link-group a {
@@ -118,23 +120,93 @@ body.theme-invest-app main.login-layout-main .link-group a:hover {
     text-decoration: none;
 }
 
-body.theme-invest-app main.login-layout-main .toast {
-    margin-top: 1rem;
-    padding: 12px 14px;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    line-height: 1.45;
+/* ── Notify Modal ── */
+body.theme-invest-app .notify-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+body.theme-invest-app .notify-modal.show {
+    display: flex;
+}
+
+body.theme-invest-app .notify-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+body.theme-invest-app .notify-modal__box {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 380px;
+    padding: 1.75rem 1.5rem 1.5rem;
+    border-radius: 14px;
     border: 1px solid transparent;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
 }
 
-body.theme-invest-app main.login-layout-main .toast-success {
-    background: rgba(52, 211, 153, 0.12);
+body.theme-invest-app .notify-modal__icon {
+    font-size: 2rem;
+    margin-bottom: 0.65rem;
+    display: block;
+}
+
+body.theme-invest-app .notify-modal__msg {
+    margin: 0 0 1.25rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+}
+
+body.theme-invest-app .notify-modal__close {
+    display: inline-block;
+    padding: 9px 30px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s;
+}
+
+body.theme-invest-app .notify-modal__close:hover {
+    filter: brightness(1.12);
+}
+
+body.theme-invest-app .notify-modal.is-success .notify-modal__box {
+    background: rgba(13, 30, 22, 0.97);
+    border-color: rgba(52, 211, 153, 0.45);
+}
+
+body.theme-invest-app .notify-modal.is-success .notify-modal__msg {
     color: #6ee7b7;
-    border-color: rgba(52, 211, 153, 0.25);
 }
 
-body.theme-invest-app main.login-layout-main .toast-error {
-    background: rgba(248, 113, 113, 0.12);
-    color: #fca5a5;
-    border-color: rgba(248, 113, 113, 0.25);
+body.theme-invest-app .notify-modal.is-success .notify-modal__close {
+    background: rgba(52, 211, 153, 0.18);
+    color: #6ee7b7;
+    border: 1px solid rgba(52, 211, 153, 0.45);
 }
+
+body.theme-invest-app .notify-modal.is-error .notify-modal__box {
+    background: rgba(30, 10, 10, 0.97);
+    border-color: rgba(248, 113, 113, 0.55);
+}
+
+body.theme-invest-app .notify-modal.is-error .notify-modal__msg {
+    color: #fca5a5;
+}
+
+body.theme-invest-app .notify-modal.is-error .notify-modal__close {
+    background: rgba(220, 50, 50, 0.18);
+    color: #fca5a5;
+    border: 1px solid rgba(248, 113, 113, 0.55);
+}
+

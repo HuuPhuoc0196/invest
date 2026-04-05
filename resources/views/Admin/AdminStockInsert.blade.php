@@ -1,4 +1,4 @@
-@extends('Layout.LayoutAdmin')
+﻿@extends('Layout.LayoutAdmin')
 
 @section('csrf-token')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -29,7 +29,7 @@
 
         <div class="form-group">
             <label for="currentPrice">Giá hiện tại: <span class="required">*</span></label>
-            <input type="text" id="currentPrice" placeholder="VD: 120,000" value="10000">
+            <input type="text" id="currentPrice" placeholder="VD: 120.000" value="10000">
             <div class="error" id="errorCurrent">Vui lòng nhập Giá hiện tại</div>
             <div class="error" id="errorCurrentType">Vui lòng nhập Số</div>
         </div>
@@ -42,13 +42,13 @@
 
         <div class="form-group">
             <label for="buyPrice">Giá mua tốt:</label>
-            <input type="text" id="buyPrice" placeholder="VD: 100,000" value="10000">
+            <input type="text" id="buyPrice" placeholder="VD: 100.000" value="10000">
             <div class="error" id="errorBuyType">Vui lòng nhập Số</div>
         </div>
 
         <div class="form-group">
             <label for="sellPrice">Giá bán tốt:</label>
-            <input type="text" id="sellPrice" placeholder="VD: 150,000" value="10000">
+            <input type="text" id="sellPrice" placeholder="VD: 150.000" value="10000">
             <div class="error" id="errorSellType">Vui lòng nhập Số</div>
         </div>
 
@@ -98,6 +98,6 @@
     @vite('resources/js/AdminStockInsert.js')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        const baseUrl = "{{ url('') }}";
+        window.__pageData = { baseUrl: "{{ url('') }}" };
     </script>
 @endsection

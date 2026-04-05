@@ -40,4 +40,12 @@ return [
         'run_update_stock_path' => env('SYNC_RUN_UPDATE_STOCK_PATH', '/run-sync-update-stocks'),
     ],
 
+    /*
+    | Secret cho cron/VPS gọi các route trong routes/api.php (trừ /api/user).
+    | Gửi: X-Cron-Secret: {CRON_API_SECRET} hoặc Authorization: Bearer {CRON_API_SECRET}
+    */
+    'cron' => [
+        'secret' => env('CRON_API_SECRET'),
+    ],
+
 ];

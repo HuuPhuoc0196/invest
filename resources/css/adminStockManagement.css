@@ -1,7 +1,6 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f6f8;
-    padding: 20px;
 }
 
 h1 {
@@ -161,7 +160,7 @@ td {
 }
 
 th {
-    background-color: #34495e;
+    background-color: #162235 !important;
     color: white;
 }
 
@@ -182,7 +181,7 @@ th {
 }
 
 .sticky-header th {
-    background-color: #34495e;
+    background-color: #162235 !important;
     z-index: 1001;
 }
 
@@ -215,7 +214,7 @@ th {
 
 /* Keep backgrounds visible when sticky overlays other cells */
 #stock-table th.col-code-sticky {
-    background-color: #34495e;
+    background-color: #162235 !important;
     border-right: none; /* dùng pseudo-element để không bị che khi overlap */
     position: sticky;
     box-shadow: none;
@@ -292,7 +291,7 @@ th {
 }
 
 #invest-table th.col-code-sticky {
-    background-color: #34495e;
+    background-color: #162235 !important;
 }
 
 #invest-table td.col-code-sticky {

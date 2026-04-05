@@ -19,14 +19,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-Route::get('/admin/collect', [Sync::class, 'getNewPrice'])->name('Sync.getNewPrice');
-Route::get('/admin/collectRisk', [Sync::class, 'getNewRisk'])->name('Sync.getNewRisk');
-Route::get('/admin/getSuggestInvestment', [Sync::class, 'suggestInvestment'])->name('Sync.suggestInvestment');
-Route::get('/admin/deleteLogs', [Sync::class, 'deleteLogs'])->name('Sync.deleteLogs');
-Route::get('/admin/sendEmailRisk', [Sync::class, 'sendEmailRisk'])->name('Sync.sendEmailRisk');
-Route::get('/admin/sendEmailStocks', [Sync::class, 'sendEmailStocks'])->name('Sync.sendEmailStocks');
-Route::post('/admin/sendEmailError', [Sync::class, 'sendEmailError'])->name('Sync.sendEmailError');
-Route::get('/admin/sendEmailStocksFollow', [Sync::class, 'sendEmailStocksFollow'])->name('Sync.sendEmailStocksFollow');
-Route::get('/admin/followStocksEveryDay', [Sync::class, 'followStocksEveryDay'])->name('Sync.followStocksEveryDay');
-Route::get('/admin/sendEmailVnindex', [Sync::class, 'sendEmailVnindex'])->name('Sync.sendEmailVnindex');
+Route::middleware('cron.secret')->group(function () {
+    Route::get('/admin/collect', [Sync::class, 'getNewPrice'])->name('Sync.getNewPrice');
+    Route::get('/admin/collectRisk', [Sync::class, 'getNewRisk'])->name('Sync.getNewRisk');
+    Route::get('/admin/getSuggestInvestment', [Sync::class, 'suggestInvestment'])->name('Sync.suggestInvestment');
+    Route::get('/admin/deleteLogs', [Sync::class, 'deleteLogs'])->name('Sync.deleteLogs');
+    Route::get('/admin/sendEmailRisk', [Sync::class, 'sendEmailRisk'])->name('Sync.sendEmailRisk');
+    Route::get('/admin/sendEmailStocks', [Sync::class, 'sendEmailStocks'])->name('Sync.sendEmailStocks');
+    Route::post('/admin/sendEmailError', [Sync::class, 'sendEmailError'])->name('Sync.sendEmailError');
+    Route::get('/admin/sendEmailStocksFollow', [Sync::class, 'sendEmailStocksFollow'])->name('Sync.sendEmailStocksFollow');
+    Route::get('/admin/followStocksEveryDay', [Sync::class, 'followStocksEveryDay'])->name('Sync.followStocksEveryDay');
+    Route::get('/admin/sendEmailVnindex', [Sync::class, 'sendEmailVnindex'])->name('Sync.sendEmailVnindex');
+});

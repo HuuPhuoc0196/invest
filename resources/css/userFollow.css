@@ -1,7 +1,6 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f6f8;
-    padding: 20px;
 }
 
 h1 {
@@ -33,7 +32,7 @@ td {
 }
 
 th {
-    background-color: #34495e;
+    background-color: #162235 !important;
     color: white;
 }
 

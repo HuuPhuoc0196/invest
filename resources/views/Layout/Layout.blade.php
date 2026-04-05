@@ -6,6 +6,27 @@
     @yield('csrf-token')
     <title>@yield('title', 'Invest')</title>
 
+    @if (View::hasSection('seo'))
+        @yield('seo')
+    @elseif (request()->routeIs('home'))
+        @include('partials.seo-public', [
+            'pageTitle' => trim(View::yieldContent('title')) ?: 'Danh sách mã cổ phiếu — ' . config('app.name'),
+            'description' => 'Xem bảng giá và danh mục mã cổ phiếu, mức rủi ro và bộ lọc dữ liệu — nền tảng quản lý đầu tư cá nhân.',
+        ])
+        <script type="application/ld+json">
+            {!! json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'WebSite',
+                'name' => config('app.name'),
+                'url' => route('home'),
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+        </script>
+    @elseif (auth()->check())
+        <meta name="robots" content="noindex, follow">
+    @endif
+
+    @include('partials.favicon')
+
     <!-- Fonts -->
     <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -19,14 +40,14 @@
     'antialiased',
     'theme-invest-app',
     'layout-user',
-    'has-mobile-back' => !request()->routeIs('home') && !request()->is('home', 'user'),
+    'has-mobile-back' => !request()->routeIs('home') && !request()->is('trang-chu', 'home', 'user'),
 ])>
     <!-- User Info -->
     @yield('user-info')
 
     <div class="mobile-topbar">
         <div class="mobile-topbar-brand">
-            <a href="{{ url('/home') }}" class="mobile-topbar-logo" aria-label="Trang chủ">
+            <a href="{{ route('home') }}" class="mobile-topbar-logo" aria-label="Trang chủ">
                 <img src="{{ route('site.logo') }}?v={{ file_exists(public_path('icon/investment_logo.svg')) ? filemtime(public_path('icon/investment_logo.svg')) : 0 }}" alt="Logo" width="36" height="36" decoding="async">
             </a>
             <div class="mobile-topbar-title">Quản lý đầu tư cá nhân</div>
@@ -35,14 +56,14 @@
     </div>
     <div class="mobile-menu-overlay" onclick="toggleMobileMenu(false)"></div>
     <div class="actions">
-        <a href="{{ url('/home') }}" class="site-brand site-brand--desktop" aria-label="Trang chủ — Quản lý đầu tư cá nhân">
+        <a href="{{ route('home') }}" class="site-brand site-brand--desktop" aria-label="Trang chủ — Quản lý đầu tư cá nhân">
             <img src="{{ route('site.logo') }}?v={{ file_exists(public_path('icon/investment_logo.svg')) ? filemtime(public_path('icon/investment_logo.svg')) : 0 }}" alt="Logo" class="site-brand__img" width="44" height="44" decoding="async">
             <span class="site-brand__text">Quản lý đầu tư cá nhân</span>
         </a>
         <div class="actions-left mobile-menu-drawer" id="mobileMenuDrawer" role="dialog" aria-modal="true" aria-label="Menu điều hướng">
             <div class="mobile-menu-header">
                 <div class="mobile-menu-header-brand">
-                    <a href="{{ url('/home') }}" class="mobile-menu-header-logo" aria-label="Trang chủ">
+                    <a href="{{ route('home') }}" class="mobile-menu-header-logo" aria-label="Trang chủ">
                         <img src="{{ route('site.logo') }}?v={{ file_exists(public_path('icon/investment_logo.svg')) ? filemtime(public_path('icon/investment_logo.svg')) : 0 }}" alt="Logo" width="36" height="36" decoding="async">
                     </a>
                     <span class="mobile-menu-title">Quản lý đầu tư cá nhân</span>
@@ -57,16 +78,6 @@
     </div>
 
     <main>
-        @if (!request()->routeIs('home') && !request()->is('home', 'user'))
-            <button
-                type="button"
-                class="mobile-menu-toggle mobile-back-button"
-                onclick="mobileGoBack()"
-                aria-label="Quay lại trang trước"
-            >
-                ←
-            </button>
-        @endif
         <div id="mobileActionsRightSlot" class="mobile-actions-right-slot"></div>
         @yield('user-body-content')
     </main>
@@ -148,7 +159,7 @@
                 window.history.back();
                 return;
             }
-            window.location.href = "{{ url('/home') }}";
+            window.location.href = "{{ route('home') }}";
         }
     </script>
     @yield('user-script')

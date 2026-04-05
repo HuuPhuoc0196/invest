@@ -1,7 +1,6 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f6f8;
-    padding: 20px;
 }
 
 .mobile-back-button {
@@ -103,7 +102,7 @@ td {
 }
 
 th {
-    background-color: #34495e;
+    background-color: #162235 !important;
     color: white;
 }
 
@@ -304,7 +303,6 @@ input[type="date"] {
         gap: 8px;
         align-content: flex-start;
         margin: 0;
-        padding: 12px;
     }
 
     .mobile-menu-drawer.actions-left .button-link,
@@ -455,10 +453,6 @@ input[type="date"] {
     .mobile-menu-open .mobile-back-button {
         pointer-events: none;
         opacity: 0.75;
-    }
-
-    .has-mobile-back .mobile-topbar-brand {
-        padding-left: 50px;
     }
 }
 

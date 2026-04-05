@@ -1,0 +1,15 @@
+/* Moved from UserUpdateFollow.blade.php <style> block */
+.form-group-auto-sync {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.form-group-auto-sync label {
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+.auto-sync-toggle {
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, filter 0.15s ease;
+}

@@ -20,13 +20,63 @@ use App\Http\Controllers\Sync\Sync;
 |
 */
 
+Route::get('/robots.txt', function () {
+    $base = rtrim((string) config('app.url'), '/');
+    $body = implode("\n", [
+        'User-agent: *',
+        'Allow: /',
+        'Disallow: /admin/',
+        'Disallow: /user/',
+        'Disallow: /profile',
+        '',
+        'Sitemap: ' . $base . '/sitemap.xml',
+        '',
+    ]);
+
+    return response($body, 200)->header('Content-Type', 'text/plain; charset=UTF-8');
+})->name('site.robots');
+
+Route::get('/sitemap.xml', function () {
+    $urls = [
+        ['loc' => route('home'), 'changefreq' => 'daily', 'priority' => '1.0'],
+        ['loc' => route('login'), 'changefreq' => 'monthly', 'priority' => '0.7'],
+        ['loc' => route('register'), 'changefreq' => 'monthly', 'priority' => '0.6'],
+        ['loc' => route('forgotPassword'), 'changefreq' => 'monthly', 'priority' => '0.4'],
+    ];
+    $lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'];
+    foreach ($urls as $u) {
+        $loc = htmlspecialchars($u['loc'], ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        $lines[] = '<url>';
+        $lines[] = '<loc>' . $loc . '</loc>';
+        $lines[] = '<changefreq>' . e($u['changefreq']) . '</changefreq>';
+        $lines[] = '<priority>' . e($u['priority']) . '</priority>';
+        $lines[] = '</url>';
+    }
+    $lines[] = '</urlset>';
+
+    return response(implode("\n", $lines), 200)->header('Content-Type', 'application/xml; charset=UTF-8');
+})->name('site.sitemap');
+
 Route::middleware('guest')->group(function () {
-    // ✅ Các route công khai, không cần login
-    Route::match(['get', 'post'], '/login', [Login::class, 'login'])->name('login');
-    Route::match(['get', 'post'], '/register', [Login::class, 'register'])->name('register');
-    Route::match(['get', 'post'], '/forgotPassword', [Login::class, 'forgotPassword'])->name('forgotPassword');
-    Route::get('/reset-password', [Login::class, 'showResetPasswordForm'])->name('password.reset');
-    Route::post('/reset-password', [Login::class, 'resetPassword'])->name('password.update');
+    Route::match(['get', 'post'], '/dang-nhap', [Login::class, 'login'])->name('login');
+    Route::match(['get', 'post'], '/dang-ky', [Login::class, 'register'])->name('register');
+    Route::match(['get', 'post'], '/quen-mat-khau', [Login::class, 'forgotPassword'])->name('forgotPassword');
+    Route::get('/dat-lai-mat-khau', [Login::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/dat-lai-mat-khau', [Login::class, 'resetPassword'])->name('password.update');
+
+    Route::post('/login', [Login::class, 'login']);
+    Route::post('/register', [Login::class, 'register']);
+    Route::post('/forgotPassword', [Login::class, 'forgotPassword']);
+    Route::post('/reset-password', [Login::class, 'resetPassword']);
+});
+
+Route::get('/login', fn () => redirect('/dang-nhap', 301));
+Route::get('/register', fn () => redirect('/dang-ky', 301));
+Route::get('/forgotPassword', fn () => redirect('/quen-mat-khau', 301));
+Route::get('/reset-password', function () {
+    $q = request()->getQueryString();
+
+    return redirect()->to('/dat-lai-mat-khau' . ($q ? '?' . $q : ''), 301);
 });
 
 // Xác thực email (user bấm link trong email, không cần đăng nhập)
@@ -96,20 +146,21 @@ Route::get('/__debug/logo', function () {
 })->name('debug.logo');
 
 // Trang chủ: cho phép cả guest và user (không bắt buộc login)
-Route::get('/home', [User::class, 'show'])->name('home');
+Route::get('/trang-chu', [User::class, 'show'])->name('home');
+Route::get('/home', fn () => redirect('/trang-chu', 301));
 Route::get('/user', [User::class, 'show']);
 
 Route::post('/logout', function () {
     Auth::logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
-    return redirect('/login');
+    return redirect()->route('login');
 })->name('logout');
 
 Route::middleware(['auth', 'admin'])->group(function () {
     // Admin
     Route::get('/admin', [Admin::class, 'show'])->name('admin.home');
-    Route::get('/admin/delete/{code}', [Admin::class, 'delete'])->name('admin.delete');
+    Route::post('/admin/delete/{code}', [Admin::class, 'delete'])->name('admin.delete');
     Route::match(['get', 'post'], '/admin/insert', [Admin::class, 'insert'])->name('insert');
     Route::match(['get', 'put'], '/admin/update/{code}', [Admin::class, 'update'])->name('admin.update');
     Route::match(['get', 'post'], '/admin/updateRiskForCode', [Sync::class, 'updateRiskForCode'])->name('updateRiskForCode');
@@ -145,6 +196,7 @@ Route::middleware(['auth', 'user'])->group(function () {
     // Route::get('/user/deleteUserProfileCode/{code}', [User::class, 'deleteUserProfileCode']);
     Route::get('/user/deleteFollow/{code}', [User::class, 'deleteFollow'])->name('user.deleteFollow');
     Route::post('/user/deleteFollowAll', [User::class, 'deleteAllFollow'])->name('user.deleteFollowAll');
+    Route::post('/user/deleteFollowBatch', [User::class, 'deleteFollowBatch'])->name('user.deleteFollowBatch');
 
     // Giao dịch
     Route::match(['get', 'post'], '/user/buy', [User::class, 'buy'])->name('buy');

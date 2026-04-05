@@ -4,435 +4,173 @@ namespace App\Http\Controllers\Sync;
 
 use App\Http\Controllers\Controller;
 use App\Models\Stock;
-use App\Models\UserFollow;
-use App\Models\StatusSync;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Log;
 use App\Services\EmailService;
-use Illuminate\Support\Facades\Http;
+use App\Services\SyncService;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
-use App\Models\UserPortfolio;
+use App\Http\Requests\UpdateRiskForCodeRequest;
 
 class Sync extends Controller
 {
+    public function __construct(private SyncService $syncService) {}
+
     public function getNewPrice()
     {
-        $stocks = Stock::getAllStocks();
         try {
             set_time_limit(0);
-            Log::info("Start cập nhật giá của cổ phiếu");
-            Log::info("Tổng số lượng cổ phiếu cần cập nhật là: " . $stocks->count());
-            $statusSync = StatusSync::getStatusSync();
-            $statusSync->status_sync_price = 1;
-            $statusSync->save();
-            foreach ($stocks as $stock) {
-                $newPrice = $this->colectPrice($stock->code);
-                Log::info("Call api lấy giá của mã chứng khoán {$stock->code} từ {$stock->current_price} thành " . round($newPrice, 2));
-                if (!is_numeric($newPrice)) {
-                    Log::error("Không thể lấy giá mới sau khi run getNewPrice với {$stock->code}");
-                    continue;
-                }
-                if ($stock->current_price != $newPrice) {
-                    $stock->current_price = $newPrice;
-                    $stock->save();
-                }
-            }
-            $statusSync->status_sync_price = 0;
-            $statusSync->save();
-            Log::info("End cập nhật giá cổ phiếu");
-            // Trả kết quả JSON
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Update thành công.',
-                // 'data' => $stock
-            ]);
+            $result = $this->syncService->syncNewPrice();
+            return response()->json($result);
         } catch (QueryException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
+            return $this->jsonServerError($e);
         }
     }
 
     public function getNewRisk()
     {
-        $stocks = Stock::getAllStocks();
         try {
             set_time_limit(0);
-            Log::info("Start cập nhật mức độ rủi ro của cổ phiếu");
-            Log::info("Tổng số lượng cổ phiếu cần cập nhật là: " . $stocks->count());
-            $statusSync = StatusSync::getStatusSync();
-            $statusSync->status_sync_risk = 1;
-            $statusSync->save();
-            foreach ($stocks as $stock) {
-                $newRisk = $this->colectRisk($stock->code);
-                Log::info("Call api mức độ rủi ro của mã chứng khoán {$stock->code} từ {$stock->risk_level} thành {$newRisk}");
-                if (!is_numeric($newRisk)) {
-                    Log::error("Không thể lấy risk mới sau khi run getNewRisk với {$stock->code}");
-                    continue;
-                }
-                if ($stock->risk_level != $newRisk) {
-                    $result = EmailService::sendRiskChangeNotification($stock->code, $stock->risk_level, $newRisk);
-                    Log::info("Send mail: " . $result);
-                    Log::info("cập nhật mức độ rủi ro của mã chứng khoán {$stock->code} từ {$stock->risk_level} thành {$newRisk}");
-                    $stock->risk_level = $newRisk;
-                    $stock->save();
-                }
-            }
-            $statusSync->status_sync_risk = 0;
-            $statusSync->save();
-            Log::info("End cập nhật mức độ rủi ro của cổ phiếu");
-            // Trả kết quả JSON
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Update thành công.',
-                // 'data' => $stock
-            ]);
+            $result = $this->syncService->syncNewRisk();
+            return response()->json($result);
         } catch (QueryException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
+            return $this->jsonServerError($e);
         }
     }
 
     public function suggestInvestment()
     {
-        $stocks = Stock::getAllStocks();
         try {
-            foreach ($stocks as $stock) {
-                $recommended_buy_price = $stock->recommended_buy_price;
-                $current_price = $stock->current_price;
-                $result = EmailService::sendSuggestInvestment($stock->code, $current_price, $recommended_buy_price, $stock->risk_level);
-                if ($result) {
-                    Log::info("Send mail Suggest cổ phiếu: " . $stock->code);
-                    Log::info("Có giá hiện tại là: {$current_price} và Giá đề xuất là {$recommended_buy_price}");
-                }
-            }
-            // Trả kết quả JSON
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Suggest Price Code Success.',
-                // 'data' => $stock
-            ]);
+            $result = $this->syncService->suggestInvestment();
+            return response()->json($result);
         } catch (QueryException $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
+            return $this->jsonServerError($e);
         }
     }
 
-    public function updateRiskForCode(Request $request)
+    public function updateRiskForCode(UpdateRiskForCodeRequest $request)
     {
         if ($request->isMethod('post')) {
-            // Có dữ liệu
             try {
                 set_time_limit(0);
-                // Validation dữ liệu
-                $validated = $request->validate([
-                    'code' => 'required|string|max:10',
-                ]);
-
-                // Kiểm tra code đã tồn tại chưa
-                $stock = Stock::getByCode($validated['code']);
-                if (!$stock) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Mã ' . $validated['code'] . ' không tồn tại.'
-                    ]);
-                }
-                Log::info("Start cập nhật mức độ rủi ro của cổ phiếu: " . $validated['code']);
-                $statusSync = StatusSync::getStatusSync();
-                $statusSync->status_sync_risk = 1;
-                $statusSync->save();
-                $newRisk = $this->colectRisk($stock->code);
-                Log::info("Call api mức độ rủi ro của mã chứng khoán {$stock->code} từ {$stock->risk_level} thành {$newRisk}");
-                if (!is_numeric($newRisk)) {
-                    Log::error("Không thể lấy risk mới sau khi run getNewRisk với {$stock->code}");
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Cập nhật rủi ro ' . $stock->code . ' thất bại.',
-                        // 'data' => $stock
-                    ]);
-                }
-                if ($stock->risk_level != $newRisk) {
-                    $result = EmailService::sendRiskChangeNotification($stock->code, $stock->risk_level, $newRisk);
-                    Log::info("Send mail: " . $result);
-                    Log::info("cập nhật mức độ rủi ro của mã chứng khoán {$stock->code} từ {$stock->risk_level} thành {$newRisk}");
-                    $stock->risk_level = $newRisk;
-                    $stock->save();
-                }
-                $statusSync->status_sync_risk = 0;
-                $statusSync->save();
-                Log::info("End cập nhật mức độ rủi ro của cổ phiếu");
-                // Trả kết quả JSON
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Cập nhật rủi ro ' . $stock->code . ' thành công.',
-                    // 'data' => $stock
-                ]);
+                $result = $this->syncService->syncRiskForCode($request->validated()['code']);
+                return response()->json($result);
             } catch (QueryException $e) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ], 500);
+                return $this->jsonServerError($e);
             }
-        } else {
-            return view('Admin.AdminUpdateRiskForCode');
         }
+        return view('Admin.AdminUpdateRiskForCode');
     }
 
     public function deleteLogs()
     {
-        // Đường dẫn tới file log
         $logPath = storage_path('logs/laravel.log');
-
-        // Kiểm tra file tồn tại không
         if (File::exists($logPath)) {
-            // Xóa nội dung file (hoặc có thể dùng File::delete($logPath) để xóa hẳn file)
             file_put_contents($logPath, '');
             return response()->json(['status' => 'success', 'message' => 'Logs đã được xóa thành công!']);
         }
-
         return response()->json(['status' => 'error', 'message' => 'Không tìm thấy file log!'], 404);
     }
 
     public function sendEmailRisk(Request $request)
     {
-        $code = $request->query('code');
+        $code      = $request->query('code');
         $risk_level = $request->query('risk_level');
-        $date = $request->query('date');
-        $newRisk = $request->query('newRisk');
-        $result = EmailService::sendRiskChangeNotification($code, $risk_level, $newRisk, $date);
-        $message = 'Hệ thống ghi nhận cổ phiếu ' . $code . ' có thay đổi mức độ rủi ro.';
-        $message .= ' Chuyển từ ' . $risk_level;
-        $message .= ' Thành ' . $newRisk;
-        $message .= ' Ngày thực hiện ' . $date;
+        $date      = $request->query('date');
+        $newRisk   = $request->query('newRisk');
+        $result    = EmailService::sendRiskChangeNotification($code, $risk_level, $newRisk, $date);
+        $message   = "Hệ thống ghi nhận cổ phiếu {$code} có thay đổi mức độ rủi ro. Chuyển từ {$risk_level} Thành {$newRisk} Ngày thực hiện {$date}";
         Log::info($message);
         Log::info("Send mail: " . $result);
-        // Trả kết quả JSON
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Send mail thành công.',
-            // 'data' => $stock
-        ]);
+        return response()->json(['status' => 'success', 'message' => 'Send mail thành công.']);
     }
 
     public function sendEmailVnindex(Request $request)
     {
         $index_current = $request->query('index_current');
         $index_suggest = $request->query('index_suggest');
-        $result = EmailService::sendVnindexChangeNotification($index_current, $index_suggest);
-        $message = 'Hệ thống ghi nhận Vnindex có mức điều chỉnh về vùng mua tốt.';
-        $message .= ' Vnindex hiện tại:  ' . $index_current;
-        $message .= ' Vindex vùng mua tốt: ' . $index_suggest;
+        $result        = EmailService::sendVnindexChangeNotification($index_current, $index_suggest);
+        $message       = "Hệ thống ghi nhận Vnindex có mức điều chỉnh về vùng mua tốt. Vnindex hiện tại: {$index_current} Vindex vùng mua tốt: {$index_suggest}";
         Log::info($message);
         Log::info("Send mail: " . $result);
-        // Trả kết quả JSON
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Send mail thành công.',
-            // 'data' => $stock
-        ]);
+        return response()->json(['status' => 'success', 'message' => 'Send mail thành công.']);
     }
 
     public function sendEmailStocks(Request $request)
     {
-        $code = $request->query('code');
-        $result = EmailService::sendSuggestStocksHave1tr($code);
-        $message = 'Hệ thống ghi nhận cổ phiếu ' . $code . ' đã có khối lượng giao dịch trên 1.000.000 và chưa được thêm vào hệ thống.';
+        $code    = $request->query('code');
+        $result  = EmailService::sendSuggestStocksHave1tr($code);
+        $message = "Hệ thống ghi nhận cổ phiếu {$code} đã có khối lượng giao dịch trên 1.000.000 và chưa được thêm vào hệ thống.";
         Log::info($message);
         Log::info("Send mail: " . $result);
-        // Trả kết quả JSON
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Send mail thành công.',
-            // 'data' => $stock
-        ]);
+        return response()->json(['status' => 'success', 'message' => 'Send mail thành công.']);
     }
 
     public function sendEmailError(Request $request)
     {
-        $file = $request->query('file');
+        $file     = $request->query('file');
         $function = $request->query('function');
-        $message = $request->query('message');
-        $result = EmailService::sendErrorNotification($file, $function, $message);
-        $logMessage = 'Hệ thống ghi nhận lỗi trong file ' . $file . ' tại function ' . $function . '. Thông báo lỗi: ' . $message;
+        $message  = $request->query('message');
+        $result   = EmailService::sendErrorNotification($file, $function, $message);
+        $logMessage = "Hệ thống ghi nhận lỗi trong file {$file} tại function {$function}. Thông báo lỗi: {$message}";
         Log::info($logMessage);
         Log::info("Send mail: " . $result);
-        // Trả kết quả JSON
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Send mail thành công.',
-            // 'data' => $stock
-        ]);
+        return response()->json(['status' => 'success', 'message' => 'Send mail thành công.']);
     }
 
     public function sendEmailStocksFollow(Request $request)
     {
-        $code = $request->query('code');
-        // Kiểm tra code đã tồn tại chưa
-        $stock = Stock::getByCode($code);
+        $code       = $request->query('code');
+        $stock      = Stock::getByCode($code);
         if (!$stock) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Mã ' . $code . ' không tồn tại.'
-            ]);
+            return response()->json(['status' => 'error', 'message' => 'Mã ' . $code . ' không tồn tại.']);
         }
-        $userFollow = new UserFollow();
-        $userFollowExit = UserFollow::getUserFollowFirst($stock->id, 1);
-
-        if ($userFollowExit) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Mã cổ phiếu ' . $code . ' đã được theo dõi.'
-            ]);
+        $userFollowExist = \App\Models\UserFollow::getUserFollowFirst($stock->id, 1);
+        if ($userFollowExist) {
+            return response()->json(['status' => 'error', 'message' => 'Mã cổ phiếu ' . $code . ' đã được theo dõi.']);
         }
-        $userFollow->user_id = 1;
-        $userFollow->stock_id = $stock->id;
-        $userFollow->follow_price_buy = $stock->recommended_buy_price;
+        $userFollow                    = new \App\Models\UserFollow();
+        $userFollow->user_id           = 1;
+        $userFollow->stock_id          = $stock->id;
+        $userFollow->follow_price_buy  = $stock->recommended_buy_price;
         $userFollow->follow_price_sell = $stock->recommended_sell_price ?? null;
-        $userFollow->notice_flag = 1;
-        // Lưu vào database
+        $userFollow->notice_flag       = 1;
         $userFollow->save();
-        $result = EmailService::sendSuggestStocksHave10tr($code);
-        $message = 'Hệ thống ghi nhận cổ phiếu ' . $code . ' đã có khối lượng giao dịch trên 10.000.000 và thêm vào table user_follow.';
+        $result  = EmailService::sendSuggestStocksHave10tr($code);
+        $message = "Hệ thống ghi nhận cổ phiếu {$code} đã có khối lượng giao dịch trên 10.000.000 và thêm vào table user_follow.";
         Log::info($message);
         Log::info("Send mail: " . $result);
-        // Trả kết quả JSON
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Send mail thành công.',
-            // 'data' => $stock
-        ]);
+        return response()->json(['status' => 'success', 'message' => 'Send mail thành công.']);
     }
 
     public function followStocksEveryDay(Request $request)
     {
-
-        $listUserProfile = UserPortfolio::getProfileUser(1);
-        foreach ($listUserProfile as $item) {
-            $stocks = Stock::getByCode($item["code"]);
-            $result = EmailService::sendFollowStocksEveryDay($stocks, $item["avg_buy_price"]);
-            Log::info("Send mail: " . $result);
+        try {
+            $result = $this->syncService->followStocksEveryDay();
+            return response()->json($result);
+        } catch (QueryException $e) {
+            return $this->jsonServerError($e);
         }
-        // Trả kết quả JSON
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Send mail follow every day thành công.',
-            // 'data' => $stock
-        ]);
     }
 
-    public function colectRisk($symbol)
-    {
-
-        $newRisk = null;
-        $maxAttempts = 5; // giới hạn số lần thử để tránh vòng lặp vô hạn
-        $attempt = 0;
-        $data = null;
-
-        while (!is_numeric($data) && $attempt < $maxAttempts) {
-            try {
-                $attempt++;
-                // $response = Http::timeout(120)->get("http://127.0.0.1:5000/getRiskFromHTML", [
-                //     'symbol' => $symbol,
-                // ]);
-                $baseUrl = config('services.sync.base_url');
-                $response = Http::timeout(120)->get($baseUrl . "/getRiskFromHTML", [
-                    'symbol' => $symbol,
-                ]);
-                Log::info($response);
-                sleep(1);
-            } catch (\Exception $e) {
-                Log::error("Request error colectRisk for symbol {$symbol}: " . $e->getMessage());
-                continue;
-            }
-            $data = $response->json();
-            $newRisk = floatval($data);
-        }
-        return $newRisk;
-    }
-
-    public function colectPrice($symbol)
-    {
-        $finalPrice = null;
-        $maxAttempts = 5; // tránh lặp vô hạn
-        $attempt = 0;
-
-        while (!is_numeric($finalPrice) && $attempt < $maxAttempts) {
-            try {
-                $attempt++;
-                // $response = Http::timeout(120)->get("http://127.0.0.1:5000/getPriceFromHTML", [
-                //     'symbol' => $symbol,
-                // ]);
-                $baseUrl = config('services.sync.base_url');
-                $response = Http::timeout(120)->get($baseUrl . "/getPriceFromHTML", [
-                    'symbol' => $symbol,
-                ]);
-                Log::info($response);
-                sleep(1);
-            } catch (\Exception $e) {
-                Log::error("Request error colectPrice for symbol {$symbol}: " . $e->getMessage());
-                continue;
-            }
-
-            $data = $response->json();
-            if (isset($data)) {
-                $price1 = $data['owner_priceClose_1'] ?? null;
-                $price2 = $data['owner_priceClose_2'] ?? null;
-
-                if ($price1 != null && $price1 != '0' && $price1 != 0 && $price1 != '--') {
-                    $finalPrice = $price1;
-                } else {
-                    $finalPrice = $price2;
-                }
-
-                // Nhân 1000 nếu là số hợp lệ
-                if (is_numeric($finalPrice)) {
-                    $finalPrice = floatval($finalPrice) * 1000;
-                    break;
-                } else {
-                    $finalPrice = null; // reset để tiếp tục lặp
-                }
-            }
-        }
-        return $finalPrice;
-    }
-
-    /**
-     * Proxy: admin (HTTPS) gọi Laravel cùng origin → server gọi HTTP tới VPS sync.
-     * Tránh Mixed Content và CORS khi trình duyệt gọi thẳng SYNC_SERVICE_URL.
-     */
     public function runSyncUpdateStock(Request $request, string $code)
     {
         $code = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $code));
         if ($code === '' || strlen($code) > 20) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Mã cổ phiếu không hợp lệ.',
-            ], 422);
+            return response()->json(['status' => 'error', 'message' => 'Mã cổ phiếu không hợp lệ.'], 422);
         }
-
-        if (! Stock::getByCode($code)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Mã cổ phiếu không tồn tại trong hệ thống.',
-            ], 404);
+        if (!Stock::getByCode($code)) {
+            return response()->json(['status' => 'error', 'message' => 'Mã cổ phiếu không tồn tại trong hệ thống.'], 404);
         }
 
         $baseUrl = rtrim((string) config('services.sync.base_url'), '/');
-        $path = (string) config('services.sync.run_update_stock_path', '/run-sync-update-stocks');
-        $path = '/' . ltrim($path, '/');
+        $path    = (string) config('services.sync.run_update_stock_path', '/run-sync-update-stocks');
+        $path    = '/' . ltrim($path, '/');
 
         if ($baseUrl === '') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Chưa cấu hình SYNC_SERVICE_URL.',
-            ], 500);
+            return response()->json(['status' => 'error', 'message' => 'Chưa cấu hình SYNC_SERVICE_URL.'], 500);
         }
 
         $url = $baseUrl . $path . '/' . rawurlencode($code);
@@ -441,30 +179,20 @@ class Sync extends Controller
             $response = Http::timeout(120)->acceptJson()->get($url);
         } catch (ConnectionException $e) {
             Log::error('runSyncUpdateStock connection: ' . $e->getMessage());
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Không kết nối được tới service sync. Kiểm tra SYNC_SERVICE_URL và firewall VPS.',
-            ], 502);
+            return response()->json(['status' => 'error', 'message' => 'Không kết nối được tới service sync. Kiểm tra SYNC_SERVICE_URL và firewall VPS.'], 502);
         } catch (\Throwable $e) {
             Log::error('runSyncUpdateStock: ' . $e->getMessage());
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Lỗi khi gọi service sync.',
-            ], 502);
+            return response()->json(['status' => 'error', 'message' => 'Lỗi khi gọi service sync.'], 502);
         }
 
         $payload = $response->json();
-
-        if (! $response->successful()) {
-            $msg = is_array($payload) && ! empty($payload['message'])
+        if (!$response->successful()) {
+            $msg = is_array($payload) && !empty($payload['message'])
                 ? (string) $payload['message']
                 : ('Service sync trả lỗi HTTP ' . $response->status());
-
             return response()->json([
-                'status' => 'error',
-                'message' => $msg,
+                'status'      => 'error',
+                'message'     => $msg,
                 'sync_status' => $response->status(),
             ], $response->status() >= 500 ? 502 : $response->status());
         }
@@ -473,76 +201,44 @@ class Sync extends Controller
             ? (string) $payload['message']
             : 'Đã gửi yêu cầu cập nhật cho mã ' . $code . '.';
 
-        return response()->json([
-            'status' => 'success',
-            'message' => $message,
-            'sync' => $payload,
-        ]);
+        return response()->json(['status' => 'success', 'message' => $message, 'sync' => $payload]);
     }
 
     public function getLogsVPS()
     {
-        try {
-            // $response = Http::timeout(120)->get("http://127.0.0.1:5000/getLogs");
-            $response = Http::timeout(120)->get(config('services.sync.base_url') . "/get-logs");
-        } catch (\Exception $e) {
-            Log::error("Request error getLogsVPS: " . $e->getMessage());
+        $baseUrl = rtrim((string) config('services.sync.base_url'), '/');
+        if ($baseUrl === '') {
+            return response('<pre>Chưa cấu hình SYNC_SERVICE_URL.</pre>', 503);
         }
-        return "<pre>" . htmlspecialchars($response) . "</pre>";
+
+        try {
+            $response = Http::timeout(120)->get($baseUrl . '/get-logs');
+        } catch (\Exception $e) {
+            Log::error('Request error getLogsVPS: ' . $e->getMessage());
+
+            return response('<pre>' . e('Không lấy được log VPS: ' . (config('app.debug') ? $e->getMessage() : 'lỗi kết nối')) . '</pre>', 502);
+        }
+
+        if (! $response->successful()) {
+            return response('<pre>' . e('Dịch vụ log trả HTTP ' . $response->status()) . '</pre>', 502);
+        }
+
+        return response('<pre>' . e($response->body()) . '</pre>');
     }
 
     public function uploadFile(Request $request)
     {
         if ($request->isMethod('post')) {
+            $validated = $request->validate([
+                'file' => ['required', 'file', 'max:5120', 'mimes:txt,csv'],
+            ]);
             try {
-                $file = $request->file('file');
-                if (!$file) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Không có file được upload.'
-                    ]);
-                }
-
-                $content = $file->get();
-                $lines = explode("\n", $content);
-                $data = [];
-
-                foreach ($lines as $line) {
-                    $line = trim($line);
-                    if (empty($line)) continue;
-
-                    $parts = explode(':', $line);
-                    if (count($parts) == 2) {
-                        $code = trim($parts[0]);
-                        $priceInvest = (int)trim($parts[1]) * 1000;
-                        $stock = Stock::getByCode(strtoupper($code));
-                        if (!$stock) {
-                            $stock = new Stock();
-                            $stock->code = strtoupper($code);
-                            $stock->recommended_buy_price = $priceInvest;
-                            $stock->current_price = $priceInvest;
-                            $stock->risk_level = 4;
-                            // Lưu vào database (ví dụ bảng stocks)
-                            $stock->save();
-                        }else {
-                            $stock->recommended_buy_price = $priceInvest;
-                            $stock->save();
-                        }
-                    }
-                }
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Upload thành công.'
-                ]);
+                $result = $this->syncService->addStocksFollowFromFile($validated['file']->get());
+                return response()->json($result);
             } catch (\Exception $e) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ], 500);
+                return $this->jsonServerError($e);
             }
-        } else {
-            return view('Admin.AdminUploadFile');
         }
+        return view('Admin.AdminUploadFile');
     }
 }

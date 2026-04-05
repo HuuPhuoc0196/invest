@@ -12,7 +12,7 @@ class AdminMiddleware
     {
         // Kiểm tra đã đăng nhập
         if (!Auth::check()) {
-            return redirect('/login');
+            return redirect()->route('login');
         }
 
         // Cho phép nếu role === 1 (admin), ngược lại thì về /

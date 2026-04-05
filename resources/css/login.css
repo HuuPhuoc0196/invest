@@ -58,6 +58,7 @@ body.theme-invest-app main.login-layout-main .login-auth-lead {
     text-align: center;
 }
 
+body.theme-invest-app main.login-layout-main .login-card h1,
 body.theme-invest-app main.login-layout-main .login-card h2 {
     margin: 0 0 1.25rem;
     font-size: 1.35rem;
@@ -66,6 +67,7 @@ body.theme-invest-app main.login-layout-main .login-card h2 {
     text-align: center;
 }
 
+body.theme-invest-app main.login-layout-main .login-card h1 + .login-auth-sub,
 body.theme-invest-app main.login-layout-main .login-card h2 + .login-auth-sub {
     margin-top: -0.5rem;
 }
@@ -83,7 +85,7 @@ body.theme-invest-app main.login-layout-main .input-group label {
 }
 
 body.theme-invest-app main.login-layout-main .input-group input {
-    background: var(--inv-surface2, #1a2235);
+    background: var(--inv-surface2, #2a3a52);
     border: 1px solid var(--inv-border, rgba(99, 179, 237, 0.12));
     color: var(--inv-text, #e2e8f0);
     border-radius: 8px;
@@ -119,7 +121,7 @@ body.theme-invest-app main.login-layout-main .login-btn:disabled {
 }
 
 body.theme-invest-app main.login-layout-main .secondary-btn {
-    background: var(--inv-surface2, #1a2235);
+    background: var(--inv-surface2, #2a3a52);
     border: 1px solid var(--inv-border, rgba(99, 179, 237, 0.12));
     color: var(--inv-text, #e2e8f0);
     border-radius: 8px;
@@ -162,6 +164,74 @@ body.theme-invest-app main.login-layout-main #formError {
     color: #fca5a5 !important;
 }
 
+/* —— Form spacing — đồng đều PC + mobile —— */
+body.theme-invest-app main.login-layout-main .input-group {
+    margin-bottom: 0.65rem;
+}
+
+body.theme-invest-app main.login-layout-main .input-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.875rem;
+}
+
+body.theme-invest-app main.login-layout-main .input-group input {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.9375rem;
+    box-sizing: border-box;
+}
+
+body.theme-invest-app main.login-layout-main .error-message {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+body.theme-invest-app main.login-layout-main .login-btn {
+    display: block;
+    width: 100%;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+body.theme-invest-app main.login-layout-main .extra-actions {
+    margin-top: 0.75rem;
+    gap: 8px;
+}
+
+@media (max-width: 480px) {
+    body.theme-invest-app main.login-layout-main .login-card {
+        padding: 1.5rem 1.25rem 1.75rem;
+    }
+
+    body.theme-invest-app main.login-layout-main .login-card h1,
+    body.theme-invest-app main.login-layout-main .login-card h2 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    body.theme-invest-app main.login-layout-main .input-group {
+        margin-bottom: 0.85rem;
+    }
+
+    body.theme-invest-app main.login-layout-main .login-btn {
+        margin-top: 1.25rem;
+        padding: 13px 16px;
+    }
+
+    body.theme-invest-app main.login-layout-main .extra-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    body.theme-invest-app main.login-layout-main .secondary-btn {
+        width: 100%;
+    }
+}
+
 /* Non-theme card */
 .login-card {
     background: white;
@@ -176,10 +246,6 @@ body.theme-invest-app main.login-layout-main #formError {
 h2 {
     text-align: center;
     margin-bottom: 20px;
-}
-
-.input-group {
-    margin-bottom: 15px;
 }
 
 .input-group label {
@@ -241,3 +307,18 @@ h2 {
 .secondary-btn:hover {
     background-color: #e0e0e0;
 }
+
+/* Button spinner — dùng chung cho Login / Register / ForgotPassword */
+.login-btn .btn-spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: btn-spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+.login-btn .btn-spinner.is-loading { display: inline-block; }
+@keyframes btn-spin { to { transform: rotate(360deg); } }

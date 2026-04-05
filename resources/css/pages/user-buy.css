@@ -1,0 +1,184 @@
+/* —— Back button —— */
+.buy-back-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.buy-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid rgba(99, 179, 237, 0.2);
+    background: var(--inv-surface2);
+    color: var(--inv-text);
+    transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.buy-back-btn:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(56, 189, 248, 0.08);
+    color: var(--inv-accent);
+    transform: translateY(-1px);
+}
+
+/* —— Override adminInsert.css — form tối theo theme —— */
+.invest-narrow-wrap .profile-detail-card {
+    padding: 28px 28px 32px;
+}
+
+/* Submit button */
+.invest-narrow-wrap .form-container > button#btnFormSubmit {
+    width: 100%;
+    padding: 13px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 14px rgba(22, 163, 74, 0.35);
+    transition: filter 0.15s, box-shadow 0.15s;
+    font-family: inherit;
+    margin-top: 4px;
+}
+
+.invest-narrow-wrap .form-container > button#btnFormSubmit:hover:not(:disabled) {
+    filter: brightness(1.08);
+    box-shadow: 0 4px 20px rgba(22, 163, 74, 0.5);
+}
+
+.invest-narrow-wrap .form-container > button#btnFormSubmit:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    background: var(--inv-surface2);
+    box-shadow: none;
+    color: var(--inv-muted);
+}
+
+/* Total amount display */
+.invest-narrow-wrap #totalAmount {
+    color: var(--inv-accent) !important;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+.invest-narrow-wrap #errorCashBuyType {
+    color: #fca5a5 !important;
+    font-size: 13px;
+    font-weight: 600;
+    display: none;
+}
+
+/* Check code button */
+.invest-narrow-wrap .btn-check-stock-code {
+    padding: 11px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: not-allowed;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid var(--inv-border);
+    color: var(--inv-muted);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    font-family: inherit;
+}
+
+.invest-narrow-wrap .btn-check-stock-code:not(:disabled) {
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--inv-accent) 0%, #0ea5e9 100%);
+    border-color: transparent;
+    color: #0b0f1a;
+    box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
+}
+
+.invest-narrow-wrap .btn-check-stock-code:not(:disabled):hover {
+    filter: brightness(1.08);
+}
+
+/* —— Notify modal —— */
+.home-notify-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-notify-modal[aria-hidden="false"] {
+    display: flex;
+}
+
+.home-notify-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 14, 26, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.home-notify-modal__box {
+    position: relative;
+    z-index: 1;
+    background: #1e293b;
+    border: 1px solid rgba(99, 179, 237, 0.18);
+    border-radius: 16px;
+    padding: 32px 28px 24px;
+    max-width: min(90vw, 360px);
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.home-notify-modal__icon {
+    font-size: 2.4rem;
+    line-height: 1;
+}
+
+.home-notify-modal__msg {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: #e2e8f0;
+}
+
+.home-notify-modal--success .home-notify-modal__box {
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+.home-notify-modal--error .home-notify-modal__box {
+    border-color: rgba(248, 113, 113, 0.35);
+}
+
+.home-notify-modal__close {
+    margin-top: 4px;
+    padding: 9px 28px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    color: #0b0f1a;
+    transition: filter 0.15s;
+    font-family: inherit;
+}
+
+.home-notify-modal__close:hover {
+    filter: brightness(1.08);
+}

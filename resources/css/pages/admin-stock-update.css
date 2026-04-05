@@ -1,0 +1,50 @@
+/* Moved from AdminUpdate.blade.php <style> block */
+.action-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    max-width: 520px;
+    margin: 0 auto 18px auto;
+}
+@media (max-width: 600px) {
+    .action-bar { flex-direction: column; max-width: 100%; }
+}
+.btn-sync-stock {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: #27ae60;
+    color: #fff;
+    border: none;
+    border-radius: 22px;
+    padding: 8px 22px 8px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(39,174,96,0.08);
+    transition: background 0.18s, box-shadow 0.18s;
+    min-width: 170px;
+    justify-content: center;
+}
+.btn-sync-stock:hover {
+    background: #219150;
+    box-shadow: 0 4px 16px rgba(39,174,96,0.16);
+}
+.btn-sync-icon {
+    font-size: 18px;
+    vertical-align: middle;
+}
+.button-link {
+    min-width: 170px;
+    text-align: center;
+}
+.modal-overlay { position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:2000; display:flex; align-items:center; justify-content:center; }
+.modal-content { background:#fff; border-radius:12px; padding:28px 24px 20px 24px; position:relative; box-shadow:0 8px 32px rgba(0,0,0,0.18); }
+.modal-close { position:absolute; top:10px; right:16px; font-size:26px; color:#aaa; cursor:pointer; font-weight:bold; }
+.modal-close:hover { color:#e74c3c; }
+.btn-cancel { padding:8px 22px; border:1px solid #bdc3c7; background:#ecf0f1; color:#2c3e50; border-radius:6px; cursor:pointer; font-size:14px; }
+.btn-cancel:hover { background:#d5dbdb; }
+.btn-import { padding:8px 22px; border:none; background:#27ae60; color:#fff; border-radius:6px; cursor:pointer; font-size:14px; }
+.btn-import:hover { background:#1e8449; }
+.btn-import:disabled { background:#95a5a6; cursor:not-allowed; }

@@ -1,0 +1,256 @@
+/* Moved from UserInvestmentPerformance.blade.php <style> block */
+.table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.sticky-clone {
+    position: fixed;
+    top: 0;
+    z-index: 1002;
+    overflow: hidden;
+    pointer-events: none;
+}
+.sticky-clone {
+    background-color: #34495e;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+.total-row td {
+    background-color: #f8f9fa;
+    border-top: 2px solid #34495e;
+}
+.perf-row td {
+    background-color: #dbeafe;
+    border-top: 2px dashed #3b82f6;
+}
+main {
+    cursor: grab;
+}
+main.dragging {
+    cursor: grabbing;
+    user-select: none;
+}
+
+/* ── Mua / Bán badge (compact) ───────────────────────────────────────────── */
+#stock-table .Buy,
+#stock-table .Sell {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    line-height: 1.5;
+    color: #fff;
+    min-width: 42px;
+    text-align: center;
+}
+/* ── Quick filter row ────────────────────────────────────────────────────── */
+.inv-perf-quick-wrap {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    max-width: 1440px;
+    margin: 0 auto 12px;
+    padding: 0 12px;
+    box-sizing: border-box;
+}
+
+.inv-perf-quick-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--inv-muted, #64748b);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.inv-perf-quick-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.inv-perf-quick-btn {
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 8px;
+    border: 1px solid rgba(99, 179, 237, 0.22);
+    background: var(--inv-surface2, #2a3a52);
+    color: var(--inv-text, #e2e8f0);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s, background 0.15s, color 0.15s, box-shadow 0.15s;
+    line-height: 1.5;
+}
+
+.inv-perf-quick-btn:hover {
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(56, 189, 248, 0.08);
+    color: #38bdf8;
+}
+
+.inv-perf-quick-btn.active {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.22) 0%, rgba(14, 165, 233, 0.16) 100%);
+    border-color: rgba(56, 189, 248, 0.75);
+    color: #7dd3fc;
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.18), 0 2px 8px rgba(56, 189, 248, 0.12);
+}
+
+@media (max-width: 720px) {
+    .inv-perf-quick-wrap {
+        padding: 0;
+    }
+}
+
+/* ── Filter bar ─────────────────────────────────────────────────────────── */
+.inv-perf-filter-wrap {
+    max-width: 1440px;
+    margin: 0 auto 1.25rem;
+    padding: 0 12px;
+    box-sizing: border-box;
+}
+
+.inv-perf-filter-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 10px 14px;
+}
+
+.inv-perf-filter-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--inv-muted, #64748b);
+    flex-shrink: 0;
+}
+
+.inv-perf-filter-date {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--inv-border, #334155);
+    background: var(--inv-surface2, #1e293b);
+    color: var(--inv-text, #e2e8f0);
+    font-size: 14px;
+    min-height: 42px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.inv-perf-filter-date:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+    filter: brightness(1.06);
+}
+
+.inv-perf-filter-date:focus {
+    outline: none;
+    border-color: rgba(56, 189, 248, 0.55);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.12);
+    filter: none;
+}
+
+.inv-perf-filter-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--inv-accent, #38bdf8) 0%, #0ea5e9 100%);
+    color: #0b0f1a;
+    transition: filter 0.15s ease;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.inv-perf-filter-btn:hover  { filter: brightness(1.06); }
+.inv-perf-filter-btn:active { filter: brightness(0.98); }
+
+/* Mobile: wrap + button to the right + no side padding on filter wrap */
+@media (max-width: 720px) {
+    .inv-perf-filter-wrap {
+        padding: 0;
+    }
+    .inv-perf-filter-bar {
+        flex-wrap: wrap;
+    }
+    .inv-perf-filter-btn {
+        margin-left: auto;
+    }
+}
+
+/* ── Dropdown trong <th> Loại giao dịch ─────────────────────────────────── */
+.th-has-filter {
+    white-space: nowrap;
+}
+
+.th-filter-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+.th-filter-label {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.th-filter-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 5px 26px 5px 9px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 7px;
+    border: 1px solid rgba(99, 179, 237, 0.25);
+    background: rgba(30, 41, 59, 0.9)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E")
+        no-repeat right 8px center;
+    color: #e2e8f0;
+    cursor: pointer;
+    min-width: 82px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    line-height: 1.4;
+}
+
+.th-filter-select:focus {
+    outline: none;
+    border-color: rgba(56, 189, 248, 0.55);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.12);
+}
+
+.th-filter-select option {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+/* Highlight header when a filter is active */
+.th-has-filter.filter-active .th-filter-select {
+    border-color: rgba(56, 189, 248, 0.6);
+    background-color: rgba(56, 189, 248, 0.08);
+}
+
+/* Mobile: wrap to 2 lines + larger tap target */
+@media (max-width: 600px) {
+    .th-has-filter {
+        white-space: normal;
+    }
+    .th-filter-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .th-filter-select {
+        width: 100%;
+        min-width: unset;
+        padding: 8px 30px 8px 10px;
+        font-size: 13px;
+        min-height: 36px;
+        box-sizing: border-box;
+    }
+}

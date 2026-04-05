@@ -1,7 +1,6 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f6f8;
-    padding: 20px;
 }
 
 h1 {
@@ -35,7 +34,7 @@ td {
 }
 
 th {
-    background-color: #34495e;
+    background-color: #162235 !important;
     color: white;
 }
 
@@ -102,7 +101,7 @@ tr.red {
 .sticky-header th {
     position: sticky;
     top: 0;
-    background-color: #34495e;
+    background-color: #162235 !important;
     z-index: 1001;
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }

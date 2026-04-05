@@ -2,13 +2,13 @@
  * Drawer / overlay mobile — dùng chung Layout + LayoutAdmin (redesign menu).
  */
 :root {
-    --drawer-bg: #111827;
-    --drawer-border: rgba(99, 179, 237, 0.12);
+    --drawer-bg: #1e293b;
+    --drawer-border: rgba(99, 179, 237, 0.14);
     --drawer-accent: #38bdf8;
     --drawer-accent2: #818cf8;
     --drawer-text: #e2e8f0;
     --drawer-muted: #64748b;
-    --drawer-surface2: #1a2235;
+    --drawer-surface2: #2a3a52;
 }
 
 .mobile-menu-overlay {
@@ -16,7 +16,7 @@
 }
 
 .mobile-menu-open .mobile-menu-overlay {
-    background: rgba(11, 15, 26, 0.65);
+    background: rgba(15, 23, 42, 0.58);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
 }
@@ -25,19 +25,43 @@
     /* Topbar tối — đồng bộ với drawer (Layout + LayoutAdmin) */
     .mobile-topbar {
         background: rgba(11, 15, 26, 0.92) !important;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-bottom: 1px solid var(--drawer-border);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-bottom: none;
         color: var(--drawer-text) !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
     }
 
+    /* Glowing accent line dưới topbar mobile — position: fixed từ app.css là positioning context */
+    .mobile-topbar::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg,
+            rgba(56, 189, 248, 0.55) 0%,
+            rgba(99, 179, 237, 0.65) 25%,
+            rgba(129, 140, 248, 0.65) 60%,
+            rgba(56, 189, 248, 0.55) 100%);
+        box-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
+    }
+
     .mobile-topbar-title {
-        color: var(--drawer-text) !important;
+        background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700 !important;
+    }
+
+    .mobile-topbar-logo img {
+        filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
     }
 
     .mobile-menu-drawer {
-        background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
         border-left: 1px solid var(--drawer-border);
         box-shadow: -20px 0 60px rgba(0, 0, 0, 0.55);
     }
@@ -75,8 +99,15 @@
         flex: 1 1 auto !important;
         font-size: 13px !important;
         font-weight: 700 !important;
-        color: var(--drawer-text) !important;
+        background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         max-width: none;
+    }
+
+    .mobile-menu-drawer.actions-left .mobile-menu-header .mobile-menu-header-logo img {
+        filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
     }
 
     .mobile-menu-drawer.actions-left .mobile-menu-header .mobile-menu-close {
@@ -95,11 +126,6 @@
     .mobile-menu-drawer.actions-left .mobile-menu-header .mobile-menu-close:hover {
         color: var(--drawer-text) !important;
         border-color: rgba(255, 255, 255, 0.15) !important;
-    }
-
-    .mobile-menu-drawer.actions-left {
-        padding: 12px 12px 20px;
-        gap: 8px;
     }
 
     .mobile-menu-drawer.actions-left .button-link,
@@ -129,7 +155,6 @@
     }
 
     .mobile-menu-drawer.actions-left .user-nav-link--active:not(.user-nav-link--logout) {
-        border-color: rgba(56, 189, 248, 0.45) !important;
         background: rgba(56, 189, 248, 0.12) !important;
         color: var(--drawer-text) !important;
         box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.2);

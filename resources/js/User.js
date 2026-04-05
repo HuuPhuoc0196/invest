@@ -224,16 +224,17 @@ export default class User{
         tbody.appendChild(totalRow);
     }
     
-    renderTableInvest(data) {
+    /**
+     * @param {string|null} perfFilterEndStr - Ngày kết thúc filter (input date YYYY-MM-DD).
+     *   Dùng để ước giá phần cổ còn lại: lấy lần bán đầu tiên SAU ngày này; không có thì current_price.
+     */
+    renderTableInvest(data, allStocks = null, perfData = null, perfFilterEndStr = null) {
         const tbody = document.getElementById('stockTableBody');
         tbody.innerHTML = '';
 
         let totalQuantity = 0;
-        let totalValue = 0;
-        let totalProfit = 0;
-        let capitalIn = 0; // tiền nạp thực tế
-        let cash = 0; // tiền mặt hiện có từ bán ra
-        
+        let totalBuyValue  = 0;  // SUM(giá trị GD Mua)
+        let totalSellValue = 0;  // SUM(giá trị GD Bán)
 
         // 👉 Sắp xếp data theo ngày giao dịch tăng dần
         data.sort((a, b) => {
@@ -249,32 +250,14 @@ export default class User{
             const typeLabel = type === "Buy" ? "Mua" : "Bán";
 
             const quantity = parseInt(stock.quantity);
-            const currentPrice = parseFloat(stock.current_price);
             const row = document.createElement('tr');
 
-            // Tính tổng số lượng và giá trị
+            // Tính tổng số lượng và giá trị theo loại
             totalQuantity += quantity;
-            totalValue += quantity * price;
-
-            // Tính lãi/lỗ:
             if (type === "Buy") {
-                const totalBuyCost = price * quantity;
-
-                // Nếu có đủ tiền mặt thì dùng tiền mặt
-                if (cash >= totalBuyCost) {
-                    cash -= totalBuyCost;
-                } else {
-                    const needToInject = totalBuyCost - cash;
-                    capitalIn += needToInject; // phải nạp thêm tiền thật
-                    cash = 0;
-                }
-
-                totalProfit += (currentPrice - price) * quantity;
+                totalBuyValue  += quantity * price;
             } else {
-                const totalSellRevenue = price * quantity;
-                cash += totalSellRevenue;
-
-                totalProfit += (price - currentPrice) * quantity; // hoặc điều chỉnh tuỳ logic bạn
+                totalSellValue += quantity * price;
             }
 
             row.className = this.getRowClass(parseFloat(stock.recommended_buy_price), parseFloat(stock.current_price));
@@ -289,36 +272,297 @@ export default class User{
             tbody.appendChild(row);
         });
 
-        // Xác định màu dựa vào tổng lãi
-        let profitColor = 'orange';
-        let profitSign = '';
-        if (totalProfit > 0) {
-            profitColor = 'green';
-            profitSign = '+';
-        } else if (totalProfit < 0) {
-            profitColor = 'red';
-            profitSign = '-';
+        // ── Tính Lãi / Lỗ và % ──────────────────────────────────────────────────
+        // Nếu chỉ filter 1 chiều (Mua hoặc Bán), 1 trong 2 sẽ = 0 → lãi/lỗ không có nghĩa
+        const bothSidesPresent  = totalBuyValue > 0 && totalSellValue > 0;
+        const profitLoss        = bothSidesPresent ? totalSellValue - totalBuyValue : 0;
+        const profitPercent     = bothSidesPresent && totalBuyValue > 0
+                                    ? (profitLoss / totalBuyValue) * 100
+                                    : 0;
+
+        // Tổng tiền Mua: luôn xanh biển, không dấu
+        const buyColor = '#60a5fa';
+
+        // Tổng tiền Bán: so sánh với Tổng tiền Mua
+        const sellColor = totalSellValue > totalBuyValue ? '#4ade80'
+                        : totalSellValue < totalBuyValue ? '#f87171'
+                        : '#facc15';
+
+        // Lãi / Lỗ và % Lãi / Lỗ
+        function profitColor(v) {
+            return v > 0 ? '#4ade80' : v < 0 ? '#f87171' : '#facc15';
+        }
+        // Dấu + / - với space phía sau
+        function signedValue(v, formatted) {
+            if (v > 0) return '+ ' + formatted;
+            if (v < 0) return '- ' + formatted;
+            return formatted;
+        }
+        function signedPercent(v) {
+            const abs = Math.abs(v).toFixed(2) + '%';
+            if (v > 0) return '+ ' + abs;
+            if (v < 0) return '- ' + abs;
+            return abs;
         }
 
-        // Tính tổng phần trăm lãi
-        const totalProfitPercent = (capitalIn > 0) ? (totalProfit / capitalIn) * 100 : 0;
+        const titleStyle = 'font-size:11px;color:#fff;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;';
 
-        // Màu và dấu tổng % lãi
-        const totalPercentColor = totalProfitPercent > 0 ? 'green' : totalProfitPercent < 0 ? 'red' : 'orange';
-        const totalPercentSign = totalProfitPercent > 0 ? '+' : totalProfitPercent < 0 ? '-' : '+';
-
-        // Tạo dòng tổng cộng
+        // ── Dòng Tổng ────────────────────────────────────────────────────────────
         const totalRow = document.createElement('tr');
         totalRow.classList.add('total-row');
         totalRow.innerHTML = `
             <td class="col-code-sticky"><strong>Tổng :</strong></td>
-            <td><strong>${totalQuantity.toLocaleString('vi-VN')}</strong></td>
-            <td></td>
-            <td><strong>${totalValue.toLocaleString('vi-VN')}</strong></td>
-            <td style="color:${totalPercentColor}"><strong>${totalPercentSign}${Math.abs(totalProfitPercent).toFixed(2)}%</strong></td>
-            <td><strong style="color:${profitColor}">Tiền lãi: ${profitSign}${Math.abs(totalProfit).toLocaleString('vi-VN')}</strong></td>
+            <td>
+                <div style="${titleStyle}">Tổng khối lượng</div>
+                <strong>${totalQuantity.toLocaleString('vi-VN')}</strong>
+            </td>
+            <td>
+                <div style="${titleStyle}">Tổng tiền Mua</div>
+                <strong style="color:${buyColor};">${totalBuyValue.toLocaleString('vi-VN')}</strong>
+            </td>
+            <td>
+                <div style="${titleStyle}">Tổng tiền Bán</div>
+                <strong style="color:${sellColor};">${totalSellValue.toLocaleString('vi-VN')}</strong>
+            </td>
+            <td>
+                <div style="${titleStyle}">Lãi / Lỗ</div>
+                <strong style="color:${profitColor(profitLoss)};">${signedValue(profitLoss, Math.abs(profitLoss).toLocaleString('vi-VN'))}</strong>
+            </td>
+            <td>
+                <div style="${titleStyle}">% Lãi / Lỗ</div>
+                <strong style="color:${profitColor(profitPercent)};">${signedPercent(profitPercent)}</strong>
+            </td>
         `;
         tbody.appendChild(totalRow);
+
+        // ── Dòng Hiệu suất ────────────────────────────────────────────────────────
+        // Luôn tính theo toàn bộ loại GD (bỏ qua type filter); chỉ bỏ qua nếu không có allStocks
+        const hieuSuatData = perfData ?? data;
+
+        const perfRow = document.createElement('tr');
+        perfRow.classList.add('total-row', 'perf-row');
+
+        if (!allStocks) {
+            perfRow.innerHTML = `
+                <td class="col-code-sticky"><strong>Hiệu suất :</strong></td>
+                <td>
+                    <div style="${titleStyle}">Tổng khối lượng</div>
+                    <strong>0</strong>
+                </td>
+                <td>
+                    <div style="${titleStyle}">Tổng tiền Mua</div>
+                    <strong style="color:${buyColor};">0</strong>
+                </td>
+                <td>
+                    <div style="${titleStyle}">Tổng tiền Bán</div>
+                    <strong style="color:#facc15;">0</strong>
+                </td>
+                <td>
+                    <div style="${titleStyle}">Lãi / Lỗ</div>
+                    <strong style="color:#facc15;">0</strong>
+                </td>
+                <td>
+                    <div style="${titleStyle}">% Lãi / Lỗ</div>
+                    <strong style="color:#facc15;">0%</strong>
+                </td>
+            `;
+        } else {
+            // Cùng logic phân loại Mua/Bán như khi render bảng (tránh nhầm dòng / field lẫn current_price)
+            const isBuyRow = (stock) => stock.buy_price !== undefined && stock.buy_price !== null;
+            const isSellRow = (stock) =>
+                !isBuyRow(stock) && stock.sell_price !== undefined && stock.sell_price !== null;
+
+            // Bước 1: gom nhóm filtered data theo mã CK
+            // Cũng tracking earliestSellDate để dùng làm cutoff khi tìm giá vốn lịch sử
+            const codeStats = {};
+
+            hieuSuatData.forEach(stock => {
+                const code = stock.code;
+                const qty  = parseInt(stock.quantity, 10);
+                if (!codeStats[code]) {
+                    codeStats[code] = {
+                        buyQty: 0, buyValue: 0,
+                        sellQty: 0, sellValue: 0,
+                        earliestSellDate: null,   // ngày bán sớm nhất trong filter
+                    };
+                }
+                if (isBuyRow(stock)) {
+                    codeStats[code].buyQty   += qty;
+                    codeStats[code].buyValue += qty * parseFloat(stock.buy_price);
+                } else if (isSellRow(stock)) {
+                    codeStats[code].sellQty   += qty;
+                    codeStats[code].sellValue += qty * parseFloat(stock.sell_price);
+                    if (stock.sell_date) {
+                        const d = new Date(stock.sell_date);
+                        if (!isNaN(d.getTime()) && (!codeStats[code].earliestSellDate || d < codeStats[code].earliestSellDate)) {
+                            codeStats[code].earliestSellDate = d;
+                        }
+                    }
+                }
+            });
+
+            // Chuẩn ngày → YYYY-MM-DD để sort (ổn định hơn new Date — tránh Invalid Date / TZ làm sai thứ tự)
+            const normDateStr = (v) => {
+                if (v == null || v === '') return '';
+                const s = String(v).trim();
+                return s.length >= 10 ? s.slice(0, 10) : s;
+            };
+
+            const pickLatestPriceByDateStr = (rows) => {
+                if (!rows.length) return null;
+                rows.sort((a, b) => {
+                    const c = b.ds.localeCompare(a.ds);
+                    if (c !== 0) return c;
+                    return b.price - a.price;
+                });
+                return rows[0].price;
+            };
+
+            /** Lần bán đầu tiên có ngày > endDs (YYYY-MM-DD), theo nghiệp vụ “bán tiếp theo” sau kỳ filter */
+            const pickFirstSellPriceAfterEndDs = (rows, endDs) => {
+                if (!endDs || !rows.length) return null;
+                const after = rows.filter((r) => r.ds && r.ds > endDs);
+                if (!after.length) return null;
+                after.sort((a, b) => a.ds.localeCompare(b.ds) || a.price - b.price);
+                return after[0].price;
+            };
+
+            // Bước 2a: lịch sử Mua (Date) cho Bước 4 — cutoff theo earliestSellDate
+            const allBuyHistory = {};
+            allStocks.forEach((stock) => {
+                if (!isBuyRow(stock)) return;
+                const code = stock.code;
+                const price = Number(stock.buy_price);
+                if (!Number.isFinite(price) || price <= 0) return;
+                const buyDate = stock.buy_date ? new Date(stock.buy_date) : null;
+                if (!buyDate || isNaN(buyDate.getTime())) return;
+                if (!allBuyHistory[code]) allBuyHistory[code] = [];
+                allBuyHistory[code].push({ price, date: buyDate });
+            });
+
+            // Bước 2b: theo dõi từng dòng Mua/Bán (chuỗi ngày) + giá hiện tại từ DB (fallback khi không còn lần bán sau filter)
+            const sellRowsByCode = {};
+            const buyRowsByCode = {};
+            const codeCurrentPrice = {};
+            allStocks.forEach((stock) => {
+                const code = stock.code;
+                const cp = Number(stock.current_price);
+                if (Number.isFinite(cp) && cp > 0 && codeCurrentPrice[code] === undefined) {
+                    codeCurrentPrice[code] = cp;
+                }
+                if (isSellRow(stock)) {
+                    const price = Number(stock.sell_price);
+                    if (!Number.isFinite(price) || price <= 0) return;
+                    if (!sellRowsByCode[code]) sellRowsByCode[code] = [];
+                    sellRowsByCode[code].push({ ds: normDateStr(stock.sell_date), price });
+                }
+                if (isBuyRow(stock)) {
+                    const price = Number(stock.buy_price);
+                    if (!Number.isFinite(price) || price <= 0) return;
+                    if (!buyRowsByCode[code]) buyRowsByCode[code] = [];
+                    buyRowsByCode[code].push({ ds: normDateStr(stock.buy_date), price });
+                }
+            });
+
+            const latestSellPriceByCode = {};
+            const latestBuyPriceByCode = {};
+            Object.keys(sellRowsByCode).forEach((code) => {
+                const p = pickLatestPriceByDateStr([...sellRowsByCode[code]]);
+                if (p != null) latestSellPriceByCode[code] = p;
+            });
+            Object.keys(buyRowsByCode).forEach((code) => {
+                const p = pickLatestPriceByDateStr([...buyRowsByCode[code]]);
+                if (p != null) latestBuyPriceByCode[code] = p;
+            });
+
+            const endDsNorm = perfFilterEndStr ? normDateStr(perfFilterEndStr) : '';
+
+            // Bước 3: tính Tổng tiền Bán (Hiệu suất)
+            //   - tiền bán thực trong filter
+            //   - phần (mua − bán) trong filter: giá = lần bán đầu tiên SAU ngày kết thúc filter; không có → giá hiện tại; vẫn không có → lần mua gần nhất
+            let perfSellValue = 0;
+            Object.entries(codeStats).forEach(([code, stats]) => {
+                perfSellValue += stats.sellValue;
+
+                const filterRemaining = Math.max(0, stats.buyQty - stats.sellQty);
+                if (filterRemaining > 0) {
+                    const sells = sellRowsByCode[code] || [];
+                    let estimatedPrice = null;
+                    if (endDsNorm) {
+                        estimatedPrice = pickFirstSellPriceAfterEndDs(sells, endDsNorm);
+                    }
+                    if (estimatedPrice == null) {
+                        estimatedPrice = latestSellPriceByCode[code] ?? null;
+                    }
+                    if (estimatedPrice == null || !Number.isFinite(estimatedPrice)) {
+                        estimatedPrice = codeCurrentPrice[code];
+                    }
+                    if (estimatedPrice == null || !Number.isFinite(estimatedPrice)) {
+                        estimatedPrice = latestBuyPriceByCode[code] ?? 0;
+                    }
+                    perfSellValue += filterRemaining * estimatedPrice;
+                }
+            });
+
+            // Bước 4: Lãi / Lỗ và %
+            //   Fix Tổng tiền Mua: nếu trong filter có Bán nhiều hơn Mua (deficit > 0),
+            //   chỉ dùng giao dịch Mua xảy ra TRƯỚC HOẶC BẰNG ngày bán sớm nhất của mã đó trong filter
+            //   để tránh dùng giá mua "tương lai" (buy_date > sell_date) làm giá vốn sai
+            let perfTotalBuyValue = 0;
+            let perfTotalQuantity = 0;
+            Object.entries(codeStats).forEach(([code, stats]) => {
+                let effectiveBuyValue = stats.buyValue;
+
+                const deficit = stats.sellQty - stats.buyQty;
+                if (deficit > 0) {
+                    const cutoff   = stats.earliestSellDate; // ngày bán sớm nhất trong filter
+                    const validBuys = (allBuyHistory[code] || [])
+                        .filter(b => !cutoff || b.date <= cutoff) // chỉ mua trước/bằng ngày bán sớm nhất
+                        .sort((a, b) => b.date - a.date);        // sắp xếp giảm dần → lấy gần nhất
+                    if (validBuys.length > 0) {
+                        effectiveBuyValue += deficit * validBuys[0].price;
+                    }
+                    // Nếu không có giao dịch mua nào trước đó: chi phí vốn = 0 (không xác định)
+                }
+
+                perfTotalBuyValue += effectiveBuyValue;
+                perfTotalQuantity += stats.buyQty + stats.sellQty;
+            });
+
+            const perfProfit  = perfSellValue - perfTotalBuyValue;
+            const perfPercent = perfTotalBuyValue > 0 ? (perfProfit / perfTotalBuyValue) * 100 : 0;
+
+            const perfSellColor = perfSellValue > perfTotalBuyValue ? '#4ade80'
+                                : perfSellValue < perfTotalBuyValue ? '#f87171'
+                                : '#facc15';
+
+            perfRow.innerHTML = `
+                <td class="col-code-sticky"><strong>Hiệu suất :</strong></td>
+                <td>
+                    <div style="${titleStyle}">Tổng khối lượng</div>
+                    <strong>${perfTotalQuantity.toLocaleString('vi-VN')}</strong>
+                </td>
+                <td>
+                    <div style="${titleStyle}">Tổng tiền Mua</div>
+                    <strong style="color:${buyColor};">${perfTotalBuyValue.toLocaleString('vi-VN')}</strong>
+                    <div style="font-size:11px;color:#fff;opacity:0.7;margin-top:2px;">tiền mua tạm tính</div>
+                </td>
+                <td>
+                    <div style="${titleStyle}">Tổng tiền Bán</div>
+                    <strong style="color:${perfSellColor};">${perfSellValue.toLocaleString('vi-VN')}</strong>
+                    <div style="font-size:11px;color:#fff;opacity:0.7;margin-top:2px;">tiền bán tạm tính</div>
+                </td>
+                <td>
+                    <div style="${titleStyle}">Lãi / Lỗ</div>
+                    <strong style="color:${profitColor(perfProfit)};">${signedValue(perfProfit, Math.abs(perfProfit).toLocaleString('vi-VN'))}</strong>
+                </td>
+                <td>
+                    <div style="${titleStyle}">% Lãi / Lỗ</div>
+                    <strong style="color:${profitColor(perfPercent)};">${signedPercent(perfPercent)}</strong>
+                </td>
+            `;
+        }
+        tbody.appendChild(perfRow);
     }
 
     renderTableUserFollow(data, userFollow) {

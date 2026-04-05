@@ -11,13 +11,15 @@
 /* —— Footer template invest (PC + responsive) —— */
 .footer.ft-invest {
     position: relative;
-    z-index: 1;
     margin-top: auto;
     padding: 0;
     text-align: initial;
-    background: #0f172a;
+    background: rgba(11, 15, 26, 0.92);
     border-top: 1px solid #1e293b;
     color: #64748b;
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .ft-top {
@@ -42,6 +44,12 @@
     .ft-top {
         grid-template-columns: 1fr;
         padding: 1.75rem 1rem 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .ft-col {
+        display: none;
     }
 }
 

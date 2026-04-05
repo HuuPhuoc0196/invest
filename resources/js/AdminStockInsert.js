@@ -181,7 +181,7 @@ window.submitStockForm = function() {
         };
 
         $.ajax({
-            url: baseUrl + '/admin/stocks/insert',
+            url: (window.__pageData && window.__pageData.baseUrl ? window.__pageData.baseUrl : '') + '/admin/stocks/insert',
             type: 'POST',
             headers: {
                 'Content-Type': 'application/json',

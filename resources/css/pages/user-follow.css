@@ -1,0 +1,89 @@
+/* —— Delete-all button: luôn ở bên phải —— */
+#btnDeleteAllFollow {
+    margin-left: auto;
+}
+
+/* —— Follow action bar (Danh sách / Thêm theo dõi) —— */.follow-action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.follow-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: filter 0.15s, box-shadow 0.15s, transform 0.1s, opacity 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+    opacity: 0.55;
+}
+
+.follow-action-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    opacity: 0.85;
+}
+
+.follow-action-btn:active {
+    transform: translateY(0);
+    filter: brightness(0.95);
+}
+
+.follow-action-btn--active {
+    opacity: 1;
+    pointer-events: none;
+}
+
+/* Danh sách — sky blue */
+.follow-action-btn--list {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border-color: rgba(14, 165, 233, 0.3);
+    color: #ffffff;
+    box-shadow: 0 2px 12px rgba(14, 165, 233, 0.25);
+}
+
+.follow-action-btn--list.follow-action-btn--active {
+    box-shadow: 0 2px 14px rgba(14, 165, 233, 0.45);
+}
+
+.follow-action-btn--list:hover {
+    box-shadow: 0 4px 18px rgba(14, 165, 233, 0.4);
+    color: #ffffff;
+}
+
+/* Thêm — green */
+.follow-action-btn--add {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    border-color: rgba(52, 211, 153, 0.3);
+    color: #ffffff;
+    box-shadow: 0 2px 12px rgba(22, 163, 74, 0.25);
+}
+
+.follow-action-btn--add.follow-action-btn--active {
+    box-shadow: 0 2px 14px rgba(22, 163, 74, 0.45);
+}
+
+.follow-action-btn--add:hover {
+    box-shadow: 0 4px 18px rgba(22, 163, 74, 0.4);
+    color: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .follow-action-bar {
+        gap: 8px;
+    }
+
+    .follow-action-btn {
+        flex: 1 1 calc(50% - 4px);
+        justify-content: center;
+        padding: 11px 12px;
+    }
+}

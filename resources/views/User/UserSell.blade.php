@@ -1,4 +1,4 @@
-@extends('Layout.Layout')
+﻿@extends('Layout.Layout')
 
 @section('csrf-token')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -9,6 +9,7 @@
 @section('header-css')
     @vite('resources/css/app.css')
     @vite('resources/css/adminInsert.css')
+    @vite('resources/css/pages/user-sell.css')
 @endsection
 
 @section('header-js')
@@ -20,6 +21,10 @@
 @endsection
 
 @section('user-body-content')
+    <div class="sell-back-bar">
+        <a href="{{ url('/user/profile') }}" class="sell-back-btn">← Quay lại</a>
+    </div>
+
     @include('partials.page-title-invest', ['title' => 'Bán Cổ Phiếu'])
 
     <div class="invest-narrow-wrap">
@@ -39,16 +44,17 @@
 
         <div class="form-group">
             <label for="sellPrice">Giá bán:</label>
-            <input type="text" id="sellPrice" placeholder="VD: 100000">
+            <input type="text" id="sellPrice" placeholder="VD: 100.000">
             <div class="error" id="errorSell">Vui lòng nhập Giá bán</div>
             <div class="error" id="errorSellType">Vui lòng nhập Số</div>
         </div>
 
         <div class="form-group">
             <label for="quantity">Khối lượng bán:</label>
-            <input type="text" id="quantity" placeholder="VD: 5000">
+            <input type="text" id="quantity" placeholder="VD: 5000" inputmode="numeric" autocomplete="off">
             <div class="error" id="errorQuantity">Vui lòng nhập Khối lượng bán</div>
             <div class="error" id="errorQuantityType">Vui lòng nhập Số</div>
+            <div id="totalAmount" style="font-weight: bold; margin-top: 5px;"></div>
         </div>
 
         <div class="form-group">
@@ -58,10 +64,18 @@
             <div class="error" id="errorSellDateType">Vui lòng nhập ngày hợp lệ</div>
         </div>
 
-        <div id="toast" class="toast"></div>
-
         <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Bán</button>
     </div>
+        </div>
+    </div>
+
+    {{-- Notify modal --}}
+    <div id="sell-notify-modal" class="home-notify-modal" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="home-notify-modal__backdrop" id="sellNotifyBackdrop"></div>
+        <div class="home-notify-modal__box">
+            <span class="home-notify-modal__icon" id="sellNotifyIcon"></span>
+            <p class="home-notify-modal__msg" id="sellNotifyMsg"></p>
+            <button type="button" class="home-notify-modal__close" id="sellNotifyClose">Đóng</button>
         </div>
     </div>
 @endsection
@@ -70,260 +84,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        const baseUrl = "{{ url('') }}";
-        const userPortfolios = @json($userPortfolios);
-        const formatter = new Intl.NumberFormat('vi-VN');
-        const sellPriceInput = document.getElementById("sellPrice");
-        const quantityInput = document.getElementById("quantity");
-        const sellDateInput = document.getElementById('sellDate');
-        const btnFormSubmit = document.getElementById('btnFormSubmit');
-        var cash = @json($cash);
-        let cashMony = formatter.format(cash);
-        $(".cash").text(cashMony);
-
-        function getTodayYmd() {
-            const d = new Date();
-            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-        }
-
-        function setDefaultSellDate() {
-            sellDateInput.value = getTodayYmd();
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const select = document.getElementById("code");
-            const quantityInput = document.getElementById("quantity");
-
-            setDefaultSellDate();
-
-            // Đổ option cho select
-            userPortfolios.forEach(p => {
-                const option = document.createElement("option");
-                option.value = p.code;
-                option.textContent = p.code;
-                select.appendChild(option);
-            });
-
-            // Khi chọn mã thì tự động cập nhật quantity
-            select.addEventListener("change", function () {
-                const selectedCode = this.value;
-                const selectedPortfolio = userPortfolios.find(p => p.code === selectedCode);
-                if (selectedPortfolio) {
-                    quantityInput.value = selectedPortfolio.total_quantity;
-                    formatToVND(quantityInput);
-                } else {
-                    quantityInput.value = "";
-                }
-                updateSellSubmitButton();
-            });
-            updateSellSubmitButton();
-        });
-
-
-        function isNumber(value) {
-            return !isNaN(value) && value.trim() !== '';
-        }
-
-        function parseNumber(str) {
-            return str.replace(/[^\d]/g, "");
-        }
-
-        function formatToVND(input) {
-            let raw = parseNumber(input.value);
-            if (raw === "") return input.value = "";
-
-            let formatted = formatter.format(raw);
-            input.value = formatted;
-        }
-
-        function canSubmitSellForm() {
-            const code = document.getElementById("code").value.trim().toUpperCase();
-            const sell = parseNumber(sellPriceInput.value);
-            const quantity = parseNumber(quantityInput.value);
-            const sellDate = sellDateInput.value.trim();
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-            if (!code || !sell || !isNumber(sell) || !quantity || !isNumber(quantity)) return false;
-            if (sellDate === '' || !dateRegex.test(sellDate) || isNaN(new Date(sellDate).getTime())) return false;
-            return true;
-        }
-
-        function updateSellSubmitButton() {
-            if (btnFormSubmit) btnFormSubmit.disabled = !canSubmitSellForm();
-        }
-
-        sellPriceInput.addEventListener("input", () => {
-            formatToVND(sellPriceInput);
-            updateSellSubmitButton();
-        });
-
-        quantityInput.addEventListener("input", () => {
-            formatToVND(quantityInput);
-            updateSellSubmitButton();
-        });
-
-        sellDateInput.addEventListener("change", updateSellSubmitButton);
-        sellDateInput.addEventListener("input", updateSellSubmitButton);
-
-        function resetForm() {
-            document.getElementById("code").value = "";
-            sellPriceInput.value = "";
-            quantityInput.value = "";
-            setDefaultSellDate();
-            updateSellSubmitButton();
-        }
-
-        function sellStocksOnForm(code, quantity) {
-            const stock = userPortfolios.find(item => item.code === code);
-            if (!stock) {
-                return false; // không tìm thấy
-            }
-            if (quantity > stock.total_quantity) {
-                return false; // vượt quá số lượng hiện có
-            }
-            stock.total_quantity -= quantity;
-            // Cập nhật lại dropdown mã cổ phiếu
-            refreshStockSelect();
-            return true;
-        }
-
-        function refreshStockSelect() {
-            const select = document.getElementById("code");
-            select.innerHTML = '<option value="">-- Chọn mã cổ phiếu --</option>';
-            userPortfolios.forEach(p => {
-                if (p.total_quantity > 0) {
-                    const option = document.createElement("option");
-                    option.value = p.code;
-                    option.textContent = p.code;
-                    select.appendChild(option);
-                }
-            });
-            updateSellSubmitButton();
-        }
-
-        function toastSuccess() {
-            // Xóa class cũ trước khi thêm class mới
-            toast.classList.remove("toast-success", "toast-error");
-            toast.classList.add("toast-success");
-            toast.classList.add("toast", "show");
-        }
-
-        function toastError() {
-            // Xóa class cũ trước khi thêm class mới
-            toast.classList.remove("toast-success", "toast-error");
-            toast.classList.add("toast-error");
-            toast.classList.add("toast", "show");
-        }
-
-        function submitForm() {
-            const code = document.getElementById("code").value.trim().toUpperCase();
-            const sell = parseNumber(sellPriceInput.value);
-            const quantity = parseNumber(quantityInput.value);
-            const sellDate = sellDateInput.value.trim();
-            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-            // Kiểm tra định dạng ngày (DD-MM-YYYY)
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-
-            let isValid = true;
-
-            document.querySelectorAll(".error").forEach(el => el.style.display = "none");
-
-            // Validate mã CK
-            if (!code) {
-                document.getElementById("errorCode").style.display = "block";
-                isValid = false;
-            }
-
-            // Validate Giá mua
-            if (!sell) {
-                document.getElementById("errorSell").style.display = "block";
-                isValid = false;
-            } else if (!isNumber(sell)) {
-                document.getElementById("errorSellType").style.display = "block";
-                isValid = false;
-            }
-
-            // Validate khối lượng giao dịch
-            if (!quantity) {
-                document.getElementById("errorQuantity").style.display = "block";
-                isValid = false;
-            } else if (!isNumber(quantity)) {
-                document.getElementById("errorQuantityType").style.display = "block";
-                isValid = false;
-            }
-
-            let cashSell = Number(sell) * Number(quantity);
-
-            // validation date sell
-            if (sellDate === '') {
-                document.getElementById('errorSellDate').style.display = 'block';
-                isValid = false;
-            } else if (!dateRegex.test(sellDate)) {
-                document.getElementById('errorSellDateType').style.display = 'block';
-                isValid = false;
-            } else if (isValid && isNaN(new Date(sellDate).getTime())) {
-                document.getElementById('errorSellDateType').style.display = 'block';
-                isValid = false;
-            }
-
-            // Nếu hợp lệ
-            if (isValid) {
-                // Gửi AJAX đến server hoặc lưu vào DB ở đây nếu cần
-                const data = {
-                    code: code,
-                    sell_price: sell,
-                    quantity: quantity,
-                    sell_date: sellDate
-                };
-                $.ajax({
-                    url: baseUrl + '/user/sell',
-                    type: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token
-                    },
-                    data: JSON.stringify(data),
-                    success: function (response) {
-                        if (response.status == "success") {
-                            const toast = document.getElementById("toast");
-                            toast.innerHTML = `✅ Đã bán thành công mã <b>${code}</b><br>`;
-                            toast.className = "toast show";
-                            let num1 = parseFloat(cash);
-                            cash = num1 + cashSell;
-                            cashMony = formatter.format(cash);
-                            $(".cash").text(cashMony);
-                            updateSellSubmitButton();
-                            toastSuccess();
-                            setTimeout(() => {
-                                toast.className = toast.className.replace("show", "");
-                            }, 3000);
-
-                            // Reset form
-                            resetForm();
-
-                            sellStocksOnForm(code, quantity);
-                        } else {
-                            const toast = document.getElementById("toast");
-                            toast.innerHTML = `❌` + response.message;
-                            toast.className = "toast show";
-                            toastError();
-                            setTimeout(() => {
-                                toast.className = toast.className.replace("show", "");
-                            }, 5000);
-                        }
-                    },
-                    error: function (xhr) {
-                        console.log(xhr);
-                        const toast = document.getElementById("toast");
-                        toast.innerHTML = '❌ Lỗi: ' + xhr.responseJSON.message;
-                        toast.className = "toast show";
-                        toastError();
-                        setTimeout(() => {
-                            toast.className = toast.className.replace("show", "");
-                        }, 5000);
-                    }
-                });
-            }
-        }
+        window.__pageData = {
+            baseUrl: "{{ url('') }}",
+            cash: @json($cash),
+            userPortfolios: @json($userPortfolios)
+        };
     </script>
+    @vite('resources/js/pages/user-sell.js')
 @endsection
