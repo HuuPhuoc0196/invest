@@ -11,4 +11,14 @@ class ChangePasswordRequest extends ApiFormRequest
             'newPassword' => 'required|string|min:6',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'password.required'    => 'Vui lòng nhập mật khẩu hiện tại.',
+            'password.min'         => 'Mật khẩu phải có ít nhất 6 ký tự.',
+            'newPassword.required' => 'Vui lòng nhập mật khẩu mới.',
+            'newPassword.min'      => 'Mật khẩu mới phải có ít nhất 6 ký tự.',
+        ];
+    }
 }

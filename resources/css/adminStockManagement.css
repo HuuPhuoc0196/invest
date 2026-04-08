@@ -3,6 +3,79 @@ body {
     background-color: #f4f6f8;
 }
 
+.admin-stocks-main-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 4px 0 14px;
+}
+
+.admin-stock-flash {
+    margin: 2px 0 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.admin-stock-flash--success {
+    background: rgba(34, 197, 94, 0.14);
+    border-color: rgba(34, 197, 94, 0.35);
+    color: #166534;
+}
+
+.admin-stock-flash--error {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #991b1b;
+}
+
+.admin-stocks-main-actions .btn-admin-main-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1px solid transparent;
+    text-decoration: none;
+}
+
+.admin-stocks-main-actions .btn-admin-main-action--add {
+    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+    color: #0b1e3d;
+    border-color: rgba(56, 189, 248, 0.75);
+}
+
+.admin-stocks-main-actions .btn-admin-main-action--add:hover {
+    filter: brightness(1.05);
+}
+
+.admin-stocks-main-actions .btn-admin-main-action--export {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #ecfdf5;
+    border-color: rgba(34, 197, 94, 0.6);
+}
+
+.admin-stocks-main-actions .btn-admin-main-action--export:hover {
+    filter: brightness(1.06);
+}
+
+.admin-stocks-main-actions .btn-admin-main-action--import {
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    color: #f5f3ff;
+    border-color: rgba(167, 139, 250, 0.65);
+}
+
+.admin-stocks-main-actions .btn-admin-main-action--import:hover {
+    filter: brightness(1.06);
+}
+
 h1 {
     text-align: center;
     color: #2c3e50;
@@ -522,6 +595,154 @@ tr.red {
     cursor: not-allowed;
 }
 
+/* Scoped visual polish for CSV import modal */
+#importCsvModal .modal-content {
+    width: min(92vw, 560px);
+    padding: 26px 22px 20px;
+}
+
+#importCsvModal .modal-content h2 {
+    margin: 0 24px 10px 0;
+    text-align: left;
+    line-height: 1.4;
+}
+
+#importCsvModal #dropZone {
+    border-radius: 12px;
+    padding: 34px 18px;
+}
+
+#importCsvModal #dropZoneText p {
+    margin-top: 10px;
+    line-height: 1.45;
+}
+
+#importCsvModal #fileInfo {
+    padding: 4px 6px;
+}
+
+#importCsvModal #fileName {
+    margin-top: 8px;
+    font-weight: 700;
+    word-break: break-word;
+}
+
+#importCsvModal .import-result {
+    margin-top: 12px;
+    margin-bottom: 10px;
+    line-height: 1.45;
+}
+
+#importCsvModal .modal-actions {
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+#importCsvModal .btn-cancel,
+#importCsvModal .btn-import {
+    min-width: 124px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+/* Export CSV confirm modal */
+#exportCsvModal .modal-content {
+    width: min(92vw, 460px);
+    padding: 24px 20px 18px;
+}
+
+#exportCsvModal .modal-content h2 {
+    margin: 0 24px 12px 0;
+    text-align: left;
+    line-height: 1.35;
+}
+
+#exportCsvModal .export-csv-modal__message {
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+#exportCsvModal .modal-actions {
+    justify-content: flex-end;
+}
+
+#exportCsvModal .btn-cancel,
+#exportCsvModal .btn-import {
+    min-width: 112px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+/* Delete stock confirm modal */
+#deleteStockModal .modal-content {
+    width: min(92vw, 460px);
+    padding: 24px 20px 18px;
+}
+
+#deleteStockModal .modal-content h2 {
+    margin: 0 24px 12px 0;
+    text-align: left;
+    line-height: 1.35;
+}
+
+#deleteStockModal .delete-stock-modal__message {
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+#deleteStockModal .modal-actions {
+    justify-content: flex-end;
+}
+
+#deleteStockModal .btn-cancel,
+#deleteStockModal .btn-delete-confirm {
+    min-width: 112px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+#deleteStockModal .btn-delete-confirm {
+    padding: 10px 24px;
+    border: none;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    #importCsvModal .modal-content {
+        padding: 22px 16px 16px;
+    }
+
+    #importCsvModal .modal-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    #importCsvModal .btn-cancel,
+    #importCsvModal .btn-import {
+        flex: 1 1 160px;
+    }
+
+    #exportCsvModal .modal-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    #exportCsvModal .btn-cancel,
+    #exportCsvModal .btn-import {
+        flex: 1 1 150px;
+    }
+
+    #deleteStockModal .modal-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    #deleteStockModal .btn-cancel,
+    #deleteStockModal .btn-delete-confirm {
+        flex: 1 1 150px;
+    }
+}
+
 /* Sort icon styles */
 th[data-sort-key] {
     cursor: pointer;
@@ -546,4 +767,16 @@ th[data-sort-key]:hover {
 th[data-sort-key].sort-asc .sort-icon,
 th[data-sort-key].sort-desc .sort-icon {
     opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .admin-stocks-main-actions {
+        gap: 8px;
+        margin: 4px 0 12px;
+    }
+
+    .admin-stocks-main-actions .btn-admin-main-action {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 150px;
+    }
 }

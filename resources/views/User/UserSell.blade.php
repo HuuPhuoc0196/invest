@@ -59,7 +59,7 @@
 
         <div class="form-group">
             <label for="sellDate">Ngày bán:</label>
-            <input type="date" id="sellDate">
+            <input type="date" id="sellDate" max="{{ date('Y-m-d') }}">
             <div class="error" id="errorSellDate">Vui lòng nhập Ngày bán</div>
             <div class="error" id="errorSellDateType">Vui lòng nhập ngày hợp lệ</div>
         </div>

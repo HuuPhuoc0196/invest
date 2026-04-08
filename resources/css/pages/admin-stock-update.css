@@ -1,14 +1,20 @@
 /* Moved from AdminUpdate.blade.php <style> block */
-.action-bar {
+.admin-update-action-bar {
     display: flex;
     gap: 12px;
     align-items: center;
     justify-content: center;
-    max-width: 520px;
-    margin: 0 auto 18px auto;
+    width: 100%;
+    max-width: none;
+    margin: 0 0 14px 0;
 }
 @media (max-width: 600px) {
-    .action-bar { flex-direction: column; max-width: 100%; }
+    .admin-update-action-bar {
+        flex-direction: row;
+        justify-content: flex-end;
+        width: 100%;
+        margin-bottom: 12px;
+    }
 }
 .btn-sync-stock {
     display: flex;
@@ -35,16 +41,179 @@
     font-size: 18px;
     vertical-align: middle;
 }
-.button-link {
+.admin-update-action-bar .button-link {
     min-width: 170px;
     text-align: center;
 }
-.modal-overlay { position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:2000; display:flex; align-items:center; justify-content:center; }
-.modal-content { background:#fff; border-radius:12px; padding:28px 24px 20px 24px; position:relative; box-shadow:0 8px 32px rgba(0,0,0,0.18); }
-.modal-close { position:absolute; top:10px; right:16px; font-size:26px; color:#aaa; cursor:pointer; font-weight:bold; }
-.modal-close:hover { color:#e74c3c; }
-.btn-cancel { padding:8px 22px; border:1px solid #bdc3c7; background:#ecf0f1; color:#2c3e50; border-radius:6px; cursor:pointer; font-size:14px; }
-.btn-cancel:hover { background:#d5dbdb; }
-.btn-import { padding:8px 22px; border:none; background:#27ae60; color:#fff; border-radius:6px; cursor:pointer; font-size:14px; }
-.btn-import:hover { background:#1e8449; }
-.btn-import:disabled { background:#95a5a6; cursor:not-allowed; }
+
+.admin-update-action-bar .button-link.admin-update-sync-btn {
+    min-width: 0;
+    width: auto;
+    padding: 8px 14px;
+    white-space: nowrap;
+}
+#syncStockModal.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 14, 26, 0.72);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+#updateNoticeModal.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 14, 26, 0.72);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+#syncStockModal .modal-content {
+    width: min(92vw, 420px);
+    max-width: 420px;
+    padding: 26px 22px 20px;
+    border-radius: 14px;
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    background: linear-gradient(180deg, #0f213f 0%, #122747 100%);
+    color: #e2e8f0;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.48);
+    position: relative;
+}
+
+#updateNoticeModal .modal-content {
+    width: min(92vw, 420px);
+    max-width: 420px;
+    padding: 26px 22px 20px;
+    border-radius: 14px;
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    background: linear-gradient(180deg, #0f213f 0%, #122747 100%);
+    color: #e2e8f0;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.48);
+    position: relative;
+}
+
+#syncStockModal .modal-content h2 {
+    margin: 0 28px 14px 0;
+    font-size: 19px;
+    line-height: 1.35;
+    color: #f8fafc;
+}
+
+#updateNoticeModal .modal-content h2 {
+    margin: 0 28px 14px 0;
+    font-size: 19px;
+    line-height: 1.35;
+    color: #f8fafc;
+}
+
+#syncStockModal .sync-stock-modal__message {
+    margin-bottom: 18px;
+    color: #cbd5e1;
+    line-height: 1.5;
+}
+
+#syncStockModal #syncStockCode {
+    color: #ffffff;
+}
+
+#syncStockModal .sync-stock-modal__actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#syncStockModal .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+#updateNoticeModal .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+#syncStockModal .modal-close:hover {
+    color: #f87171;
+}
+
+#updateNoticeModal .modal-close:hover {
+    color: #f87171;
+}
+
+#syncStockModal .btn-cancel {
+    padding: 9px 22px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: rgba(15, 23, 42, 0.72);
+    color: #e2e8f0;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#syncStockModal .btn-cancel:hover {
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(30, 41, 59, 0.92);
+}
+
+#syncStockModal .btn-import {
+    padding: 9px 22px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#syncStockModal .btn-import:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+#syncStockModal .btn-import:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+#updateNoticeModal .update-notice-modal__message {
+    margin-bottom: 16px;
+    line-height: 1.5;
+    color: #cbd5e1;
+}
+
+#updateNoticeModal.is-success .modal-content {
+    border-color: rgba(52, 211, 153, 0.45);
+}
+
+#updateNoticeModal.is-success #updateNoticeTitle {
+    color: #6ee7b7;
+}
+
+#updateNoticeModal.is-error .modal-content {
+    border-color: rgba(248, 113, 113, 0.45);
+}
+
+#updateNoticeModal.is-error #updateNoticeTitle {
+    color: #fca5a5;
+}

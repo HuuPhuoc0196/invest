@@ -43,7 +43,7 @@
 
         <div class="form-group">
             <label for="cashDate">Ngày rút:</label>
-            <input type="date" id="cashDate">
+            <input type="date" id="cashDate" max="{{ date('Y-m-d') }}">
             <div class="error" id="errorCashDate">Vui lòng nhập Ngày rút</div>
             <div class="error" id="errorCashDateType">Vui lòng nhập ngày hợp lệ</div>
         </div>

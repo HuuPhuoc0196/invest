@@ -82,15 +82,37 @@ function resetStockForm() {
     updateStockInsertSubmitButton();
 }
 
-function toastShow(type, message) {
-    const toast = document.getElementById("toast");
-    toast.classList.remove("toast-success", "toast-error");
-    toast.classList.add(type === 'success' ? "toast-success" : "toast-error");
-    toast.innerHTML = message;
-    toast.classList.add("toast", "show");
-    setTimeout(() => {
-        toast.className = toast.className.replace("show", "");
-    }, 3000);
+function showAdminInsertModal(msg, type, onClose) {
+    const modal = document.getElementById('admin-insert-notify-modal');
+    const icon = document.getElementById('adminInsertNotifyIcon');
+    const msgEl = document.getElementById('adminInsertNotifyMsg');
+    const closeBtn = document.getElementById('adminInsertNotifyClose');
+    const backdrop = document.getElementById('adminInsertNotifyBackdrop');
+    if (!modal) return;
+    modal.classList.remove('home-notify-modal--success', 'home-notify-modal--error');
+    if (type === 'success') {
+        modal.classList.add('home-notify-modal--success');
+        icon.textContent = '✅';
+    } else {
+        modal.classList.add('home-notify-modal--error');
+        icon.textContent = '❌';
+    }
+    msgEl.textContent = msg;
+    modal.setAttribute('aria-hidden', 'false');
+    setTimeout(() => closeBtn.focus(), 40);
+
+    function closeModal() {
+        if (modal.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+        modal.setAttribute('aria-hidden', 'true');
+        closeBtn.removeEventListener('click', closeModal);
+        backdrop.removeEventListener('click', closeModal);
+        if (typeof onClose === 'function') onClose();
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
 }
 
 window.submitStockForm = function() {
@@ -190,15 +212,15 @@ window.submitStockForm = function() {
             data: JSON.stringify(data),
             success: function (response) {
                 if (response.status === "success") {
-                    toastShow('success', `✅ Đã thêm mã <b>${code}</b>`);
+                    showAdminInsertModal(`Đã thêm mã ${code}`, 'success');
                     resetStockForm();
                 } else {
-                    toastShow('error', `❌ ${response.message}`);
+                    showAdminInsertModal(response.message || 'Có lỗi xảy ra.', 'error');
                 }
             },
             error: function (xhr) {
                 console.log(xhr);
-                toastShow('error', '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
+                showAdminInsertModal('Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'), 'error');
             }
         });
     }

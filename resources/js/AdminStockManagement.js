@@ -46,6 +46,8 @@ function getRatingBadge(rating) {
     return `<span class="rating-badge ${cls}">${val.toFixed(2)}</span>`;
 }
 
+let pendingDeleteCode = '';
+
 window.renderStockTable = function(data) {
     const baseUrl = (window.__pageData && window.__pageData.baseUrl) ? window.__pageData.baseUrl : '';
     const tbody = document.getElementById('stockTableBody');
@@ -111,8 +113,8 @@ window.renderStockTable = function(data) {
             <td>${volumeAvg}</td>
             <td style="color: ${valuationColor}; font-weight: bold;">${sign}${valuation}%</td>
             <td>
-                <button onclick="location.href='${baseUrl}/admin/update/${stock.code}'">Update</button>
-                <button class="btn-delete" onclick="confirmDelete('${stock.code}')">Delete</button>
+                <button onclick="location.href='${baseUrl}/admin/update/${stock.code}'">Cập nhật</button>
+                <button class="btn-delete" onclick="confirmDelete('${stock.code}')">Xoá</button>
             </td>
         `;
         tbody.appendChild(row);
@@ -123,10 +125,35 @@ window.renderStockTable = function(data) {
 };
 
 window.confirmDelete = function(code) {
+    const modal = document.getElementById('deleteStockModal');
+    const codeEl = document.getElementById('deleteStockCode');
+    const btn = document.getElementById('btnDeleteStockConfirm');
+    if (!modal || !codeEl) return;
+    pendingDeleteCode = code;
+    codeEl.textContent = code;
+    if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Xoá';
+    }
+    modal.style.display = 'flex';
+};
+
+window.closeDeleteStockModal = function() {
+    const modal = document.getElementById('deleteStockModal');
+    if (!modal) return;
+    pendingDeleteCode = '';
+    modal.style.display = 'none';
+};
+
+window.runDeleteStock = function() {
     const baseUrl = (window.__pageData && window.__pageData.baseUrl) ? window.__pageData.baseUrl : '';
     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    if (!confirm('Bạn có chắc chắn muốn xóa mã ' + code + '?')) {
-        return;
+    const code = pendingDeleteCode;
+    const btn = document.getElementById('btnDeleteStockConfirm');
+    if (!baseUrl || !code) return;
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Đang xoá...';
     }
     const form = document.createElement('form');
     form.method = 'POST';
@@ -138,6 +165,44 @@ window.confirmDelete = function(code) {
     form.appendChild(input);
     document.body.appendChild(form);
     form.submit();
+};
+
+window.confirmExportCsv = function() {
+    const modal = document.getElementById('exportCsvModal');
+    const btn = document.getElementById('btnExportCsvConfirm');
+    if (!modal) return;
+    if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Đồng ý';
+    }
+    modal.style.display = 'flex';
+};
+
+window.closeExportCsvModal = function() {
+    const modal = document.getElementById('exportCsvModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+};
+
+window.runExportCsv = function() {
+    const baseUrl = (window.__pageData && window.__pageData.baseUrl) ? window.__pageData.baseUrl : '';
+    const btn = document.getElementById('btnExportCsvConfirm');
+    if (!baseUrl) return;
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Đang xuất...';
+    }
+    window.location.href = baseUrl + '/admin/stocks/export-csv';
+    setTimeout(function() {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Đồng ý';
+        }
+        if (typeof window.closeExportCsvModal === 'function') {
+            window.closeExportCsvModal();
+        }
+    }, 350);
 };
 
 // Drag to scroll horizontally within table container
@@ -281,14 +346,24 @@ function updateImportCsvSubmitButton() {
 }
 
 window.openImportModal = function() {
-    document.getElementById('importCsvModal').style.display = 'flex';
-    document.getElementById('csvFileInput').value = '';
-    document.getElementById('dropZoneText').style.display = 'block';
-    document.getElementById('fileInfo').style.display = 'none';
+    const modal = document.getElementById('importCsvModal');
+    const fileInput = document.getElementById('csvFileInput');
+    const dropZoneText = document.getElementById('dropZoneText');
+    const fileInfo = document.getElementById('fileInfo');
+    const dropZone = document.getElementById('dropZone');
+    if (!modal || !fileInput || !dropZoneText || !fileInfo || !dropZone) return;
+
+    modal.style.display = 'flex';
+    fileInput.value = '';
+    dropZoneText.style.display = 'block';
+    fileInfo.style.display = 'none';
+    dropZone.classList.remove('drag-over');
     const result = document.getElementById('importResult');
-    result.style.display = 'none';
-    result.className = 'import-result';
-    result.innerHTML = '';
+    if (result) {
+        result.style.display = 'none';
+        result.className = 'import-result';
+        result.innerHTML = '';
+    }
     const btn = document.getElementById('btnImportCsvSubmit');
     if (btn) {
         btn.removeAttribute('data-busy');
@@ -337,6 +412,18 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('importCsvModal').addEventListener('click', function(e) {
         if (e.target === this) closeImportModal();
     });
+    const exportModal = document.getElementById('exportCsvModal');
+    if (exportModal) {
+        exportModal.addEventListener('click', function(e) {
+            if (e.target === this) closeExportCsvModal();
+        });
+    }
+    const deleteModal = document.getElementById('deleteStockModal');
+    if (deleteModal) {
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteStockModal();
+        });
+    }
 
     if (new URLSearchParams(window.location.search).get('import') === '1') {
         if (typeof window.openImportModal === 'function') {

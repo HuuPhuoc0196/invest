@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Stock extends Model
 {
@@ -42,6 +43,26 @@ class Stock extends Model
         }
 
         return false; // Không tìm thấy
+    }
+
+    public static function getDeleteDependencyCounts(string $code): array
+    {
+        $stock = self::where('code', strtoupper($code))->first();
+        if (!$stock) {
+            return [
+                'user_portfolios' => 0,
+                'user_portfolios_sell' => 0,
+                'user_follows' => 0,
+            ];
+        }
+
+        $stockId = (int) $stock->id;
+
+        return [
+            'user_portfolios' => DB::table('user_portfolios')->where('stock_id', $stockId)->count(),
+            'user_portfolios_sell' => DB::table('user_portfolios_sell')->where('stock_id', $stockId)->count(),
+            'user_follows' => DB::table('user_follows')->where('stock_id', $stockId)->count(),
+        ];
     }
 
     // Lấy stock theo mã code

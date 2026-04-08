@@ -56,8 +56,33 @@ class Admin extends Controller
 
     public function delete(string $code)
     {
-        Stock::deleteByCode(strtoupper($code));
-        return redirect('/admin/stocks');
+        $code = strtoupper($code);
+        $stock = Stock::getByCode($code);
+        if (!$stock) {
+            return redirect('/admin/stocks')->with('error', "Không tìm thấy mã cổ phiếu {$code}.");
+        }
+
+        $deps = Stock::getDeleteDependencyCounts($code);
+        $totalRefs = array_sum($deps);
+        if ($totalRefs > 0) {
+            $message = "Không thể xoá mã {$code} vì đang có dữ liệu liên quan. "
+                . "Danh mục mua: {$deps['user_portfolios']}, "
+                . "Lịch sử bán: {$deps['user_portfolios_sell']}, "
+                . "Danh sách theo dõi: {$deps['user_follows']}.";
+
+            return redirect('/admin/stocks')->with('error', $message);
+        }
+
+        try {
+            $deleted = Stock::deleteByCode($code);
+            if ($deleted) {
+                return redirect('/admin/stocks')->with('success', "Đã xoá mã cổ phiếu {$code}.");
+            }
+
+            return redirect('/admin/stocks')->with('error', "Không thể xoá mã cổ phiếu {$code}.");
+        } catch (QueryException $e) {
+            return redirect('/admin/stocks')->with('error', "Không thể xoá mã {$code}: dữ liệu đang được sử dụng.");
+        }
     }
 
     public function stockManagement()

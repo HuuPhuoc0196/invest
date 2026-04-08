@@ -56,16 +56,6 @@
     </div>
 
     <main>
-        @if (!request()->is('admin'))
-            <button
-                type="button"
-                class="mobile-menu-toggle mobile-back-button"
-                onclick="mobileGoBack()"
-                aria-label="Quay lại trang trước"
-            >
-                ←
-            </button>
-        @endif
         <div id="mobileActionsRightSlot" class="mobile-actions-right-slot"></div>
         @yield('admin-body-content')
     </main>
@@ -147,14 +137,6 @@
         window.addEventListener('resize', scheduleRelocate);
         document.addEventListener('DOMContentLoaded', scheduleRelocate);
 
-        function mobileGoBack() {
-            // Ưu tiên quay lại lịch sử trình duyệt; nếu không có thì fallback về /admin.
-            if (document.referrer) {
-                window.history.back();
-                return;
-            }
-            window.location.href = "{{ url('/admin') }}";
-        }
     </script>
     @yield('admin-script')
 </body>

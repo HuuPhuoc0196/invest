@@ -222,6 +222,9 @@
         if (body.style.display === 'none') {
             body.style.display = 'block';
             icon.textContent = '▲';
+            requestAnimationFrame(function() {
+                window.dispatchEvent(new Event('resize'));
+            });
         } else {
             body.style.display = 'none';
             icon.textContent = '▼';
@@ -317,6 +320,9 @@
         if (body.style.display === 'none') {
             body.style.display = 'block';
             icon.textContent = '▲';
+            requestAnimationFrame(function() {
+                window.dispatchEvent(new Event('resize'));
+            });
         } else {
             body.style.display = 'none';
             icon.textContent = '▼';

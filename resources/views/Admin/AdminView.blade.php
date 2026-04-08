@@ -14,6 +14,8 @@
 
 
 @section('actions-right')
+    <input type="text" id="searchInput" placeholder="Nhập mã CK...">
+    <button onclick="searchStock()">🔍 Tìm kiếm</button>
 @endsection
 
 @section('admin-body-content')
@@ -75,13 +77,6 @@
                 <button class="btn-filter" onclick="applyFilter()">🔍 Lọc</button>
                 <button class="btn-filter-reset" onclick="resetFilter()">🔄 Đặt lại</button>
             </div>
-        </div>
-    </div>
-
-    <div class="table-top-bar">
-        <div class="table-search-inline">
-            <input type="text" id="searchInput" placeholder="Nhập mã CK...">
-            <button onclick="searchStock()">🔍 Tìm kiếm</button>
         </div>
     </div>
 

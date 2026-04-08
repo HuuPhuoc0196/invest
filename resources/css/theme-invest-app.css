@@ -676,49 +676,6 @@ body.theme-invest-app main.login-layout-main {
         filter: brightness(1.06);
     }
 
-    /* Trang /admin/stocks — 3 nút một hàng dưới topbar (mobile) */
-    body.theme-invest-app.layout-admin .admin-stocks-page .iphone-admin-stocks-actions {
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: stretch !important;
-        justify-content: space-between !important;
-        gap: 6px !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 !important;
-        margin-bottom: 16px !important;
-        box-sizing: border-box !important;
-    }
-
-    body.theme-invest-app.layout-admin .admin-stocks-page .iphone-admin-stocks-actions .button-link {
-        flex: 1 1 0 !important;
-        min-width: 0 !important;
-        width: auto !important;
-        max-width: none !important;
-        min-height: 44px;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        text-align: center !important;
-        padding: 8px 6px !important;
-        font-size: 11px !important;
-        font-weight: 700 !important;
-        border-radius: 10px !important;
-        box-sizing: border-box !important;
-        text-decoration: none !important;
-        white-space: nowrap !important;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        background: linear-gradient(180deg, var(--inv-surface2) 0%, rgba(42, 58, 82, 0.95) 100%) !important;
-        border: 1px solid rgba(99, 179, 237, 0.2) !important;
-        color: var(--inv-text) !important;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
-    }
-
-    body.theme-invest-app.layout-admin .admin-stocks-page .iphone-admin-stocks-actions .button-link:hover {
-        filter: brightness(1.08);
-        border-color: rgba(56, 189, 248, 0.45) !important;
-    }
 }
 
 /* Mobile topbar: dùng theme-drawer-shared (global). Chỉ tinh chỉnh nhẹ nếu cần. */
@@ -2058,6 +2015,164 @@ body.theme-invest-app #importCsvModal .btn-import:disabled {
     cursor: not-allowed;
 }
 
+/* —— Modal xác nhận Export CSV (admin/stocks) —— */
+body.theme-invest-app #exportCsvModal.modal-overlay {
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 10000;
+}
+
+body.theme-invest-app #exportCsvModal .modal-content {
+    background: var(--inv-surface2);
+    border: 1px solid var(--inv-border);
+    border-radius: 14px;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #exportCsvModal .modal-close {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #exportCsvModal .modal-close:hover {
+    color: #fca5a5;
+}
+
+body.theme-invest-app #exportCsvModal .modal-content h2 {
+    color: var(--inv-text);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+body.theme-invest-app #exportCsvModal .export-csv-modal__message {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #exportCsvModal .btn-cancel {
+    background: var(--inv-surface);
+    color: var(--inv-text);
+    border: 1px solid var(--inv-border);
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+body.theme-invest-app #exportCsvModal .btn-cancel:hover {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+body.theme-invest-app #exportCsvModal .btn-import {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 700;
+    border: none;
+}
+
+body.theme-invest-app #exportCsvModal .btn-import:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+body.theme-invest-app #exportCsvModal .btn-import:disabled {
+    background: var(--inv-surface);
+    color: var(--inv-muted);
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* —— Modal xác nhận Xoá mã cổ phiếu (admin/stocks) —— */
+body.theme-invest-app #deleteStockModal.modal-overlay {
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 10000;
+}
+
+body.theme-invest-app #deleteStockModal .modal-content {
+    background: var(--inv-surface2);
+    border: 1px solid var(--inv-border);
+    border-radius: 14px;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #deleteStockModal .modal-close {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #deleteStockModal .modal-close:hover {
+    color: #fca5a5;
+}
+
+body.theme-invest-app #deleteStockModal .modal-content h2 {
+    color: var(--inv-text);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+body.theme-invest-app #deleteStockModal .delete-stock-modal__message {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #deleteStockModal .delete-stock-modal__message b {
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #deleteStockModal .btn-cancel {
+    background: var(--inv-surface);
+    color: var(--inv-text);
+    border: 1px solid var(--inv-border);
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+body.theme-invest-app #deleteStockModal .btn-cancel:hover {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+body.theme-invest-app #deleteStockModal .btn-delete-confirm {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 700;
+    border: none;
+}
+
+body.theme-invest-app #deleteStockModal .btn-delete-confirm:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+body.theme-invest-app #deleteStockModal .btn-delete-confirm:disabled {
+    background: var(--inv-surface);
+    color: var(--inv-muted);
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+body.theme-invest-app .admin-stock-flash {
+    background: var(--inv-surface2);
+    border-color: var(--inv-border);
+    color: var(--inv-text);
+}
+
+body.theme-invest-app .admin-stock-flash--success {
+    background: rgba(52, 211, 153, 0.12);
+    border-color: rgba(52, 211, 153, 0.45);
+    color: #6ee7b7;
+}
+
+body.theme-invest-app .admin-stock-flash--error {
+    background: rgba(248, 113, 113, 0.12);
+    border-color: rgba(248, 113, 113, 0.45);
+    color: #fca5a5;
+}
+
 /* Toast (adminInsert.css): căn giữa viewport, z-index trên header/drawer */
 body.theme-invest-app main .toast {
     left: 50% !important;
@@ -2232,6 +2347,19 @@ body.theme-invest-app .invest-narrow-wrap .form-container textarea:focus {
     border-color: rgba(56, 189, 248, 0.55);
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
     background: rgba(15, 23, 42, 0.85);
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container input[readonly] {
+    cursor: not-allowed;
+    background: rgba(15, 23, 42, 0.35);
+    color: var(--inv-muted);
+    border-color: rgba(148, 163, 184, 0.35);
+}
+
+body.theme-invest-app .invest-narrow-wrap .form-container input[readonly]:focus {
+    border-color: rgba(148, 163, 184, 0.35);
+    box-shadow: none;
+    background: rgba(15, 23, 42, 0.35);
 }
 
 body.theme-invest-app .invest-narrow-wrap .form-container input::placeholder,

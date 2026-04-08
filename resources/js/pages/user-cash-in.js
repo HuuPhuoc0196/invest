@@ -37,6 +37,32 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
+// ── Ngày YYYY-MM-DD: tồn tại trên lịch (không nhận 2023-02-31) ──
+function parseYmdStrict(s) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s).trim());
+    if (!m) return null;
+    const y = +m[1];
+    const mo = +m[2];
+    const d = +m[3];
+    const dt = new Date(y, mo - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+    return { y, mo, d };
+}
+
+function isAfterTodayYmd(ymd) {
+    const p = parseYmdStrict(ymd);
+    if (!p) return false;
+    const t = new Date();
+    const ty = t.getFullYear();
+    const tm = t.getMonth() + 1;
+    const td = t.getDate();
+    if (p.y > ty) return true;
+    if (p.y < ty) return false;
+    if (p.mo > tm) return true;
+    if (p.mo < tm) return false;
+    return p.d > td;
+}
+
 // ── Form logic ─────────────────────────────────────────────────
 function getTodayYmd() {
     const d = new Date();
@@ -58,9 +84,8 @@ function formatToVND(input) {
 function canSubmitCashInForm() {
     const cashIn = parseNumber(cashInInput.value);
     const cashDate = cashDateInput.value.trim();
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!cashIn || !isNumber(cashIn)) return false;
-    if (cashDate === '' || !dateRegex.test(cashDate) || isNaN(new Date(cashDate).getTime())) return false;
+    if (cashDate === '' || !parseYmdStrict(cashDate)) return false;
     return true;
 }
 
@@ -71,24 +96,44 @@ function updateCashInSubmitButton() {
 cashInInput.addEventListener('input', () => { formatToVND(cashInInput); updateCashInSubmitButton(); });
 cashDateInput.addEventListener('change', updateCashInSubmitButton);
 cashDateInput.addEventListener('input', updateCashInSubmitButton);
+if (cashDateInput) {
+    cashDateInput.addEventListener('click', function () {
+        try { this.showPicker(); } catch (_) {}
+    });
+}
 updateCashInSubmitButton();
 
 function resetForm() { cashInInput.value = ''; setDefaultCashDate(); updateCashInSubmitButton(); }
+
+function ajaxErrorMessage(xhr, fallback) {
+    if (xhr.status === 422 && xhr.responseJSON) {
+        const j = xhr.responseJSON;
+        if (j.errors && j.errors.cashDate && j.errors.cashDate[0]) return j.errors.cashDate[0];
+        if (j.message) return j.message;
+    }
+    return fallback;
+}
 
 function submitForm() {
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const cashDate = cashDateInput.value.trim();
     const cashIn = parseNumber(cashInInput.value);
     let isValid = true;
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
     document.querySelectorAll('.error').forEach(el => (el.style.display = 'none'));
 
     if (cashIn) { if (!isNumber(cashIn)) { document.getElementById('errorCashInType').style.display = 'block'; isValid = false; } }
 
-    if (cashDate === '') { document.getElementById('errorCashDate').style.display = 'block'; isValid = false; }
-    else if (!dateRegex.test(cashDate)) { document.getElementById('errorCashDateType').style.display = 'block'; isValid = false; }
-    else if (isValid && isNaN(new Date(cashDate).getTime())) { document.getElementById('errorCashDateType').style.display = 'block'; isValid = false; }
+    if (cashDate === '') {
+        document.getElementById('errorCashDate').style.display = 'block';
+        isValid = false;
+    } else if (!parseYmdStrict(cashDate)) {
+        showCashInModal('error', '❌', 'Ngày nạp không hợp lệ');
+        isValid = false;
+    } else if (isAfterTodayYmd(cashDate)) {
+        showCashInModal('error', '❌', 'Ngày nạp không hợp lệ');
+        isValid = false;
+    }
 
     if (isValid) {
         btnFormSubmit.disabled = true;
@@ -108,7 +153,7 @@ function submitForm() {
                 }
             },
             error: function (xhr) {
-                const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi kết nối.';
+                const msg = ajaxErrorMessage(xhr, 'Lỗi kết nối.');
                 showCashInModal('error', '❌', msg);
             },
             complete: function () {

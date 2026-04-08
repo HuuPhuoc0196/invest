@@ -1,4 +1,5 @@
 const formatter = new Intl.NumberFormat('vi-VN');
+const { baseUrl, stockData } = window.__pageData || {};
 
 function isNumber(value) {
     return !isNaN(value) && value.trim() !== '';
@@ -66,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Pre-populate fields from stockData (passed from Blade)
-    if (typeof stockData !== 'undefined' && stockData) {
+    if (stockData) {
         document.getElementById("code").value = stockData.code || "";
 
         const priceMap = {
@@ -102,19 +103,36 @@ document.addEventListener("DOMContentLoaded", function () {
     updateStockUpdateSubmitButton();
 });
 
-function toastShow(type, message) {
-    const toast = document.getElementById("toast");
-    toast.classList.remove("toast-success", "toast-error");
-    toast.classList.add(type === 'success' ? "toast-success" : "toast-error");
-    toast.innerHTML = message;
-    toast.classList.add("toast", "show");
-    setTimeout(() => {
-        toast.className = toast.className.replace("show", "");
-    }, 3000);
+function showUpdateNoticeModal(type, message) {
+    const modal = document.getElementById("updateNoticeModal");
+    const title = document.getElementById("updateNoticeTitle");
+    const msg = document.getElementById("updateNoticeMessage");
+    if (!modal || !title || !msg) return;
+    modal.classList.remove("is-success", "is-error");
+    modal.classList.add(type === "success" ? "is-success" : "is-error");
+    title.textContent = type === "success" ? "Cập nhật thành công" : "Cập nhật thất bại";
+    msg.innerHTML = message;
+    modal.style.display = "flex";
 }
+window.showUpdateNoticeModal = showUpdateNoticeModal;
+
+window.closeUpdateNoticeModal = function() {
+    const modal = document.getElementById("updateNoticeModal");
+    if (!modal) return;
+    modal.style.display = "none";
+};
+
+document.addEventListener("DOMContentLoaded", function() {
+    const modal = document.getElementById("updateNoticeModal");
+    if (modal) {
+        modal.addEventListener("click", function(e) {
+            if (e.target === this) window.closeUpdateNoticeModal();
+        });
+    }
+});
 
 window.submitUpdateForm = function() {
-    const code = document.getElementById("code").value.trim().toUpperCase();
+    const code = (stockData && stockData.code ? String(stockData.code) : document.getElementById("code").value).trim().toUpperCase();
     const currentPrice = parseNumber(document.getElementById("currentPrice").value);
     const priceAvg = parseNumber(document.getElementById("priceAvg").value);
     const buyPrice = parseNumber(document.getElementById("buyPrice").value);
@@ -128,12 +146,6 @@ window.submitUpdateForm = function() {
 
     let isValid = true;
     document.querySelectorAll(".error").forEach(el => el.style.display = "none");
-
-    // Required: Mã CK
-    if (!code) {
-        document.getElementById("errorCode").style.display = "block";
-        isValid = false;
-    }
 
     // Required: Giá hiện tại
     if (!currentPrice) {
@@ -188,7 +200,6 @@ window.submitUpdateForm = function() {
 
     if (isValid) {
         const data = {
-            code: code,
             currentPrice: currentPrice,
             priceAvg: priceAvg || null,
             buyPrice: buyPrice || null,
@@ -201,7 +212,7 @@ window.submitUpdateForm = function() {
         };
 
         $.ajax({
-            url: baseUrl + '/admin/update/' + code,
+            url: baseUrl + '/admin/update/' + encodeURIComponent(code),
             type: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -210,14 +221,14 @@ window.submitUpdateForm = function() {
             data: JSON.stringify(data),
             success: function (response) {
                 if (response.status === "success") {
-                    toastShow('success', `✅ Đã cập nhật mã <b>${code}</b>`);
+                    showUpdateNoticeModal('success', `✅ Đã cập nhật mã <b>${code}</b>`);
                 } else {
-                    toastShow('error', `❌ ${response.message}`);
+                    showUpdateNoticeModal('error', `❌ ${response.message}`);
                 }
             },
             error: function (xhr) {
                 console.log(xhr);
-                toastShow('error', '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
+                showUpdateNoticeModal('error', '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
             }
         });
     }

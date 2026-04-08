@@ -15,20 +15,22 @@
     @vite('resources/js/app.js')
 @endsection
 
-@section('actions-right')
-    <button type="button" class="button-link admin-update-sync-btn" onclick="openSyncStockModal()">🔄 Cập nhật cổ phiếu</button>
-@endsection
-
 @section('admin-body-content')
+    <div class="buy-back-bar">
+        <a href="{{ url('/admin/stocks') }}" class="buy-back-btn">← Quay lại</a>
+    </div>
+
     @include('partials.page-title-invest', ['title' => 'Cập Nhật Mã cổ phiếu'])
+    <div class="admin-update-action-bar">
+        <button type="button" class="button-link admin-update-sync-btn" onclick="openSyncStockModal()">🔄 Cập nhật cổ phiếu</button>
+    </div>
 
     <div class="invest-narrow-wrap">
         <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
-            <label for="code">Mã cổ phiếu: <span class="required">*</span></label>
-            <input type="text" id="code" placeholder="VD: FPT" disabled>
-            <div class="error" id="errorCode">Vui lòng nhập Mã cổ phiếu</div>
+            <label for="code">Mã cổ phiếu:</label>
+            <input type="text" id="code" value="{{ $stock->code }}" readonly>
         </div>
 
         <div class="form-group">
@@ -90,21 +92,30 @@
             <div class="error" id="errorStocksVnType">Vui lòng nhập Số</div>
         </div>
 
-        <div id="toast" class="toast"></div>
-
         <button type="button" id="btnFormSubmit" onclick="submitUpdateForm()" disabled>Cập nhật</button>
     </div>
         </div>
     </div>
     <!-- Modal confirm sync update stock -->
     <div id="syncStockModal" class="modal-overlay" style="display:none;">
-        <div class="modal-content" style="max-width:350px;">
+        <div class="modal-content">
             <span class="modal-close" onclick="closeSyncStockModal()">&times;</span>
-            <h2 style="font-size:20px;margin-bottom:18px;">Xác nhận cập nhật cổ phiếu</h2>
-            <div style="margin-bottom:18px;">Bạn có chắc chắn muốn cập nhật dữ liệu cho mã <b id="syncStockCode"></b>?</div>
-            <div style="display:flex;justify-content:center;gap:12px;">
+            <h2>Xác nhận cập nhật cổ phiếu</h2>
+            <div class="sync-stock-modal__message">Bạn có chắc chắn muốn cập nhật dữ liệu cho mã <b id="syncStockCode"></b>?</div>
+            <div class="sync-stock-modal__actions">
                 <button class="btn-cancel" onclick="closeSyncStockModal()">Huỷ</button>
                 <button class="btn-import" id="btnSyncStock" onclick="runSyncStock()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal notification update result -->
+    <div id="updateNoticeModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeUpdateNoticeModal()">&times;</span>
+            <h2 id="updateNoticeTitle">Thông báo</h2>
+            <div id="updateNoticeMessage" class="update-notice-modal__message"></div>
+            <div class="sync-stock-modal__actions">
+                <button class="btn-import" id="btnUpdateNoticeOk" onclick="closeUpdateNoticeModal()">Đồng ý</button>
             </div>
         </div>
     </div>

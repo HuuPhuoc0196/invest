@@ -11,7 +11,11 @@ function updateUpdateNameSubmitButton() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    if (userInit) document.getElementById('name').value = userInit.name || '';
+    if (userInit) {
+        document.getElementById('name').value = userInit.name || '';
+        const emailEl = document.getElementById('email');
+        if (emailEl && userInit.email) emailEl.value = userInit.email;
+    }
     updateUpdateNameSubmitButton();
 });
 

@@ -10,7 +10,7 @@
     $isInsertFollow = request()->routeIs('insertFollow');
     $showFollowSub = $isFollowList || $isFollowUpdate || $isInsertFollow;
 
-    $isInfo = request()->is('user/infoProfile*') || request()->is('user/updateInfoProfile*');
+    $isInfo = request()->is('user/infoProfile*') || request()->is('user/updateInfoProfile*') || request()->routeIs('changePassword');
     $isCashIn = request()->is('user/cashIn*');
     $isCashOut = request()->is('user/cashOut*');
     $isEmail = request()->is('user/email-settings*');

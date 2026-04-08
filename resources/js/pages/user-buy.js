@@ -111,6 +111,12 @@ function isValidCalendarDateYmd(s) {
     return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
 }
 
+/** So sánh hai chuỗi Y-m-d (hợp lệ). */
+function cmpYmd(a, b) {
+    if (a === b) return 0;
+    return a < b ? -1 : 1;
+}
+
 function formatToVND(input) {
     const raw = parseNumber(input.value);
     if (raw === '') return (input.value = '');
@@ -128,8 +134,10 @@ function formatQuantityInteger(input) {
 function syncBuyRangeErrors() {
     const erBuy = document.getElementById('errorBuyRange');
     const erQty = document.getElementById('errorQuantityRange');
+    const erCash = document.getElementById('errorCashBuyType');
     if (erBuy) erBuy.style.display = 'none';
     if (erQty) erQty.style.display = 'none';
+    if (erCash) erCash.style.display = 'none';
     const buyStr = parseNumber(buyPriceInput.value);
     const qtyStr = parseNumber(quantityInput.value);
     if (buyStr !== '') {
@@ -140,6 +148,14 @@ function syncBuyRangeErrors() {
         const qtyN = parseInt(qtyStr, 10);
         if (!Number.isFinite(qtyN) || qtyN < 1 || qtyN > QUANTITY_MAX) { if (erQty) erQty.style.display = 'block'; }
     }
+    if (erCash && buyStr !== '' && qtyStr !== '') {
+        const buyN = parseFloat(buyStr);
+        const qtyN = parseInt(qtyStr, 10);
+        if (Number.isFinite(buyN) && buyN > 0 && Number.isFinite(qtyN) && qtyN >= 1 && buyN <= BUY_PRICE_MAX && qtyN <= QUANTITY_MAX) {
+            const cashBuy = buyN * qtyN;
+            if (Number.isFinite(cashBuy) && cashBuy > cash) erCash.style.display = 'block';
+        }
+    }
 }
 
 function canSubmitBuyForm() {
@@ -147,6 +163,7 @@ function canSubmitBuyForm() {
     const buyStr = parseNumber(buyPriceInput.value);
     const qtyStr = parseNumber(quantityInput.value);
     const buyDate = buyDateInput.value.trim();
+    const today = getTodayYmd();
     if (!code || !buyStr || !qtyStr) return false;
     if (!isNumber(buyStr) || !isNumber(qtyStr)) return false;
     const buyN = parseFloat(buyStr), qtyN = parseInt(qtyStr, 10);
@@ -156,6 +173,7 @@ function canSubmitBuyForm() {
     const cashBuy = buyN * qtyN;
     if (!Number.isFinite(cashBuy) || cashBuy > cash) return false;
     if (buyDate === '' || !isValidCalendarDateYmd(buyDate)) return false;
+    if (cmpYmd(buyDate, today) > 0) return false;
     return true;
 }
 
@@ -167,8 +185,21 @@ function updateBuySubmitButton() {
 buyPriceInput.addEventListener('input', () => { formatToVND(buyPriceInput); updateTotalAmount(); updateBuySubmitButton(); });
 quantityInput.addEventListener('input', () => { formatQuantityInteger(quantityInput); updateTotalAmount(); updateBuySubmitButton(); });
 codeInput.addEventListener('input', function () { updateBuySubmitButton(); updateCheckCodeButton(); });
-buyDateInput.addEventListener('change', updateBuySubmitButton);
+buyDateInput.addEventListener('change', function () {
+    const v = this.value.trim();
+    if (v !== '') {
+        if (!isValidCalendarDateYmd(v) || cmpYmd(v, getTodayYmd()) > 0) {
+            showBuyModal('Ngày mua không hợp lệ', 'error');
+        }
+    }
+    updateBuySubmitButton();
+});
 buyDateInput.addEventListener('input', updateBuySubmitButton);
+if (buyDateInput) {
+    buyDateInput.addEventListener('click', function () {
+        try { this.showPicker(); } catch (_) {}
+    });
+}
 
 function updateTotalAmount() {
     const buy = parseFloat(parseNumber(buyPriceInput.value)) || 0;
@@ -184,6 +215,8 @@ function resetForm() {
     setDefaultBuyDate();
     document.getElementById('errorBuyRange').style.display = 'none';
     document.getElementById('errorQuantityRange').style.display = 'none';
+    const erCash = document.getElementById('errorCashBuyType');
+    if (erCash) erCash.style.display = 'none';
     updateBuySubmitButton();
     updateCheckCodeButton();
 }
@@ -215,7 +248,13 @@ function submitForm() {
     if (isValid && cashBuy > cash) { document.getElementById('errorCashBuyType').style.display = 'block'; isValid = false; }
 
     if (buyDate === '') { document.getElementById('errorBuyDate').style.display = 'block'; isValid = false; }
-    else if (!dateRegex.test(buyDate) || !isValidCalendarDateYmd(buyDate)) { document.getElementById('errorBuyDateType').style.display = 'block'; isValid = false; }
+    else if (!dateRegex.test(buyDate) || !isValidCalendarDateYmd(buyDate)) {
+        document.getElementById('errorBuyDateType').style.display = 'block';
+        isValid = false;
+    } else if (cmpYmd(buyDate, getTodayYmd()) > 0) {
+        showBuyModal('Ngày mua không hợp lệ', 'error');
+        isValid = false;
+    }
 
     if (isValid) {
         btnFormSubmit.disabled = true;
@@ -239,7 +278,15 @@ function submitForm() {
                 }
             },
             error: function (xhr) {
-                const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Lỗi kết nối, vui lòng thử lại.';
+                let msg = 'Lỗi kết nối, vui lòng thử lại.';
+                if (xhr.responseJSON) {
+                    const j = xhr.responseJSON;
+                    if (xhr.status === 422 && j.errors && j.errors.buy_date && j.errors.buy_date[0]) {
+                        msg = j.errors.buy_date[0];
+                    } else if (j.message) {
+                        msg = j.message;
+                    }
+                }
                 showBuyModal(msg, 'error');
             },
             complete: function () {

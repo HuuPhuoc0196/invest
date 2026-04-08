@@ -76,6 +76,15 @@ class UserPortfolio extends Model
             // Nếu đã bán hết == bỏ qua
             if ($totalQty == 0) continue;
 
+            // Ngày mua sớm nhất của lô còn tồn (FIFO) — dùng validate ngày bán >= ngày này
+            $earliestBuyDate = null;
+            foreach ($buys as $buy) {
+                if ((float) $buy->quantity > 0) {
+                    $earliestBuyDate = substr((string) $buy->buy_date, 0, 10);
+                    break;
+                }
+            }
+
             // 6. Lấy thông tin mã cổ phiếu
             $stockInfo = DB::table('stocks')->where('id', $stockId)->first();
             if (!$stockInfo) {
@@ -88,10 +97,60 @@ class UserPortfolio extends Model
                 'avg_buy_price' => round($totalCost / $totalQty, 2),
                 'current_price' => $stockInfo->current_price,
                 'risk_level' => $stockInfo->risk_level,
+                'earliest_buy_date' => $earliestBuyDate,
             ];
         }
 
         return $result;
+    }
+
+    /**
+     * Ngày mua (Y-m-d) của lô còn tồn sớm nhất theo FIFO — dùng kiểm tra ngày bán không trước ngày mua.
+     */
+    public static function getEarliestRemainingBuyDateYmdForCode(int $userId, string $code): ?string
+    {
+        $stock = DB::table('stocks')->where('code', strtoupper($code))->first();
+        if (!$stock) {
+            return null;
+        }
+        $stockId = $stock->id;
+
+        $buys = DB::table('user_portfolios')
+            ->where('user_id', $userId)
+            ->where('stock_id', $stockId)
+            ->orderBy('buy_date', 'asc')
+            ->get();
+
+        if ($buys->isEmpty()) {
+            return null;
+        }
+
+        $sellQty = (float) DB::table('user_portfolios_sell')
+            ->where('user_id', $userId)
+            ->where('stock_id', $stockId)
+            ->sum('quantity');
+
+        foreach ($buys as $buy) {
+            if ($sellQty <= 0) {
+                break;
+            }
+            $qty = (float) $buy->quantity;
+            if ($sellQty >= $qty) {
+                $sellQty -= $qty;
+                $buy->quantity = 0;
+            } else {
+                $buy->quantity = $qty - $sellQty;
+                $sellQty = 0;
+            }
+        }
+
+        foreach ($buys as $buy) {
+            if ((float) $buy->quantity > 0) {
+                return substr((string) $buy->buy_date, 0, 10);
+            }
+        }
+
+        return null;
     }
 
     public static function getStockHolding($userId, $stockId)

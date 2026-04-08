@@ -95,16 +95,33 @@ function isValidCalendarDateYmd(s) {
     return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
 }
 
+function cmpYmd(a, b) {
+    if (a === b) return 0;
+    return a < b ? -1 : 1;
+}
+
+function getEarliestBuyYmdForCode(code) {
+    if (!code) return null;
+    const upper = String(code).toUpperCase();
+    const p = userPortfolios.find(x => String(x.code).toUpperCase() === upper);
+    if (!p || !p.earliest_buy_date) return null;
+    return String(p.earliest_buy_date).slice(0, 10);
+}
+
 function canSubmitSellForm() {
     const code = document.getElementById('code').value.trim().toUpperCase();
     const sell = parseNumber(sellPriceInput.value);
     const quantity = parseNumber(quantityInput.value);
     const sellDate = sellDateInput.value.trim();
+    const today = getTodayYmd();
     if (!code || !sell || !isNumber(sell) || !quantity || !isNumber(quantity)) return false;
     const sellN = parseFloat(sell), qtyN = parseInt(quantity, 10);
     if (!Number.isFinite(sellN) || sellN <= 0) return false;
     if (!Number.isFinite(qtyN) || qtyN < 1) return false;
     if (sellDate === '' || !isValidCalendarDateYmd(sellDate)) return false;
+    if (cmpYmd(sellDate, today) > 0) return false;
+    const earliest = getEarliestBuyYmdForCode(code);
+    if (earliest && cmpYmd(sellDate, earliest) < 0) return false;
     return true;
 }
 
@@ -121,8 +138,25 @@ function updateSellSubmitButton() {
 
 sellPriceInput.addEventListener('input', () => { formatToVND(sellPriceInput); updateTotalAmount(); updateSellSubmitButton(); });
 quantityInput.addEventListener('input', () => { formatQuantityInteger(quantityInput); updateTotalAmount(); updateSellSubmitButton(); });
-sellDateInput.addEventListener('change', updateSellSubmitButton);
+sellDateInput.addEventListener('change', function () {
+    const v = this.value.trim();
+    const code = document.getElementById('code').value.trim().toUpperCase();
+    if (v !== '') {
+        if (!isValidCalendarDateYmd(v) || cmpYmd(v, getTodayYmd()) > 0) {
+            showSellModal('Ngày bán không hợp lệ', 'error');
+        } else if (code) {
+            const earliest = getEarliestBuyYmdForCode(code);
+            if (earliest && cmpYmd(v, earliest) < 0) showSellModal('Ngày bán không hợp lệ', 'error');
+        }
+    }
+    updateSellSubmitButton();
+});
 sellDateInput.addEventListener('input', updateSellSubmitButton);
+if (sellDateInput) {
+    sellDateInput.addEventListener('click', function () {
+        try { this.showPicker(); } catch (_) {}
+    });
+}
 
 function resetForm() {
     document.getElementById('code').value = '';
@@ -173,6 +207,11 @@ function submitForm() {
     else if (!isNumber(quantity)) { document.getElementById('errorQuantityType').style.display = 'block'; isValid = false; }
     if (sellDate === '') { document.getElementById('errorSellDate').style.display = 'block'; isValid = false; }
     else if (!isValidCalendarDateYmd(sellDate)) { document.getElementById('errorSellDateType').style.display = 'block'; isValid = false; }
+    else if (cmpYmd(sellDate, getTodayYmd()) > 0) { showSellModal('Ngày bán không hợp lệ', 'error'); isValid = false; }
+    else {
+        const earliest = getEarliestBuyYmdForCode(code);
+        if (earliest && cmpYmd(sellDate, earliest) < 0) { showSellModal('Ngày bán không hợp lệ', 'error'); isValid = false; }
+    }
 
     if (isValid) {
         btnFormSubmit.disabled = true;
@@ -194,7 +233,15 @@ function submitForm() {
                 }
             },
             error: function (xhr) {
-                const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Lỗi kết nối, vui lòng thử lại.';
+                let msg = 'Lỗi kết nối, vui lòng thử lại.';
+                if (xhr.responseJSON) {
+                    const j = xhr.responseJSON;
+                    if (xhr.status === 422 && j.errors && j.errors.sell_date && j.errors.sell_date[0]) {
+                        msg = j.errors.sell_date[0];
+                    } else if (j.message) {
+                        msg = j.message;
+                    }
+                }
                 showSellModal(msg, 'error');
             },
             complete: function () {

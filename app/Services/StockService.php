@@ -9,7 +9,7 @@ class StockService
     public function insertStockBasic(array $data): array
     {
         if (Stock::getByCode($data['code'])) {
-            return ['status' => 'error', 'message' => 'Mã code đã tồn tại.'];
+            return ['status' => 'error', 'message' => 'Mã cổ phiếu đã tồn tại.'];
         }
         $stock                        = new Stock();
         $stock->code                  = $data['code'];
@@ -23,7 +23,7 @@ class StockService
     public function insertStock(array $data): array
     {
         if (Stock::getByCode($data['code'])) {
-            return ['status' => 'error', 'message' => 'Mã code đã tồn tại.'];
+            return ['status' => 'error', 'message' => 'Mã cổ phiếu đã tồn tại.'];
         }
 
         $stock                         = new Stock();
@@ -50,7 +50,6 @@ class StockService
             return ['status' => 'error', 'message' => 'Mã code không tồn tại.'];
         }
 
-        $stock->code                   = $data['code'];
         $stock->current_price          = $data['currentPrice'];
         $stock->risk_level             = $data['risk'];
         $stock->price_avg              = $data['priceAvg'] ?? $stock->price_avg;

@@ -16,6 +16,10 @@
 @endsection
 
 @section('admin-body-content')
+    <div class="buy-back-bar">
+        <a href="{{ url('/admin/stocks') }}" class="buy-back-btn">← Quay lại</a>
+    </div>
+
     @include('partials.page-title-invest', ['title' => 'Thêm cổ phiếu'])
 
     <div class="invest-narrow-wrap">
@@ -86,10 +90,17 @@
             <div class="error" id="errorStocksVnType">Vui lòng nhập Số</div>
         </div>
 
-        <div id="toast" class="toast"></div>
-
         <button type="button" id="btnFormSubmit" onclick="submitStockForm()" disabled>Thêm mới</button>
     </div>
+        </div>
+    </div>
+
+    <div id="admin-insert-notify-modal" class="home-notify-modal" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="home-notify-modal__backdrop" id="adminInsertNotifyBackdrop"></div>
+        <div class="home-notify-modal__box">
+            <span class="home-notify-modal__icon" id="adminInsertNotifyIcon"></span>
+            <p class="home-notify-modal__msg" id="adminInsertNotifyMsg"></p>
+            <button type="button" class="home-notify-modal__close" id="adminInsertNotifyClose">Đóng</button>
         </div>
     </div>
 @endsection

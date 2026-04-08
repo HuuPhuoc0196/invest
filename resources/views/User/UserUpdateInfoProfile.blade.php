@@ -30,6 +30,11 @@
         <div class="profile-detail-card">
     <div class="form-container">
         <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" value="{{ $user->email ?? '' }}" readonly autocomplete="email" aria-readonly="true">
+        </div>
+
+        <div class="form-group">
             <label for="name">Tên:</label>
             <input type="text" id="name">
             <div class="error" id="errorName">Vui lòng nhập tên của bạn</div>

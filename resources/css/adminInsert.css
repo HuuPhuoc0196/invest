@@ -129,3 +129,8 @@ button:hover {
 .cash {
     color: green;
 }
+
+/* Nạp / Rút tiền: click cả ô mở date picker (showPicker) + trỏ chuột rõ ràng */
+.form-container input[type="date"] {
+    cursor: pointer;
+}

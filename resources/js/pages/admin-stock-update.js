@@ -27,9 +27,13 @@
                 btn.textContent = 'Đồng ý';
                 closeSyncStockModal();
                 if (res && res.status === 'success') {
-                    showToast('✅ ' + (res.message || ('Đã gửi yêu cầu cập nhật cho mã ' + stockData.code)));
+                    if (typeof window.showUpdateNoticeModal === 'function') {
+                        window.showUpdateNoticeModal('success', '✅ ' + (res.message || ('Đã gửi yêu cầu cập nhật cho mã ' + stockData.code)));
+                    }
                 } else {
-                    showToast('❌ ' + (res && res.message ? res.message : 'Lỗi gửi yêu cầu cập nhật!'));
+                    if (typeof window.showUpdateNoticeModal === 'function') {
+                        window.showUpdateNoticeModal('error', '❌ ' + (res && res.message ? res.message : 'Lỗi gửi yêu cầu cập nhật!'));
+                    }
                 }
             },
             error: function(xhr) {
@@ -37,16 +41,11 @@
                 btn.textContent = 'Đồng ý';
                 closeSyncStockModal();
                 var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Lỗi gửi yêu cầu cập nhật!';
-                showToast('❌ ' + msg);
+                if (typeof window.showUpdateNoticeModal === 'function') {
+                    window.showUpdateNoticeModal('error', '❌ ' + msg);
+                }
             }
         });
     }
     window.runSyncStock = runSyncStock;
-
-    function showToast(msg) {
-        const toast = document.getElementById('toast');
-        toast.innerHTML = msg;
-        toast.className = 'toast show';
-        setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3500);
-    }
 })();

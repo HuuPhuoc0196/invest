@@ -7,7 +7,6 @@ class StockUpdateRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'code'         => 'required|string|max:10',
             'currentPrice' => 'required|numeric|gt:0',
             'risk'         => 'required|integer|min:1|max:5',
             'priceAvg'     => 'nullable|numeric|min:0',

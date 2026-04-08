@@ -39,6 +39,31 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
+function parseYmdStrict(s) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s).trim());
+    if (!m) return null;
+    const y = +m[1];
+    const mo = +m[2];
+    const d = +m[3];
+    const dt = new Date(y, mo - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+    return { y, mo, d };
+}
+
+function isAfterTodayYmd(ymd) {
+    const p = parseYmdStrict(ymd);
+    if (!p) return false;
+    const t = new Date();
+    const ty = t.getFullYear();
+    const tm = t.getMonth() + 1;
+    const td = t.getDate();
+    if (p.y > ty) return true;
+    if (p.y < ty) return false;
+    if (p.mo > tm) return true;
+    if (p.mo < tm) return false;
+    return p.d > td;
+}
+
 // ── Form logic ─────────────────────────────────────────────────
 function getTodayYmd() {
     const d = new Date();
@@ -61,10 +86,9 @@ function formatToVND(input) {
 function canSubmitCashOutForm() {
     const cashOut = parseNumber(cashOutInput.value);
     const cashDate = cashDateInput.value.trim();
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!isNumber(cashOut)) return false;
     if (Number(cashOut) > Number(cash)) return false;
-    if (cashDate === '' || !dateRegex.test(cashDate) || isNaN(new Date(cashDate).getTime())) return false;
+    if (cashDate === '' || !parseYmdStrict(cashDate)) return false;
     return true;
 }
 
@@ -75,24 +99,44 @@ function updateCashOutSubmitButton() {
 cashOutInput.addEventListener('input', () => { formatToVND(cashOutInput); updateCashOutSubmitButton(); });
 cashDateInput.addEventListener('change', updateCashOutSubmitButton);
 cashDateInput.addEventListener('input', updateCashOutSubmitButton);
+if (cashDateInput) {
+    cashDateInput.addEventListener('click', function () {
+        try { this.showPicker(); } catch (_) {}
+    });
+}
 
 function resetForm() { cashOutInput.value = ''; setDefaultCashDate(); updateCashOutSubmitButton(); }
+
+function ajaxErrorMessage(xhr, fallback) {
+    if (xhr.status === 422 && xhr.responseJSON) {
+        const j = xhr.responseJSON;
+        if (j.errors && j.errors.cashDate && j.errors.cashDate[0]) return j.errors.cashDate[0];
+        if (j.message) return j.message;
+    }
+    return fallback;
+}
 
 function submitForm() {
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const cashDate = cashDateInput.value.trim();
     const cashOut = parseNumber(cashOutInput.value);
     let isValid = true;
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
     document.querySelectorAll('.error').forEach(el => (el.style.display = 'none'));
 
     if (!isNumber(cashOut)) { document.getElementById('errorCashOutType').style.display = 'block'; isValid = false; }
     if (Number(cashOut) > Number(cash)) { document.getElementById('errorCashOutPriceType').style.display = 'block'; isValid = false; }
 
-    if (cashDate === '') { document.getElementById('errorCashDate').style.display = 'block'; isValid = false; }
-    else if (!dateRegex.test(cashDate)) { document.getElementById('errorCashDateType').style.display = 'block'; isValid = false; }
-    else if (isValid && isNaN(new Date(cashDate).getTime())) { document.getElementById('errorCashDateType').style.display = 'block'; isValid = false; }
+    if (cashDate === '') {
+        document.getElementById('errorCashDate').style.display = 'block';
+        isValid = false;
+    } else if (!parseYmdStrict(cashDate)) {
+        showCashOutModal('error', '❌', 'Ngày rút không hợp lệ');
+        isValid = false;
+    } else if (isAfterTodayYmd(cashDate)) {
+        showCashOutModal('error', '❌', 'Ngày rút không hợp lệ');
+        isValid = false;
+    }
 
     if (isValid) {
         btnFormSubmit.disabled = true;
@@ -114,7 +158,7 @@ function submitForm() {
                 }
             },
             error: function (xhr) {
-                const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi kết nối.';
+                const msg = ajaxErrorMessage(xhr, 'Lỗi kết nối.');
                 showCashOutModal('error', '❌', msg);
             },
             complete: function () {

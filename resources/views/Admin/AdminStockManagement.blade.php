@@ -22,13 +22,18 @@
 
 @section('admin-body-content')
     <div class="admin-stocks-page">
-        <div class="iphone-admin-stocks-actions">
-            <a href="{{ url('/admin/stocks/insert') }}" class="button-link">➕ Thêm cổ phiếu</a>
-            <a href="javascript:void(0)" class="button-link" onclick="confirmExportCsv()">📄 Xuất file csv</a>
-            <a href="javascript:void(0)" class="button-link" onclick="openImportModal()">📥 Nhập file csv</a>
-        </div>
-
         @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu', 'level' => 1])
+        @if (session('success'))
+            <div class="admin-stock-flash admin-stock-flash--success">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="admin-stock-flash admin-stock-flash--error">{{ session('error') }}</div>
+        @endif
+        <div class="admin-stocks-main-actions">
+            <a href="{{ url('/admin/stocks/insert') }}" class="button-link btn-admin-main-action btn-admin-main-action--add">➕ Thêm cổ phiếu</a>
+            <a href="javascript:void(0)" class="button-link btn-admin-main-action btn-admin-main-action--export" onclick="confirmExportCsv()">📄 Xuất file csv</a>
+            <a href="javascript:void(0)" class="button-link btn-admin-main-action btn-admin-main-action--import" onclick="openImportModal()">📥 Nhập file csv</a>
+        </div>
 
     <!-- Filter Panel -->
         <div class="filter-panel">
@@ -112,6 +117,36 @@
             </tbody>
         </table>
     </div>
+
+        <!-- Modal Confirm Export CSV -->
+        <div id="exportCsvModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeExportCsvModal()">&times;</span>
+            <h2>Xác nhận xuất file CSV</h2>
+            <div class="export-csv-modal__message">
+                Bạn có chắc chắn muốn xuất toàn bộ danh sách cổ phiếu ra file CSV?
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeExportCsvModal()">Huỷ</button>
+                <button type="button" class="btn-import" id="btnExportCsvConfirm" onclick="runExportCsv()">Đồng ý</button>
+            </div>
+        </div>
+        </div>
+
+        <!-- Modal Confirm Delete Stock -->
+        <div id="deleteStockModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeDeleteStockModal()">&times;</span>
+            <h2>Xác nhận xoá mã cổ phiếu</h2>
+            <div class="delete-stock-modal__message">
+                Bạn có chắc chắn muốn xoá mã <b id="deleteStockCode"></b>?
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeDeleteStockModal()">Huỷ</button>
+                <button type="button" class="btn-delete-confirm" id="btnDeleteStockConfirm" onclick="runDeleteStock()">Xoá</button>
+            </div>
+        </div>
+        </div>
 
         <!-- Modal Import CSV -->
         <div id="importCsvModal" class="modal-overlay" style="display:none;">

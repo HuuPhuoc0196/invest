@@ -42,15 +42,37 @@
 }
 .table-container {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
-table {
-    min-width: 600px;
+/* Chi tiết bảng email: theme-invest-app (notice-table-*) — width 100% + table-layout fixed */
+.email-settings-page .table-container table {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    table-layout: fixed;
 }
 th, td {
     padding: 10px 14px;
     text-align: center;
+}
+@media (max-width: 768px) {
+    .email-settings-page .section-body {
+        padding: 12px 14px !important;
+    }
+    .email-settings-page .section-header {
+        padding: 12px 14px;
+        font-size: 13px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .email-settings-page th,
+    .email-settings-page td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
 }
 .checkbox-all {
     cursor: pointer;
@@ -90,7 +112,9 @@ th, td {
     position: fixed;
     top: 0;
     z-index: 1002;
-    overflow: hidden;
+    /* Giữ cắt ngang theo vùng scroll; cho phép header xuống dòng (không clip dọc). */
+    overflow-x: hidden;
+    overflow-y: visible;
     background-color: #34495e;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     pointer-events: auto;

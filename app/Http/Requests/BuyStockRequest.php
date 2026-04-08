@@ -9,21 +9,25 @@ class BuyStockRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'code'     => 'required|string|max:10',
+            'code'      => 'required|string|max:10',
             'buy_price' => 'required|numeric|gt:0|max:' . UserPortfolio::BUY_PRICE_MAX,
-            'quantity' => 'required|integer|min:1|max:' . UserPortfolio::QUANTITY_MAX,
-            'buy_date' => 'required|date|before_or_equal:today',
+            'quantity'  => 'required|integer|min:1|max:' . UserPortfolio::QUANTITY_MAX,
+            'buy_date'  => ['required', 'date_format:Y-m-d', 'date', 'before_or_equal:today'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'buy_price.max'      => 'Giá mua không hợp lệ!',
-            'buy_price.numeric'  => 'Giá mua không hợp lệ!',
-            'quantity.max'       => 'Khối lượng giao dịch không hợp lệ!',
-            'quantity.integer'   => 'Khối lượng giao dịch không hợp lệ!',
-            'quantity.min'       => 'Khối lượng giao dịch không hợp lệ!',
+            'buy_price.max'            => 'Giá mua không hợp lệ!',
+            'buy_price.numeric'        => 'Giá mua không hợp lệ!',
+            'quantity.max'             => 'Khối lượng giao dịch không hợp lệ!',
+            'quantity.integer'         => 'Khối lượng giao dịch không hợp lệ!',
+            'quantity.min'             => 'Khối lượng giao dịch không hợp lệ!',
+            'buy_date.required'        => 'Vui lòng nhập ngày mua.',
+            'buy_date.date_format'     => 'Ngày mua không hợp lệ',
+            'buy_date.date'            => 'Ngày mua không hợp lệ',
+            'buy_date.before_or_equal' => 'Ngày mua không hợp lệ',
         ];
     }
 }

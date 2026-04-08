@@ -439,47 +439,11 @@ input[type="date"] {
     }
 
     .mobile-back-button {
-        display: inline-flex;
-        position: fixed;
-        top: 8px; /* căn giữa trong mobile-topbar (56px) với nút 40px */
-        left: 12px;
-        z-index: 2801;
-        width: 40px;
-        height: 40px;
-        padding: 0;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        display: none !important;
     }
-
-    .mobile-menu-open .mobile-back-button {
-        pointer-events: none;
-        opacity: 0.75;
-    }
-}
-
-/* Mobile actions for admin stocks page (when hamburger menu is visible) */
-.iphone-admin-stocks-actions {
-    display: none;
 }
 
 @media (max-width: 768px) {
-    .iphone-admin-stocks-actions {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 0;
-        margin-bottom: 10px;
-        padding: 0 12px;
-        justify-content: center;
-    }
-
-    .iphone-admin-stocks-actions .button-link {
-        flex: 1 1 120px;
-        width: auto;
-        text-align: center;
-        box-sizing: border-box;
-    }
-
     .admin-stocks-action-hide-iphone {
         display: none !important;
     }
