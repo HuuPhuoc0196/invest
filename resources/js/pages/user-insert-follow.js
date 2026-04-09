@@ -48,18 +48,13 @@ function checkStockCode() {
         url: baseUrl + '/user/checkStockCode/' + code,
         type: 'GET',
         success: function (response) {
-            const toast = document.getElementById('toast');
             if (response.status === 'success') {
-                toast.innerHTML = `✅ ${response.message}`;
-                toast.className = 'toast show';
-                toastSuccess();
+                showNotifyModal('success', `✅ ${response.message}`);
                 if (response.data && response.data.recommended_buy_price) followPriceBuyInput.value = formatter.format(response.data.recommended_buy_price);
                 if (response.data && response.data.recommended_sell_price) followPriceSellInput.value = formatter.format(response.data.recommended_sell_price);
                 updateInsertFollowSubmitButton();
             } else if (response.status === 'warning') {
-                toast.innerHTML = `⚠️ ${response.message}`;
-                toast.className = 'toast show';
-                toastError();
+                showNotifyModal('warning', `⚠️ ${response.message}`);
                 if (response.data && response.data.recommended_buy_price) followPriceBuyInput.value = formatter.format(response.data.recommended_buy_price);
                 if (response.data && response.data.recommended_sell_price) followPriceSellInput.value = formatter.format(response.data.recommended_sell_price);
             } else {
@@ -67,16 +62,13 @@ function checkStockCode() {
                 followPriceBuyInput.value = '';
                 followPriceSellInput.value = '';
                 updateInsertFollowSubmitButton();
-                Swal.fire({ icon: 'error', title: 'Không tìm thấy mã', text: plain, confirmButtonText: 'Đóng' });
-            }
-            if (response.status === 'success' || response.status === 'warning') {
-                setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 4000);
+                showNotifyModal('error', '❌ ' + plain);
             }
         },
         error: function (xhr) {
             let msg = 'Lỗi kết nối, vui lòng thử lại.';
             if (xhr.responseJSON && xhr.responseJSON.message) msg = String(xhr.responseJSON.message).replace(/<[^>]*>/g, '');
-            Swal.fire({ icon: 'error', title: 'Lỗi', text: msg, confirmButtonText: 'Đóng' });
+            showNotifyModal('error', '❌ ' + msg);
         },
         complete: function () {
             btnCheckCode.disabled = false;
@@ -92,18 +84,6 @@ function resetForm() {
     followPriceBuyInput.value = '';
     followPriceSellInput.value = '';
     updateInsertFollowSubmitButton();
-}
-
-function toastSuccess() {
-    const toast = document.getElementById('toast');
-    toast.classList.remove('toast-success', 'toast-error');
-    toast.classList.add('toast-success', 'toast', 'show');
-}
-
-function toastError() {
-    const toast = document.getElementById('toast');
-    toast.classList.remove('toast-success', 'toast-error');
-    toast.classList.add('toast-error', 'toast', 'show');
 }
 
 function submitForm() {
@@ -125,26 +105,15 @@ function submitForm() {
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
             data: JSON.stringify({ code, followPriceBuy, followPriceSell }),
             success: function (response) {
-                const toast = document.getElementById('toast');
                 if (response.status === 'success') {
-                    toast.innerHTML = `✅ Đã thêm thành công mã <b>${code}</b><br>`;
-                    toast.className = 'toast show';
-                    toastSuccess();
-                    setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+                    showNotifyModal('success', `✅ Đã thêm thành công mã <b>${code}</b>`);
                     resetForm();
                 } else {
-                    toast.innerHTML = `❌ ` + response.message;
-                    toast.className = 'toast show';
-                    toastError();
-                    setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 5000);
+                    showNotifyModal('error', '❌ ' + (response.message || 'Có lỗi xảy ra.'));
                 }
             },
             error: function (xhr) {
-                const toast = document.getElementById('toast');
-                toast.innerHTML = '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Lỗi');
-                toast.className = 'toast show';
-                toastError();
-                setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 5000);
+                showNotifyModal('error', '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Lỗi'));
             }
         });
     }

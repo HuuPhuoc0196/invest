@@ -1,4 +1,4 @@
-﻿@extends('Layout.Layout')
+@extends('Layout.Layout')
 
 @section('csrf-token')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -16,12 +16,12 @@
 @endsection
 
 @section('actions-left')
-    @include('partials.user-nav-primary')
+    @include('partials.admin-nav-primary')
 @endsection
 
 @section('user-body-content')
     <div class="back-bar">
-        <a href="{{ url('/user/infoProfile') }}" class="back-btn">← Quay lại</a>
+        <a href="{{ url('/admin/infoProfile') }}" class="back-btn">← Quay lại</a>
     </div>
 
     @include('partials.page-title-invest', ['title' => 'Cập nhật thông tin cá nhân'])
@@ -52,7 +52,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        window.__pageData = { baseUrl: "{{ url('') }}", user: @json($user) };
+        window.__pageData = {
+            baseUrl: "{{ url('') }}",
+            user: @json($user),
+            apiUrl: "{{ url('/admin/updateInfoProfile') }}"
+        };
     </script>
     @vite('resources/js/pages/user-update-info-profile.js')
 @endsection

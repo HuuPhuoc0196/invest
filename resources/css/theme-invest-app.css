@@ -230,6 +230,10 @@ body.theme-invest-app main.login-layout-main {
         min-width: 0;
     }
 
+    body.theme-invest-app.layout-admin .admin-nav-primary__cluster {
+        flex-wrap: nowrap;
+    }
+
     body.theme-invest-app.layout-admin .admin-nav-primary__stock-branch,
     body.theme-invest-app.layout-user .user-nav-primary__asset-branch,
     body.theme-invest-app.layout-user .user-nav-primary__follow-branch {
@@ -2534,6 +2538,14 @@ body.theme-invest-app .invest-narrow-wrap .form-container .error {
 
 .home-notify-modal--error .home-notify-modal__box {
     border-color: rgba(248, 113, 113, 0.35);
+}
+
+.home-notify-modal--warning .home-notify-modal__box {
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+.home-notify-modal--warning .home-notify-modal__msg {
+    color: #fde68a;
 }
 
 .home-notify-modal__close {

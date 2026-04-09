@@ -19,18 +19,6 @@ fileInputEl.addEventListener('change', function () {
 
 function resetForm() { fileInputEl.value = ''; updateUploadSubmitButton(); }
 
-function toastSuccess() {
-    const toast = document.getElementById('toast');
-    toast.classList.remove('toast-success', 'toast-error');
-    toast.classList.add('toast-success', 'toast', 'show');
-}
-
-function toastError() {
-    const toast = document.getElementById('toast');
-    toast.classList.remove('toast-success', 'toast-error');
-    toast.classList.add('toast-error', 'toast', 'show');
-}
-
 function submitForm() {
     const fileInput = document.getElementById('file');
     const file = fileInput.files[0];
@@ -53,26 +41,15 @@ function submitForm() {
         headers: { 'X-CSRF-TOKEN': token },
         data: formData, processData: false, contentType: false,
         success: function (response) {
-            const toast = document.getElementById('toast');
             if (response.status === 'success') {
-                toast.innerHTML = '✅ File đã được upload thành công<br>';
-                toast.className = 'toast show';
-                toastSuccess();
-                setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+                showNotifyModal('success', '✅ File đã được upload thành công');
                 resetForm();
             } else {
-                toast.innerHTML = `❌` + response.message;
-                toast.className = 'toast show';
-                toastError();
-                setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 5000);
+                showNotifyModal('error', '❌ ' + (response.message || 'Có lỗi xảy ra.'));
             }
         },
         error: function (xhr) {
-            const toast = document.getElementById('toast');
-            toast.innerHTML = '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error');
-            toast.className = 'toast show';
-            toastError();
-            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 5000);
+            showNotifyModal('error', '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
         }
     });
 }

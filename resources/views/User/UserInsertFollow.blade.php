@@ -59,16 +59,14 @@
             <div class="error" id="errorFollowPriceSellType">Vui lòng nhập Số</div>
         </div>
 
-        <div id="toast" class="toast"></div>
-
         <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Thêm</button>
     </div>
         </div>
     </div>
+    @include('partials.notify-modal')
 @endsection
 
 @section('user-script')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         window.__pageData = { baseUrl: "{{ url('') }}" };

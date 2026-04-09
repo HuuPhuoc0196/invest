@@ -49,12 +49,11 @@
                 <option value="4">Đình chỉ/Huỷ</option>
             </select>
         </div>
-        <div id="toast" class="toast"></div>
-
         <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Thêm mới</button>
     </div>
         </div>
     </div>
+    @include('partials.notify-modal')
 @endsection
 
 @section('admin-script')

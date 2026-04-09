@@ -29,7 +29,7 @@
     </div>
         </div>
     </div>
-    <div id="toast" class="toast"></div>
+    @include('partials.notify-modal')
 @endsection
 
 @section('admin-script')

@@ -39,7 +39,7 @@
 <body @class([
     'antialiased',
     'theme-invest-app',
-    'layout-user',
+    request()->is('admin*') ? 'layout-admin' : 'layout-user',
     'has-mobile-back' => !request()->routeIs('home') && !request()->is('trang-chu', 'home', 'user'),
 ])>
     <!-- User Info -->

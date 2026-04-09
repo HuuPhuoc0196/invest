@@ -1,0 +1,352 @@
+.admin-users-page #user-table {
+    min-width: 1080px;
+    margin-top: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: visible;
+}
+
+.admin-users-page #user-table th,
+.admin-users-page #user-table td {
+    padding: 12px 16px;
+    text-align: center;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid var(--inv-border);
+    border-right: 1px solid var(--inv-border);
+    color: var(--inv-text);
+    background-color: var(--inv-bg) !important;
+}
+
+.admin-users-page #user-table td:nth-child(2) {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.admin-users-page #user-table td:last-child {
+    min-width: 170px;
+}
+
+.admin-users-page #user-table td:last-child button {
+    min-width: 74px;
+    margin: 2px;
+}
+
+.admin-users-page #user-table td:last-child .btn-delete:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.admin-users-page .table-container:active {
+    cursor: grabbing;
+}
+
+.admin-users-page #user-table th,
+.admin-users-page #user-table td {
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid var(--inv-border);
+    border-right: 1px solid var(--inv-border);
+    color: var(--inv-text);
+}
+
+.admin-users-page #user-table th:last-child,
+.admin-users-page #user-table td:last-child {
+    border-right: none;
+}
+
+.admin-users-page .sticky-clone th {
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid var(--inv-border);
+    border-right: 1px solid var(--inv-border);
+    color: var(--inv-text);
+}
+
+.admin-users-page .sticky-clone th:last-child {
+    border-right: none;
+}
+
+.admin-users-page #user-table th {
+    background-color: #162235 !important;
+    color: #fff;
+}
+
+.admin-users-page #user-table .sticky-header th {
+    background-color: #162235 !important;
+    z-index: 1001;
+}
+
+.admin-users-page .sticky-clone {
+    position: fixed;
+    top: 0;
+    z-index: 1002;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    background-color: #34495e;
+}
+
+.admin-users-page .user-status-badge,
+.admin-users-page .user-role-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    border: 1px solid transparent;
+}
+
+.admin-users-page .user-status-badge--active {
+    color: #166534;
+    background: #dcfce7;
+    border-color: #86efac;
+}
+
+.admin-users-page .user-status-badge--inactive {
+    color: #991b1b;
+    background: #fee2e2;
+    border-color: #fca5a5;
+}
+
+.admin-users-page .user-role-badge--admin {
+    color: #1d4ed8;
+    background: #dbeafe;
+    border-color: #93c5fd;
+}
+
+.admin-users-page .user-role-badge--investor {
+    color: #7c2d12;
+    background: #ffedd5;
+    border-color: #fdba74;
+}
+
+#deleteUserModal .modal-content {
+    width: min(92vw, 460px);
+    padding: 24px 20px 18px;
+}
+
+#deleteUserModal .modal-content h2 {
+    margin: 0 24px 12px 0;
+    text-align: left;
+    line-height: 1.35;
+}
+
+#deleteUserModal .delete-user-modal__message {
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+#deleteUserModal .modal-actions {
+    justify-content: flex-end;
+}
+
+#deleteUserModal .btn-cancel,
+#deleteUserModal .btn-delete-confirm {
+    min-width: 112px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+#userNoticeModal .modal-content {
+    width: min(92vw, 430px);
+    padding: 24px 20px 18px;
+}
+
+#userNoticeModal .modal-content h2 {
+    margin: 0 28px 12px 0;
+    line-height: 1.35;
+}
+
+#userNoticeModal .modal-actions {
+    justify-content: center;
+}
+
+#deleteUserModal .btn-delete-confirm {
+    padding: 10px 24px;
+    border: none;
+    cursor: pointer;
+}
+
+body.theme-invest-app .admin-users-page #user-table td:nth-child(2) {
+    color: var(--inv-text);
+}
+
+body.theme-invest-app .admin-users-page #user-table {
+    background: var(--inv-surface);
+}
+
+body.theme-invest-app .admin-users-page #user-table th {
+    background: linear-gradient(180deg, #0b1e3d 0%, #112748 100%) !important;
+    color: #e2e8f0 !important;
+}
+
+body.theme-invest-app .admin-users-page #user-table tbody tr {
+    background: var(--inv-surface);
+}
+
+body.theme-invest-app .admin-users-page #user-table tbody tr:hover {
+    background: rgba(56, 189, 248, 0.08);
+}
+
+body.theme-invest-app #deleteUserModal.modal-overlay {
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 10000;
+}
+
+body.theme-invest-app #deleteUserModal .modal-content {
+    background: var(--inv-surface2);
+    border: 1px solid var(--inv-border);
+    border-radius: 14px;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #deleteUserModal .modal-close {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #deleteUserModal .modal-close:hover {
+    color: #fca5a5;
+}
+
+body.theme-invest-app #deleteUserModal .modal-content h2 {
+    color: var(--inv-text);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+body.theme-invest-app #deleteUserModal .delete-user-modal__message {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #deleteUserModal .delete-user-modal__message b {
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #deleteUserModal .btn-cancel {
+    background: var(--inv-surface);
+    color: var(--inv-text);
+    border: 1px solid var(--inv-border);
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+body.theme-invest-app #deleteUserModal .btn-cancel:hover {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+body.theme-invest-app #deleteUserModal .btn-delete-confirm {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 700;
+    border: none;
+}
+
+body.theme-invest-app #deleteUserModal .btn-delete-confirm:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+body.theme-invest-app #deleteUserModal .btn-delete-confirm:disabled {
+    background: var(--inv-surface);
+    color: var(--inv-muted);
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+body.theme-invest-app #userNoticeModal.modal-overlay {
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 10000;
+}
+
+body.theme-invest-app #userNoticeModal .modal-content {
+    background: var(--inv-surface2);
+    border: 1px solid var(--inv-border);
+    border-radius: 14px;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #userNoticeModal .modal-close {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #userNoticeModal .modal-close:hover {
+    color: #fca5a5;
+}
+
+body.theme-invest-app #userNoticeModal .modal-content h2 {
+    color: var(--inv-text);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+body.theme-invest-app #userNoticeModal .delete-user-modal__message {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #userNoticeModal.is-success .modal-content {
+    border-color: rgba(52, 211, 153, 0.45);
+}
+
+body.theme-invest-app #userNoticeModal.is-success #userNoticeTitle {
+    color: #6ee7b7;
+}
+
+body.theme-invest-app #userNoticeModal.is-error .modal-content {
+    border-color: rgba(248, 113, 113, 0.45);
+}
+
+body.theme-invest-app #userNoticeModal.is-error #userNoticeTitle {
+    color: #fca5a5;
+}
+
+body.theme-invest-app .admin-users-page .user-status-badge--active {
+    color: #6ee7b7;
+    background: rgba(52, 211, 153, 0.14);
+    border-color: rgba(52, 211, 153, 0.45);
+}
+
+body.theme-invest-app .admin-users-page .user-status-badge--inactive {
+    color: #fca5a5;
+    background: rgba(248, 113, 113, 0.14);
+    border-color: rgba(248, 113, 113, 0.45);
+}
+
+body.theme-invest-app .admin-users-page .user-role-badge--admin {
+    color: #93c5fd;
+    background: rgba(59, 130, 246, 0.16);
+    border-color: rgba(147, 197, 253, 0.45);
+}
+
+body.theme-invest-app .admin-users-page .user-role-badge--investor {
+    color: #fcd34d;
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(252, 211, 77, 0.45);
+}
+
+@media (max-width: 768px) {
+    .admin-users-page #user-table {
+        min-width: 860px;
+    }
+
+    #deleteUserModal .modal-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    #deleteUserModal .btn-cancel,
+    #deleteUserModal .btn-delete-confirm {
+        flex: 1 1 150px;
+    }
+}

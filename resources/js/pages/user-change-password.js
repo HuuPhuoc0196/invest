@@ -1,4 +1,4 @@
-const { baseUrl } = window.__pageData || {};
+const { baseUrl, apiUrl: changePasswordUrl } = window.__pageData || {};
 const btnFormSubmit = document.getElementById('btnFormSubmit');
 
 function canSubmitChangePasswordForm() {
@@ -83,18 +83,6 @@ function updateChangePasswordSubmitButton() {
 });
 updateChangePasswordSubmitButton();
 
-function toastSuccess() {
-    const toast = document.getElementById('toast');
-    toast.classList.remove('toast-success', 'toast-error');
-    toast.classList.add('toast-success', 'toast', 'show');
-}
-
-function toastError() {
-    const toast = document.getElementById('toast');
-    toast.classList.remove('toast-success', 'toast-error');
-    toast.classList.add('toast-error', 'toast', 'show');
-}
-
 function removeValue() {
     ['password', 'newPassword', 'reNewPassword'].forEach(id => {
         const el = document.getElementById(id);
@@ -143,24 +131,18 @@ function submitForm() {
     btnFormSubmit.disabled = true;
 
     $.ajax({
-        url: baseUrl + '/user/changePassword/',
+        url: changePasswordUrl || (baseUrl + '/user/changePassword/'),
         type: 'PUT',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
         data: JSON.stringify({ password, newPassword }),
         success: function (response) {
-            const toast = document.getElementById('toast');
             if (response.status === 'success') {
                 removeValue();
-                toast.innerHTML = '✅ Đã cập nhật thành công <br>';
-                toast.className = 'toast show';
-                toastSuccess();
-                setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+                showNotifyModal('success', 'Đã cập nhật mật khẩu thành công');
             } else {
-                toast.innerHTML = '❌' + (response.message || 'Có lỗi xảy ra.');
-                toast.className = 'toast show';
-                toastError();
-                setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 5000);
-                if (response.message && String(response.message).indexOf('Mật khẩu không đúng') !== -1) {
+                const msg = response.message || 'Có lỗi xảy ra.';
+                showNotifyModal('error', msg);
+                if (String(msg).indexOf('Mật khẩu không đúng') !== -1) {
                     const el = document.getElementById('errorPassword');
                     if (el) {
                         el.textContent = 'Mật khẩu hiện tại không đúng.';
@@ -171,7 +153,6 @@ function submitForm() {
             }
         },
         error: function (xhr) {
-            const toast = document.getElementById('toast');
             let msg = 'Lỗi kết nối, vui lòng thử lại.';
             if (xhr.responseJSON) {
                 const j = xhr.responseJSON;
@@ -182,10 +163,7 @@ function submitForm() {
                     msg = j.message;
                 }
             }
-            toast.innerHTML = '❌ ' + msg;
-            toast.className = 'toast show';
-            toastError();
-            setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 5000);
+            showNotifyModal('error', msg);
         },
         complete: function () {
             btnFormSubmit.disabled = !canSubmitChangePasswordForm();

@@ -25,12 +25,11 @@
             <input type="file" id="file" accept=".txt">
             <div class="error" id="errorFile">Vui lòng chọn file .txt</div>
         </div>
-        <div id="toast" class="toast"></div>
-
         <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Upload</button>
     </div>
         </div>
     </div>
+    @include('partials.notify-modal')
 @endsection
 
 @section('admin-script')

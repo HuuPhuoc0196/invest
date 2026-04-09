@@ -117,9 +117,6 @@
         updateUpdateFollowSubmitButton();
     });
 
-    function toastSuccess() {}
-    function toastError() {}
-
     function submitForm() {
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const code = document.getElementById("code").value.trim().toUpperCase();

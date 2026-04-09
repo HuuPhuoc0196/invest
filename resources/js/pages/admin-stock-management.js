@@ -1,14 +1,14 @@
 const { stocks } = window.__pageData || {};
 
-let currentSortKey = 'valuation';
-let currentSortDir = 'asc';
+window.currentSortKey = 'valuation';
+window.currentSortDir = 'asc';
 
 function sortByColumn(key) {
-    if (currentSortKey === key) {
-        currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+    if (window.currentSortKey === key) {
+        window.currentSortDir = window.currentSortDir === 'asc' ? 'desc' : 'asc';
     } else {
-        currentSortKey = key;
-        currentSortDir = 'asc';
+        window.currentSortKey = key;
+        window.currentSortDir = 'asc';
     }
     updateSortIcons();
     renderStockTable(getFilteredStocks());
@@ -21,10 +21,10 @@ function updateSortIcons() {
         const icon = th.querySelector('.sort-icon');
         if (icon) icon.textContent = '⇅';
     });
-    document.querySelectorAll('th[data-sort-key="' + currentSortKey + '"]').forEach(th => {
-        th.classList.add(currentSortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    document.querySelectorAll('th[data-sort-key="' + window.currentSortKey + '"]').forEach(th => {
+        th.classList.add(window.currentSortDir === 'asc' ? 'sort-asc' : 'sort-desc');
         const icon = th.querySelector('.sort-icon');
-        if (icon) icon.textContent = currentSortDir === 'asc' ? '▲' : '▼';
+        if (icon) icon.textContent = window.currentSortDir === 'asc' ? '▲' : '▼';
     });
 }
 
@@ -48,8 +48,8 @@ function getFilteredStocks() {
     const stocksVn = document.getElementById('filterStocksVn').value;
     const ratingMin = document.getElementById('filterRatingMin').value;
     const ratingMax = document.getElementById('filterRatingMax').value;
-    const volumeMin = document.getElementById('filterVolumeMin').value;
-    const volumeMax = document.getElementById('filterVolumeMax').value;
+    const volumeMin = document.getElementById('filterVolumeMin').value.replace(/\./g, '');
+    const volumeMax = document.getElementById('filterVolumeMax').value.replace(/\./g, '');
     const valuationMin = document.getElementById('filterValuationMin').value;
     const valuationMax = document.getElementById('filterValuationMax').value;
 
@@ -60,8 +60,8 @@ function getFilteredStocks() {
         else if (stocksVn === '100') { if (![30, 100].includes(Number(stock.stocks_vn))) return false; }
 
         const rating = parseFloat(stock.rating_stocks);
-        if (ratingMin !== '' && (isNaN(rating) || rating < parseFloat(ratingMin))) return false;
-        if (ratingMax !== '' && (isNaN(rating) || rating > parseFloat(ratingMax))) return false;
+        if (ratingMin !== '' && (isNaN(rating) || rating < parseInt(ratingMin, 10))) return false;
+        if (ratingMax !== '' && (isNaN(rating) || rating > parseInt(ratingMax, 10))) return false;
 
         const vol = parseFloat(stock.volume_avg) || 0;
         if (volumeMin !== '' && vol < parseFloat(volumeMin)) return false;
@@ -105,3 +105,61 @@ function toggleFilter() {
     else { body.style.display = 'none'; icon.textContent = '▼'; }
 }
 window.toggleFilter = toggleFilter;
+
+// Format KL trung bình: hiển thị dạng 1.000 / 100.000 cho dễ đọc
+function formatVolume(val) {
+    const raw = String(val).replace(/\./g, '').trim();
+    const num = parseInt(raw, 10);
+    if (isNaN(num) || raw === '') return '';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Điểm: chỉ nhập số nguyên 1-10, blur ra ngoài range → reset ''
+    ['filterRatingMin', 'filterRatingMax'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.addEventListener('keydown', function(e) {
+            const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+            if (allowed.includes(e.key)) return;
+            if (e.ctrlKey || e.metaKey) return;
+            if (!/^\d$/.test(e.key)) e.preventDefault();
+        });
+
+        el.addEventListener('blur', function() {
+            const raw = this.value.trim();
+            if (raw === '') return;
+            const num = parseInt(raw, 10);
+            if (isNaN(num) || num < 1 || num > 10) {
+                this.value = '';
+            } else {
+                this.value = num;
+            }
+        });
+    });
+
+    ['filterVolumeMin', 'filterVolumeMax'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        // Chỉ cho nhập số và phím điều hướng
+        el.addEventListener('keydown', function(e) {
+            const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+            if (allowed.includes(e.key)) return;
+            if (e.ctrlKey || e.metaKey) return; // cho phép Ctrl+A, Ctrl+C...
+            if (!/^\d$/.test(e.key)) e.preventDefault();
+        });
+
+        // Khi rời field: format hiển thị
+        el.addEventListener('blur', function() {
+            const formatted = formatVolume(this.value);
+            this.value = formatted;
+        });
+
+        // Khi vào field: trả về số thô để user gõ tiếp
+        el.addEventListener('focus', function() {
+            this.value = this.value.replace(/\./g, '');
+        });
+    });
+});

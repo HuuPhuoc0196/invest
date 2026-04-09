@@ -253,8 +253,8 @@
         const stocksVn = document.getElementById('filterStocksVn').value;
         const ratingMin = document.getElementById('filterRatingMin').value;
         const ratingMax = document.getElementById('filterRatingMax').value;
-        const volumeMin = document.getElementById('filterVolumeMin').value;
-        const volumeMax = document.getElementById('filterVolumeMax').value;
+        const volumeMin = document.getElementById('filterVolumeMin').value.replace(/\./g, '');
+        const volumeMax = document.getElementById('filterVolumeMax').value.replace(/\./g, '');
         const valuationMin = document.getElementById('filterValuationMin').value;
         const valuationMax = document.getElementById('filterValuationMax').value;
 
@@ -269,8 +269,8 @@
             }
 
             const rating = parseFloat(stock.rating_stocks);
-            if (ratingMin !== '' && (isNaN(rating) || rating < parseFloat(ratingMin))) return false;
-            if (ratingMax !== '' && (isNaN(rating) || rating > parseFloat(ratingMax))) return false;
+            if (ratingMin !== '' && (isNaN(rating) || rating < parseInt(ratingMin, 10))) return false;
+            if (ratingMax !== '' && (isNaN(rating) || rating > parseInt(ratingMax, 10))) return false;
 
             const vol = parseFloat(stock.volume) || 0;
             if (volumeMin !== '' && vol < parseFloat(volumeMin)) return false;
@@ -330,4 +330,46 @@
         }
     }
     window.toggleFilter = toggleFilter;
+
+    // Format KL trung bình + validate Điểm
+    function formatVolume(val) {
+        const raw = String(val).replace(/\./g, '').trim();
+        const num = parseInt(raw, 10);
+        if (isNaN(num) || raw === '') return '';
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        ['filterRatingMin', 'filterRatingMax'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('keydown', function(e) {
+                const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+                if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+                if (!/^\d$/.test(e.key)) e.preventDefault();
+            });
+            el.addEventListener('blur', function() {
+                const raw = this.value.trim();
+                if (raw === '') return;
+                const num = parseInt(raw, 10);
+                this.value = (isNaN(num) || num < 1 || num > 10) ? '' : num;
+            });
+        });
+
+        ['filterVolumeMin', 'filterVolumeMax'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('keydown', function(e) {
+                const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+                if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+                if (!/^\d$/.test(e.key)) e.preventDefault();
+            });
+            el.addEventListener('blur', function() {
+                this.value = formatVolume(this.value);
+            });
+            el.addEventListener('focus', function() {
+                this.value = this.value.replace(/\./g, '');
+            });
+        });
+    });
 })();

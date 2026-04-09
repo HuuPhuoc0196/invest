@@ -301,13 +301,13 @@
             data: JSON.stringify({ items: items }),
             success: function (response) {
                 if (response.status === 'success') {
-                    toastShow('success', '✅ ' + response.message);
+                    showNotifyModal('success', '✅ ' + response.message);
                 } else {
-                    toastShow('error', '❌ ' + response.message);
+                    showNotifyModal('error', '❌ ' + response.message);
                 }
             },
             error: function (xhr) {
-                toastShow('error', '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
+                showNotifyModal('error', '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
             }
         });
     }
@@ -395,26 +395,16 @@
             data: JSON.stringify({ items: items }),
             success: function (response) {
                 if (response.status === 'success') {
-                    toastShow('success', '✅ ' + response.message);
+                    showNotifyModal('success', '✅ ' + response.message);
                 } else {
-                    toastShow('error', '❌ ' + response.message);
+                    showNotifyModal('error', '❌ ' + response.message);
                 }
             },
             error: function (xhr) {
-                toastShow('error', '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
+                showNotifyModal('error', '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
             }
         });
     }
     window.saveFlagsSession = saveFlagsSession;
 
-    function toastShow(type, message) {
-        const toast = document.getElementById('toast');
-        toast.classList.remove('toast-success', 'toast-error', 'show');
-        toast.classList.add(type === 'success' ? 'toast-success' : 'toast-error');
-        toast.innerHTML = message;
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
-    }
 })();

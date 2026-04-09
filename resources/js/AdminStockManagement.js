@@ -54,25 +54,25 @@ window.renderStockTable = function(data) {
     tbody.innerHTML = '';
 
     // Dynamic sort using global sort state
-    if (typeof currentSortKey !== 'undefined') {
+    if (typeof window.currentSortKey !== 'undefined') {
         data.sort((a, b) => {
             let valA, valB;
-            if (currentSortKey === 'valuation') {
+            if (window.currentSortKey === 'valuation') {
                 const buyA = parseFloat(a.recommended_buy_price) || 1;
                 const curA = parseFloat(a.current_price) || 0;
                 valA = buyA !== 0 ? ((curA - buyA) / buyA) * 100 : 0;
                 const buyB = parseFloat(b.recommended_buy_price) || 1;
                 const curB = parseFloat(b.current_price) || 0;
                 valB = buyB !== 0 ? ((curB - buyB) / buyB) * 100 : 0;
-            } else if (currentSortKey === 'code') {
+            } else if (window.currentSortKey === 'code') {
                 valA = (a.code || '').toString();
                 valB = (b.code || '').toString();
-                return currentSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                return window.currentSortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
             } else {
-                valA = parseFloat(a[currentSortKey]) || 0;
-                valB = parseFloat(b[currentSortKey]) || 0;
+                valA = parseFloat(a[window.currentSortKey]) || 0;
+                valB = parseFloat(b[window.currentSortKey]) || 0;
             }
-            return currentSortDir === 'asc' ? valA - valB : valB - valA;
+            return window.currentSortDir === 'asc' ? valA - valB : valB - valA;
         });
     }
 

@@ -189,7 +189,7 @@ export default class User{
             <td></td>
             <td></td>
             <td><strong>${totalInvested.toLocaleString('vi-VN')}</strong></td>
-            <td><strong>${totalCurrentValue.toLocaleString('vi-VN')}</strong</td>
+            <td><strong>${totalCurrentValue.toLocaleString('vi-VN')}</strong></td>
             <td style="color:${totalProfitColor}"><strong>${totalProfitSign}${Math.abs(totalProfit).toLocaleString('vi-VN')}</strong></td>
             <td style="color:${totalPercentColor}"><strong>${totalPercentSign}${Math.abs(totalProfitPercent).toFixed(2)}%</strong></td>
         `;
@@ -217,7 +217,7 @@ export default class User{
         totalRow.innerHTML = `
             <td class="col-code-sticky"><strong>Tổng:</strong></td>
             <td><strong>${Number(data.cash_in).toLocaleString('vi-VN')}</strong></td>
-            <td><strong>${Number(data.cash).toLocaleString('vi-VN')}</strong</td>
+            <td><strong>${Number(data.cash).toLocaleString('vi-VN')}</strong></td>
             <td style="color:${totalProfitColor}"><strong>${totalProfitSign}${Math.abs(totalProfit).toLocaleString('vi-VN')}</strong></td>
             <td style="color:${totalPercentColor}"><strong>${totalPercentSign}${Math.abs(totalProfitPercent).toFixed(2)}%</strong></td>
         `;

@@ -172,6 +172,16 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/stocks/import-csv', [Admin::class, 'importStocksCsv'])->name('admin.stocks.importCsv');
     Route::match(['get', 'post'], '/admin/stocks/insert', [Admin::class, 'stockInsert'])->name('admin.stocks.insert');
 
+    // Quản lý user
+    Route::get('/admin/users', [Admin::class, 'userManagement'])->name('admin.users');
+    Route::match(['get', 'put'], '/admin/users/update/{id}', [Admin::class, 'updateUser'])->name('admin.users.update');
+    Route::post('/admin/users/delete/{id}', [Admin::class, 'deleteUser'])->name('admin.users.delete');
+
+    // Thông tin cá nhân admin
+    Route::get('/admin/infoProfile', [Admin::class, 'infoProfile'])->name('admin.infoProfile');
+    Route::match(['get', 'put'], '/admin/updateInfoProfile', [Admin::class, 'updateInfoProfile'])->name('admin.updateInfoProfile');
+    Route::match(['get', 'put'], '/admin/changePassword', [Admin::class, 'changePassword'])->name('admin.changePassword');
+
     // Log có thể chứa thông tin nhạy cảm; chỉ admin mới truy cập được. Production nên cân nhắc giới hạn độ dài hoặc phân quyền chặt hơn.
     Route::get('/admin/logs', function () {
         $logFile = storage_path('logs/laravel.log');

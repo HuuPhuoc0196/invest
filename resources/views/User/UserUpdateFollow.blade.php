@@ -56,8 +56,6 @@
             <button type="button" id="autoSyncToggle" class="auto-sync-toggle auto-sync-on" aria-pressed="true">Bật</button>
         </div>
 
-        <div id="toast" class="toast"></div>
-
         <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Cập nhật</button>
     </div>
         </div>

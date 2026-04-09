@@ -1,0 +1,111 @@
+.admin-user-update-form input[readonly] {
+    background: #eef2f7;
+    color: #4b5563;
+    cursor: not-allowed;
+}
+
+.admin-user-update-flash {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.admin-user-update-flash--success {
+    background: rgba(34, 197, 94, 0.14);
+    border-color: rgba(34, 197, 94, 0.35);
+    color: #166534;
+}
+
+.admin-user-update-flash--error {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #991b1b;
+}
+
+body.theme-invest-app .admin-user-update-form input[readonly] {
+    background: #0f213f;
+    color: #94a3b8;
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+body.theme-invest-app .admin-user-update-flash {
+    background: var(--inv-surface2);
+    border-color: var(--inv-border);
+    color: var(--inv-text);
+}
+
+body.theme-invest-app .admin-user-update-flash--success {
+    background: rgba(52, 211, 153, 0.12);
+    border-color: rgba(52, 211, 153, 0.45);
+    color: #6ee7b7;
+}
+
+body.theme-invest-app .admin-user-update-flash--error {
+    background: rgba(248, 113, 113, 0.12);
+    border-color: rgba(248, 113, 113, 0.45);
+    color: #fca5a5;
+}
+
+#userUpdateNoticeModal.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 14, 26, 0.72);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+#userUpdateNoticeModal .modal-content {
+    width: min(92vw, 420px);
+    max-width: 420px;
+    padding: 26px 22px 20px;
+    border-radius: 14px;
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    background: linear-gradient(180deg, #0f213f 0%, #122747 100%);
+    color: #e2e8f0;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.48);
+    position: relative;
+}
+
+#userUpdateNoticeModal .modal-content h2 {
+    margin: 0 28px 14px 0;
+    font-size: 19px;
+    line-height: 1.35;
+    color: #f8fafc;
+}
+
+#userUpdateNoticeModal .user-update-notice-modal__message {
+    margin-bottom: 16px;
+    line-height: 1.5;
+    color: #cbd5e1;
+}
+
+#userUpdateNoticeModal .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+#userUpdateNoticeModal .modal-close:hover {
+    color: #f87171;
+}
+
+#userUpdateNoticeModal.is-success .modal-content {
+    border-color: rgba(52, 211, 153, 0.45);
+}
+
+#userUpdateNoticeModal.is-success #userUpdateNoticeTitle {
+    color: #6ee7b7;
+}

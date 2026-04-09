@@ -48,8 +48,6 @@
             <div class="error" id="errorCashDateType">Vui lòng nhập ngày hợp lệ</div>
         </div>
 
-        <div id="toast" class="toast"></div>
-
         <button type="button" id="btnFormSubmit" onclick="submitForm()" disabled>Rút tiền</button>
     </div>
         </div>

@@ -13,18 +13,6 @@ document.getElementById('code').addEventListener('input', updateUpdateRiskSubmit
 
 function resetForm() { document.getElementById('code').value = ''; updateUpdateRiskSubmitButton(); }
 
-function toastSuccess() {
-    const toast = document.getElementById('toast');
-    toast.classList.remove('toast-success', 'toast-error');
-    toast.classList.add('toast-success', 'toast', 'show');
-}
-
-function toastError() {
-    const toast = document.getElementById('toast');
-    toast.classList.remove('toast-success', 'toast-error');
-    toast.classList.add('toast-error', 'toast', 'show');
-}
-
 function submitForm() {
     const code = document.getElementById('code').value.trim().toUpperCase();
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -40,26 +28,14 @@ function submitForm() {
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
             data: JSON.stringify({ code }),
             success: function (response) {
-                const toast = document.getElementById('toast');
                 if (response.status === 'success') {
-                    toast.innerHTML = `✅ Đã cập nhật mức độ rủi ro cho cổ phiếu: <b>${code}</b><br>`;
-                    toast.className = 'toast show';
-                    toastSuccess();
-                    setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
-                    resetForm();
+                    showNotifyModal('success', `Đã cập nhật mức độ rủi ro cho cổ phiếu: <b>${code}</b>`, resetForm);
                 } else {
-                    toast.innerHTML = `❌` + response.message;
-                    toast.className = 'toast show';
-                    toastError();
-                    setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 5000);
+                    showNotifyModal('error', response.message || 'Có lỗi xảy ra.');
                 }
             },
             error: function (xhr) {
-                const toast = document.getElementById('toast');
-                toast.innerHTML = '❌ Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Lỗi');
-                toast.className = 'toast show';
-                toastError();
-                setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 5000);
+                showNotifyModal('error', 'Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Lỗi kết nối'));
             }
         });
     }

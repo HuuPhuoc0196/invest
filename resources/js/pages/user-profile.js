@@ -9,6 +9,17 @@
         user.renderTableProfile(userPortfolios);
         user.renderInvestTableProfile(userInvestCash);
 
+        // Sync invest-table width to stock-table width
+        const stockTable = document.getElementById('stock-table');
+        const investTable = document.getElementById('invest-table');
+        function syncInvestTableWidth() {
+            if (stockTable && investTable) {
+                investTable.style.minWidth = stockTable.scrollWidth + 'px';
+            }
+        }
+        requestAnimationFrame(syncInvestTableWidth);
+        window.addEventListener('resize', syncInvestTableWidth);
+
         // === JS-based sticky header + sticky total row ===
         const stickyTable = document.getElementById('stock-table');
         const stickyContainer = document.querySelector('.table-container');

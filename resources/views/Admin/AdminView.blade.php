@@ -49,19 +49,19 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label></label>Điểm:</label>
+                    <label>Điểm:</label>
                     <div class="filter-range">
-                        <input type="number" id="filterRatingMin" placeholder="Từ" step="0.1">
+                        <input type="text" inputmode="numeric" id="filterRatingMin" placeholder="1-10">
                         <span>~</span>
-                        <input type="number" id="filterRatingMax" placeholder="Đến" step="0.1">
+                        <input type="text" inputmode="numeric" id="filterRatingMax" placeholder="1-10">
                     </div>
                 </div>
                 <div class="filter-group">
                     <label>Khối lượng:</label>
                     <div class="filter-range">
-                        <input type="number" id="filterVolumeMin" placeholder="Từ">
+                        <input type="text" inputmode="numeric" id="filterVolumeMin" placeholder="Từ">
                         <span>~</span>
-                        <input type="number" id="filterVolumeMax" placeholder="Đến">
+                        <input type="text" inputmode="numeric" id="filterVolumeMax" placeholder="Đến">
                     </div>
                 </div>
                 <div class="filter-group">

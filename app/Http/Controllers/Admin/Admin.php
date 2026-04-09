@@ -12,10 +12,17 @@ use App\Http\Requests\InsertStockBasicRequest;
 use App\Http\Requests\StockInsertRequest;
 use App\Http\Requests\StockUpdateRequest;
 use App\Http\Requests\ImportStocksCsvRequest;
+use App\Http\Requests\UpdateInfoProfileRequest;
+use App\Http\Requests\ChangePasswordRequest;
+use App\Models\User as UserModel;
+use App\Services\AuthService;
 
 class Admin extends Controller
 {
-    public function __construct(private StockService $stockService) {}
+    public function __construct(
+        private StockService $stockService,
+        private AuthService  $authService,
+    ) {}
 
     public function show()
     {
@@ -85,6 +92,51 @@ class Admin extends Controller
         }
     }
 
+    public function infoProfile()
+    {
+        $userId = auth()->id();
+        $user   = UserModel::getUserById($userId);
+        if (!$user) {
+            abort(404);
+        }
+        return view('Admin.AdminInfoProfile', compact('user'));
+    }
+
+    public function updateInfoProfile(UpdateInfoProfileRequest $request)
+    {
+        if ($request->isMethod('PUT')) {
+            try {
+                $result     = $this->authService->updateUserName(auth()->id(), $request->validated()['name']);
+                $httpStatus = ($result['code'] ?? 200);
+                unset($result['code']);
+                return response()->json($result, $httpStatus);
+            } catch (QueryException $e) {
+                return $this->jsonServerError($e);
+            }
+        }
+        $user = UserModel::getUserById(auth()->id());
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Tài khoản không tồn tại.');
+        }
+        return view('Admin.AdminUpdateInfoProfile', compact('user'));
+    }
+
+    public function changePassword(ChangePasswordRequest $request)
+    {
+        if ($request->isMethod('PUT')) {
+            try {
+                $validated  = $request->validated();
+                $result     = $this->authService->changePassword(auth()->id(), $validated['password'], $validated['newPassword']);
+                $httpStatus = ($result['code'] ?? 200);
+                unset($result['code']);
+                return response()->json($result, $httpStatus);
+            } catch (QueryException $e) {
+                return $this->jsonServerError($e);
+            }
+        }
+        return view('Admin.AdminChangePassword');
+    }
+
     public function stockManagement()
     {
         $stocks = Stock::getAllStocks();
@@ -146,5 +198,68 @@ class Admin extends Controller
             }
         }
         return view('Admin.AdminStockInsert');
+    }
+
+    public function userManagement()
+    {
+        $users = UserModel::query()
+            ->select(['id', 'email', 'name', 'role', 'active', 'email_verified_at', 'created_at'])
+            ->orderByDesc('id')
+            ->get();
+
+        return view('Admin.AdminUserManagement', compact('users'));
+    }
+
+    public function updateUser(Request $request, int $id)
+    {
+        $user = UserModel::find($id);
+        if (!$user) {
+            return redirect()->route('admin.users')->with('error', 'Không tìm thấy user.');
+        }
+
+        if ($request->isMethod('put')) {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'min:2', 'max:100'],
+                'role' => ['required', 'in:0,1'],
+                'active' => ['required', 'in:0,1'],
+                'email_verified' => ['required', 'in:0,1'],
+            ], [
+                'name.required' => 'Tên không được để trống.',
+                'name.min' => 'Tên phải có ít nhất 2 ký tự.',
+                'role.in' => 'Vai trò không hợp lệ.',
+                'active.in' => 'Trạng thái không hợp lệ.',
+                'email_verified.in' => 'Trạng thái xác thực email không hợp lệ.',
+            ]);
+
+            $user->name = trim((string) $validated['name']);
+            $user->role = (int) $validated['role'];
+            $user->active = (int) $validated['active'];
+            $user->email_verified_at = ((int) $validated['email_verified'] === 1) ? now() : null;
+            $user->save();
+
+            return redirect()->route('admin.users.update', ['id' => $user->id])
+                ->with('success', 'Đã cập nhật thông tin user thành công.');
+        }
+
+        return view('Admin.AdminUserUpdate', compact('user'));
+    }
+
+    public function deleteUser(int $id)
+    {
+        $user = UserModel::find($id);
+        if (!$user) {
+            return redirect()->route('admin.users')->with('error', 'Không tìm thấy user để xoá.');
+        }
+
+        if (auth()->id() === $user->id) {
+            return redirect()->route('admin.users')->with('error', 'Không thể tự xoá tài khoản đang đăng nhập.');
+        }
+
+        try {
+            $user->delete();
+            return redirect()->route('admin.users')->with('success', 'Đã xoá user thành công.');
+        } catch (QueryException $e) {
+            return redirect()->route('admin.users')->with('error', 'Không thể xoá user vì đang có dữ liệu liên quan.');
+        }
     }
 }
