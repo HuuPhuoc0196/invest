@@ -45,7 +45,7 @@
         const btnText = document.getElementById('btnLoginText');
         btnSubmit.disabled = true;
         btnSpinner.classList.add('is-loading');
-        btnText.textContent = 'Đang xử lý...';
+        btnText.textContent = 'Đang đăng nhập...';
 
         const data = { email: email, password: password, _token: csrfToken };
 
@@ -74,6 +74,11 @@
                 btnSubmit.disabled = false;
                 btnSpinner.classList.remove('is-loading');
                 btnText.textContent = 'Đăng nhập';
+                // 419 = CSRF token hết hạn → tải lại trang để lấy token mới
+                if (xhr.status === 419) {
+                    window.location.reload();
+                    return;
+                }
                 let msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Lỗi không xác định.';
                 errorMessage.innerText = msg;
                 errorMessage.style.display = "block";

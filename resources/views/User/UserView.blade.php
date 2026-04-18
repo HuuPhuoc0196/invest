@@ -104,10 +104,7 @@
                 <tr>
                     @auth
                     <th class="col-select th-select-all" id="thSelectAll" onclick="toggleSelectAll()" title="Theo dõi tất cả">
-                        <span class="th-select-all__inner">
-                            <span class="th-select-all__label">Theo dõi</span>
-                            <span class="th-select-all__state" aria-hidden="true"></span>
-                        </span>
+                        Theo dõi
                     </th>
                     @endauth
                     <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã CK <span class="sort-icon">⇅</span></th>

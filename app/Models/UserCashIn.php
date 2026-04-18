@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\CacheService;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class UserCashIn extends Model
 {
@@ -12,6 +12,8 @@ class UserCashIn extends Model
 
     public static function getCashIn($userId)
     {
-        return self::where('user_id', $userId)->sum('cash_in');
+        return CacheService::remember("user_cashin_{$userId}", CacheService::TTL_ONE_DAY, function () use ($userId) {
+            return self::where('user_id', $userId)->sum('cash_in');
+        });
     }
 }

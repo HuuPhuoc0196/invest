@@ -65,6 +65,14 @@
                     </div>
                 </div>
                 <div class="filter-group">
+                    <label>KL trung bình:</label>
+                    <div class="filter-range">
+                        <input type="text" inputmode="numeric" id="filterVolumeAvgMin" placeholder="Từ">
+                        <span>~</span>
+                        <input type="text" inputmode="numeric" id="filterVolumeAvgMax" placeholder="Đến">
+                    </div>
+                </div>
+                <div class="filter-group">
                     <label>% Định giá:</label>
                     <div class="filter-range">
                         <input type="number" id="filterValuationMin" placeholder="Từ" step="0.01">
@@ -95,6 +103,7 @@
                     <th data-sort-key="percent_sell" onclick="sortByColumn('percent_sell')">Tỉ lệ bán <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="rating_stocks" onclick="sortByColumn('rating_stocks')">Điểm <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="volume" onclick="sortByColumn('volume')">Khối lượng <span class="sort-icon">⇅</span></th>
+                    <th data-sort-key="volume_avg" onclick="sortByColumn('volume_avg')">Khối lượng TB <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="valuation" onclick="sortByColumn('valuation')">% Định giá <span class="sort-icon">▲</span></th>
                 </tr>
             </thead>

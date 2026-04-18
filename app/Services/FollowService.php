@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Stock;
 use App\Models\UserFollow;
+use App\Services\CacheService;
 
 class FollowService
 {
@@ -31,6 +32,12 @@ class FollowService
         $userFollow->notice_flag      = 1;
         $userFollow->auto_sync        = 1;
         $userFollow->save();
+
+        // Clear cache sau khi thêm follow
+        CacheService::forgetMany([
+            "user_follow_{$userId}",
+            "user_follow_notice_{$userId}"
+        ]);
 
         return ['status' => 'success', 'message' => 'Thêm theo dõi thành công.', 'data' => $userFollow];
     }
@@ -70,6 +77,14 @@ class FollowService
             $added[] = $code;
         }
 
+        // Clear cache sau khi thêm batch
+        if (count($added) > 0) {
+            CacheService::forgetMany([
+                "user_follow_{$userId}",
+                "user_follow_notice_{$userId}"
+            ]);
+        }
+
         $message = count($added) > 0
             ? 'Đã thêm ' . count($added) . ' mã vào danh mục theo dõi: ' . implode(', ', $added) . '.'
             : 'Không có mã nào được thêm.';
@@ -106,6 +121,12 @@ class FollowService
         $userFollowExist->follow_price_sell = $data['followPriceSell'] ?? null;
         $userFollowExist->auto_sync         = (int) $data['autoSync'];
         $userFollowExist->save();
+
+        // Clear cache sau khi update
+        CacheService::forgetMany([
+            "user_follow_{$userId}",
+            "user_follow_notice_{$userId}"
+        ]);
 
         return ['status' => 'success', 'message' => 'Update theo dõi thành công.', 'data' => $userFollowExist];
     }

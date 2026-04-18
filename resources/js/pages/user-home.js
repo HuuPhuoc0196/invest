@@ -124,15 +124,18 @@
                 cloneWrap = document.createElement('div');
                 cloneWrap.className = 'sticky-clone';
                 cloneTable = document.createElement('table');
-                cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:transparent;margin:0;table-layout:fixed;';
+                cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:transparent;margin:0;';
                 /* cloneNode(true) giữ onclick trên th — không addEventListener (tránh gọi 2 lần) */
                 const cloneThead = thead.cloneNode(true);
+
                 cloneTable.appendChild(cloneThead);
                 cloneWrap.appendChild(cloneTable);
                 cloneWrap.style.pointerEvents = 'auto';
                 document.body.appendChild(cloneWrap);
                 syncWidths();
                 syncScroll();
+                // Sync checkbox state into the freshly created clone
+                updateSelectAllState();
                 cloneWrap.style.display = 'none';
             }
 
@@ -140,17 +143,18 @@
                 if (!cloneTable) return;
                 const origCells = thead.querySelectorAll('th');
                 const cloneCells = cloneTable.querySelectorAll('th');
-                const tableWidth = stickyTable.getBoundingClientRect().width;
-                cloneTable.style.width = tableWidth + 'px';
+                let totalWidth = 0;
                 origCells.forEach((cell, i) => {
+                    const w = cell.getBoundingClientRect().width;
+                    totalWidth += w;
                     if (cloneCells[i]) {
-                        const w = cell.getBoundingClientRect().width;
                         cloneCells[i].style.boxSizing = 'border-box';
                         cloneCells[i].style.width = w + 'px';
                         cloneCells[i].style.minWidth = w + 'px';
                         cloneCells[i].style.maxWidth = w + 'px';
                     }
                 });
+                cloneTable.style.width = totalWidth + 'px';
             }
 
             function syncScroll() {
@@ -171,6 +175,7 @@
                 if (tableRect.top < topOffset && tableRect.bottom > (topOffset + theadHeight)) {
                     cloneWrap.style.display = 'block';
                     syncScroll();
+                    updateSelectAllState();
                 } else {
                     cloneWrap.style.display = 'none';
                 }
@@ -287,27 +292,27 @@
         if (!btn) return;
         const checked = document.querySelectorAll('#stockTableBody .follow-checkbox:checked:not(:disabled)');
         btn.disabled = checked.length === 0;
-        // keep select-all th icon in sync
-        updateSelectAllThIcon();
+        updateSelectAllState();
     }
 
-    function updateSelectAllThIcon() {
-        const all = document.querySelectorAll('#stockTableBody .follow-checkbox:not(:disabled)');
+    // Sets all non-disabled row checkboxes to `checked`, then refreshes state
+    function setAllFollowRows(checked) {
+        document.querySelectorAll('#stockTableBody .follow-checkbox:not(:disabled)')
+            .forEach(cb => { cb.checked = checked; });
+        updateAddFollowButtonState();
+    }
+
+    function updateSelectAllState() {
+        const all     = document.querySelectorAll('#stockTableBody .follow-checkbox:not(:disabled)');
         const checked = document.querySelectorAll('#stockTableBody .follow-checkbox:checked:not(:disabled)');
-        const n = all.length;
-        const c = checked.length;
-        const allChecked = n > 0 && c === n;
+        const n = all.length, c = checked.length;
+        const allChecked  = n > 0 && c === n;
         const someChecked = c > 0 && c < n;
+
         document.querySelectorAll('.th-select-all').forEach(th => {
             const state = th.querySelector('.th-select-all__state');
             if (state) {
-                if (n === 0 || (!allChecked && !someChecked)) {
-                    state.textContent = '';
-                } else if (allChecked) {
-                    state.textContent = '☑';
-                } else {
-                    state.textContent = '−';
-                }
+                state.textContent = allChecked ? '✓' : (someChecked ? '−' : '');
             }
             th.title = allChecked ? 'Bỏ theo dõi tất cả' : 'Theo dõi tất cả';
             th.classList.toggle('th-select-all--active', allChecked);
@@ -319,8 +324,7 @@
         const checkboxes = document.querySelectorAll('#stockTableBody .follow-checkbox:not(:disabled)');
         if (checkboxes.length === 0) return;
         const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-        checkboxes.forEach(cb => { cb.checked = !allChecked; });
-        updateAddFollowButtonState();
+        setAllFollowRows(!allChecked);
     }
     window.toggleSelectAll = toggleSelectAll;
 

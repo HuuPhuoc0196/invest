@@ -40,8 +40,9 @@
                         <tr>
                             <th>Mã CK</th>
                             <th>Giá mua theo dõi</th>
+                            <th><input type="checkbox" class="checkbox-all" id="checkAllFollowBuy"></th>
                             <th>Giá bán theo dõi</th>
-                            <th><input type="checkbox" class="checkbox-all" id="checkAllFollow" onclick="toggleAllFollow()"></th>
+                            <th><input type="checkbox" class="checkbox-all" id="checkAllFollowSell"></th>
                         </tr>
                     </thead>
                     <tbody id="noticeTableBodyFollow"></tbody>
@@ -65,7 +66,7 @@
                     <thead>
                         <tr>
                             <th>Mã CK</th>
-                            <th><input type="checkbox" class="checkbox-all" id="checkAllSession" onclick="toggleAllSession()"></th>
+                            <th><input type="checkbox" class="checkbox-all" id="checkAllSession"></th>
                         </tr>
                     </thead>
                     <tbody id="noticeTableBodySession"></tbody>

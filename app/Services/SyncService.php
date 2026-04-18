@@ -8,6 +8,7 @@ use App\Models\UserFollow;
 use App\Models\UserPortfolio;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Services\CacheService;
 
 class SyncService
 {
@@ -21,6 +22,7 @@ class SyncService
 
         $statusSync->status_sync_price = 1;
         $statusSync->save();
+        CacheService::forget('status_sync');
 
         foreach ($stocks as $stock) {
             $newPrice = $this->collectPrice($stock->code);
@@ -37,6 +39,7 @@ class SyncService
 
         $statusSync->status_sync_price = 0;
         $statusSync->save();
+        CacheService::forget('status_sync');
         Log::info("End cập nhật giá cổ phiếu");
 
         return ['status' => 'success', 'message' => 'Update thành công.'];
@@ -52,6 +55,7 @@ class SyncService
 
         $statusSync->status_sync_risk = 1;
         $statusSync->save();
+        CacheService::forget('status_sync');
 
         foreach ($stocks as $stock) {
             $newRisk = $this->collectRisk($stock->code);
@@ -71,6 +75,7 @@ class SyncService
 
         $statusSync->status_sync_risk = 0;
         $statusSync->save();
+        CacheService::forget('status_sync');
         Log::info("End cập nhật mức độ rủi ro của cổ phiếu");
 
         return ['status' => 'success', 'message' => 'Update thành công.'];
@@ -88,6 +93,7 @@ class SyncService
         $statusSync = StatusSync::getStatusSync();
         $statusSync->status_sync_risk = 1;
         $statusSync->save();
+        CacheService::forget('status_sync');
 
         $newRisk = $this->collectRisk($stock->code);
         Log::info("Call api mức độ rủi ro của mã chứng khoán {$stock->code} từ {$stock->risk_level} thành {$newRisk}");
@@ -96,6 +102,7 @@ class SyncService
             Log::error("Không thể lấy risk mới sau khi run getNewRisk với {$stock->code}");
             $statusSync->status_sync_risk = 0;
             $statusSync->save();
+            CacheService::forget('status_sync');
             return ['status' => 'error', 'message' => 'Cập nhật rủi ro ' . $stock->code . ' thất bại.'];
         }
 
@@ -109,6 +116,7 @@ class SyncService
 
         $statusSync->status_sync_risk = 0;
         $statusSync->save();
+        CacheService::forget('status_sync');
         Log::info("End cập nhật mức độ rủi ro của cổ phiếu");
 
         return ['status' => 'success', 'message' => 'Cập nhật rủi ro ' . $stock->code . ' thành công.'];
@@ -168,6 +176,9 @@ class SyncService
                 }
             }
         }
+
+        CacheService::clearTableCache('stocks');
+
         return ['status' => 'success', 'message' => 'Upload thành công.'];
     }
 

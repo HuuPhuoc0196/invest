@@ -14,6 +14,17 @@ function formatToVND(input) {
     input.value = formatter.format(raw);
 }
 
+function setStockInsertSubmitLoading(isLoading) {
+    const btn = document.getElementById("btnFormSubmit");
+    if (!btn) return;
+    if (!btn.dataset.defaultText) {
+        btn.dataset.defaultText = btn.textContent.trim() || "Thêm mới";
+    }
+    btn.dataset.loading = isLoading ? "true" : "false";
+    btn.textContent = isLoading ? "⏳ Đang thêm..." : btn.dataset.defaultText;
+    btn.disabled = isLoading || !isStockInsertFormReady();
+}
+
 function isStockInsertFormReady() {
     const codeEl = document.getElementById("code");
     if (!codeEl) return false;
@@ -41,7 +52,12 @@ function isStockInsertFormReady() {
 
 function updateStockInsertSubmitButton() {
     const btn = document.getElementById("btnFormSubmit");
-    if (btn) btn.disabled = !isStockInsertFormReady();
+    if (!btn) return;
+    if (btn.dataset.loading === "true") {
+        btn.disabled = true;
+        return;
+    }
+    btn.disabled = !isStockInsertFormReady();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -49,6 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
     priceFields.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
+            formatToVND(el);
             el.addEventListener("input", () => {
                 formatToVND(el);
                 updateStockInsertSubmitButton();
@@ -72,9 +89,9 @@ function resetStockForm() {
         if (el) el.value = "";
     });
     // Giữ lại các giá trị default
-    document.getElementById("currentPrice").value = "10,000";
-    document.getElementById("buyPrice").value = "10,000";
-    document.getElementById("sellPrice").value = "10,000";
+    document.getElementById("currentPrice").value = formatter.format(10000);
+    document.getElementById("buyPrice").value = formatter.format(10000);
+    document.getElementById("sellPrice").value = formatter.format(10000);
     document.getElementById("percentBuy").value = "100";
     document.getElementById("percentSell").value = "100";
     document.getElementById("risk").value = "4";
@@ -189,6 +206,7 @@ window.submitStockForm = function() {
     }
 
     if (isValid) {
+        setStockInsertSubmitLoading(true);
         const data = {
             code: code,
             currentPrice: currentPrice,
@@ -211,6 +229,7 @@ window.submitStockForm = function() {
             },
             data: JSON.stringify(data),
             success: function (response) {
+                setStockInsertSubmitLoading(false);
                 if (response.status === "success") {
                     showAdminInsertModal(`Đã thêm mã ${code}`, 'success');
                     resetStockForm();
@@ -219,6 +238,7 @@ window.submitStockForm = function() {
                 }
             },
             error: function (xhr) {
+                setStockInsertSubmitLoading(false);
                 console.log(xhr);
                 showAdminInsertModal('Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'), 'error');
             }

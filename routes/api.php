@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CacheController;
 use App\Http\Controllers\Sync\Sync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,4 +31,12 @@ Route::middleware('cron.secret')->group(function () {
     Route::get('/admin/sendEmailStocksFollow', [Sync::class, 'sendEmailStocksFollow'])->name('Sync.sendEmailStocksFollow');
     Route::get('/admin/followStocksEveryDay', [Sync::class, 'followStocksEveryDay'])->name('Sync.followStocksEveryDay');
     Route::get('/admin/sendEmailVnindex', [Sync::class, 'sendEmailVnindex'])->name('Sync.sendEmailVnindex');
+    
+    // Cache management APIs
+    Route::post('/cache/clear-all', [CacheController::class, 'clearAll'])->name('api.cache.clearAll');
+    Route::post('/cache/clear-table', [CacheController::class, 'clearTable'])->name('api.cache.clearTable');
+    Route::post('/cache/clear-user', [CacheController::class, 'clearUser'])->name('api.cache.clearUser');
+    Route::post('/cache/clear-stock', [CacheController::class, 'clearStock'])->name('api.cache.clearStock');
+    Route::post('/cache/clear-keys', [CacheController::class, 'clearKeys'])->name('api.cache.clearKeys');
+    Route::get('/cache/info', [CacheController::class, 'getCacheInfo'])->name('api.cache.info');
 });

@@ -2,28 +2,31 @@
 
 namespace App\Models;
 
+use App\Services\CacheService;
 use Illuminate\Support\Facades\DB;
 
 use Illuminate\Database\Eloquent\Model;
 
 class UserFollow extends Model
 {
-    protected $fillable = ['user_id', 'stock_id', 'follow_price_buy', 'follow_price_sell', 'notice_flag', 'auto_sync'];
+    protected $fillable = ['user_id', 'stock_id', 'follow_price_buy', 'follow_price_sell', 'notice_flag', 'notice_buy', 'notice_sell', 'auto_sync'];
 
     public static function getUserFollow($userId)
     {
-        return DB::table('user_follows')
-            ->join('stocks', 'user_follows.stock_id', '=', 'stocks.id')
-            ->where('user_follows.user_id', $userId)
-            ->select('stocks.code', 'user_follows.follow_price_buy', 'user_follows.follow_price_sell')
-            ->get()
-            ->map(function ($row) {
-                return [
-                    'code' => $row->code,
-                    'follow_price_buy' => $row->follow_price_buy,
-                    'follow_price_sell' => $row->follow_price_sell
-                ];
-            });
+        return CacheService::remember("user_follow_{$userId}", CacheService::TTL_ONE_DAY, function () use ($userId) {
+            return DB::table('user_follows')
+                ->join('stocks', 'user_follows.stock_id', '=', 'stocks.id')
+                ->where('user_follows.user_id', $userId)
+                ->select('stocks.code', 'user_follows.follow_price_buy', 'user_follows.follow_price_sell')
+                ->get()
+                ->map(function ($row) {
+                    return [
+                        'code' => $row->code,
+                        'follow_price_buy' => $row->follow_price_buy,
+                        'follow_price_sell' => $row->follow_price_sell
+                    ];
+                });
+        });
     }
 
     public static function deleteByCodeAndUser(string $code, int $userId): bool
@@ -34,9 +37,19 @@ class UserFollow extends Model
             return false;
         }
 
-        return self::where('stock_id', $stock->id)
+        $deleted = self::where('stock_id', $stock->id)
             ->where('user_id', $userId)
             ->delete() > 0;
+        
+        // Clear cache sau khi delete
+        if ($deleted) {
+            CacheService::forgetMany([
+                "user_follow_{$userId}",
+                "user_follow_notice_{$userId}"
+            ]);
+        }
+        
+        return $deleted;
     }
 
     public static function deleteByCodesAndUser(array $codes, int $userId): int
@@ -49,14 +62,34 @@ class UserFollow extends Model
         if (empty($stockIds)) {
             return 0;
         }
-        return self::whereIn('stock_id', $stockIds)
+        $deleted = self::whereIn('stock_id', $stockIds)
             ->where('user_id', $userId)
             ->delete();
+        
+        // Clear cache sau khi delete
+        if ($deleted > 0) {
+            CacheService::forgetMany([
+                "user_follow_{$userId}",
+                "user_follow_notice_{$userId}"
+            ]);
+        }
+        
+        return $deleted;
     }
 
     public static function deleteAllByUserId(int $userId): int
     {
-        return self::where('user_id', $userId)->delete();
+        $deleted = self::where('user_id', $userId)->delete();
+        
+        // Clear cache sau khi delete
+        if ($deleted > 0) {
+            CacheService::forgetMany([
+                "user_follow_{$userId}",
+                "user_follow_notice_{$userId}"
+            ]);
+        }
+        
+        return $deleted;
     }
 
     public static function getUserFollowFirst(int $code_id, int $userId)
@@ -82,9 +115,16 @@ class UserFollow extends Model
      */
     public static function updateNoticeFlag(int $id, int $userId, int $flag): int
     {
-        return self::where('id', $id)
+        $updated = self::where('id', $id)
             ->where('user_id', $userId)
             ->update(['notice_flag' => $flag]);
+        
+        // Clear cache sau khi update
+        if ($updated > 0) {
+            CacheService::forget("user_follow_notice_{$userId}");
+        }
+        
+        return $updated;
     }
 
     /**
@@ -92,19 +132,36 @@ class UserFollow extends Model
      */
     public static function getFollowNoticeByUser(int $userId)
     {
-        return DB::table('user_follows')
-            ->join('stocks', 'user_follows.stock_id', '=', 'stocks.id')
-            ->where('user_follows.user_id', $userId)
-            ->select(
-                'user_follows.id',
-                'user_follows.stock_id',
-                'stocks.code',
-                'user_follows.follow_price_buy',
-                'user_follows.follow_price_sell',
-                'user_follows.notice_flag'
-            )
-            ->orderBy('stocks.code', 'asc')
-            ->get();
+        return CacheService::remember("user_follow_notice_{$userId}", CacheService::TTL_ONE_DAY, function () use ($userId) {
+            return DB::table('user_follows')
+                ->join('stocks', 'user_follows.stock_id', '=', 'stocks.id')
+                ->where('user_follows.user_id', $userId)
+                ->select(
+                    'user_follows.id',
+                    'user_follows.stock_id',
+                    'stocks.code',
+                    'user_follows.follow_price_buy',
+                    'user_follows.follow_price_sell',
+                    'user_follows.notice_buy',
+                    'user_follows.notice_sell'
+                )
+                ->orderBy('stocks.code', 'asc')
+                ->get();
+        });
+    }
+
+    /**
+     * Cập nhật notice_buy và notice_sell cho một record follow cụ thể của user.
+     */
+    public static function updateNoticeBuySell(int $id, int $userId, int $noticeBuy, int $noticeSell): int
+    {
+        $updated = self::where('id', $id)
+            ->where('user_id', $userId)
+            ->update(['notice_buy' => $noticeBuy, 'notice_sell' => $noticeSell]);
+        if ($updated > 0) {
+            CacheService::forget("user_follow_notice_{$userId}");
+        }
+        return $updated;
     }
 
 }

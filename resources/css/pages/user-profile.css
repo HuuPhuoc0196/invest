@@ -43,11 +43,8 @@ main.dragging {
     transition: filter 0.15s, box-shadow 0.15s, transform 0.1s;
     white-space: nowrap;
     letter-spacing: 0.01em;
-}
-
-.asset-action-btn:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
+    will-change: filter, transform;
+    transform: translateZ(0);
 }
 
 .asset-action-btn:active {

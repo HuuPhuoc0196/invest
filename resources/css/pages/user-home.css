@@ -24,7 +24,6 @@
 }
 #stock-table td.col-select input.follow-checkbox:disabled {
     cursor: not-allowed;
-    opacity: 0.75;
 }
 
 /* —— Select-all th (Theo dõi header) —— */
@@ -38,7 +37,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 4px;
     line-height: 1.15;
 }
 
@@ -48,30 +47,60 @@
     letter-spacing: 0.02em;
     color: var(--inv-text, #e2e8f0);
 }
-
 .th-select-all__state {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1;
     display: inline-block;
-    transition: color 0.15s, opacity 0.15s;
     color: var(--inv-muted, #94a3b8);
     min-height: 1em;
+    transition: color 0.15s;
 }
+.th-select-all__state:empty { display: none; }
+.th-select-all--partial .th-select-all__state { color: #fbbf24; }
+.th-select-all--active  .th-select-all__state { color: var(--inv-accent, #38bdf8); }
 
-.th-select-all__state:empty {
-    display: none;
+/* Row selection checkbox: hide native control, render custom indicator */
+#stock-table td.col-select .cell-label-select {
+    position: relative;
 }
-
-.th-select-all:hover .th-select-all__state:not(:empty) {
-    opacity: 0.85;
+#stock-table td.col-select .cell-label-select::before {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(148, 163, 184, 0.45);
+    border-radius: 4px;
+    background: transparent;
+    transition: background 0.15s, border-color 0.15s;
+    pointer-events: none;
+    flex-shrink: 0;
 }
-
-.th-select-all--partial .th-select-all__state {
-    color: #fbbf24;
+#stock-table td.col-select .cell-label-select:has(.follow-checkbox:checked)::before {
+    background: var(--inv-accent, #38bdf8);
+    border-color: var(--inv-accent, #38bdf8);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8l3.5 3.5 6.5-7' stroke='%230f172a' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 12px 12px;
 }
-
-.th-select-all--active .th-select-all__state {
-    color: #38bdf8;
+#stock-table td.col-select .cell-label-select:has(.follow-checkbox:disabled)::before {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+#stock-table td.col-select .cell-label-select:has(.follow-checkbox:checked:disabled)::before {
+    background: #d1d5db;
+    border-color: #9ca3af;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8l3.5 3.5 6.5-7' stroke='%236b7280' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+#stock-table td.col-select input.follow-checkbox {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+    z-index: 1;
 }
 
 /* —— Notify modal (Thêm theo dõi) —— */

@@ -128,6 +128,8 @@ function submitForm() {
     const newPassword = document.getElementById('newPassword').value.trim();
 
     removeError();
+    btnFormSubmit.dataset.originalText = btnFormSubmit.innerHTML;
+    btnFormSubmit.innerHTML = '⏳ Đang cập nhật...';
     btnFormSubmit.disabled = true;
 
     $.ajax({
@@ -166,6 +168,7 @@ function submitForm() {
             showNotifyModal('error', msg);
         },
         complete: function () {
+            btnFormSubmit.innerHTML = btnFormSubmit.dataset.originalText || 'Cập nhật';
             btnFormSubmit.disabled = !canSubmitChangePasswordForm();
         }
     });

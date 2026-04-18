@@ -2,6 +2,9 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 
 export default defineConfig({
+    server: {
+        host: '127.0.0.1',
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css',
@@ -27,6 +30,8 @@ export default defineConfig({
                 'resources/css/pages/user-buy.css',
                 'resources/css/pages/user-sell.css',
                 'resources/css/pages/user-follow.css',
+                'resources/css/pages/user-update-info-profile.css',
+                'resources/css/pages/user-change-password.css',
                 'resources/js/Admin.js',
                 'resources/js/AdminStockManagement.js',
                 'resources/js/AdminUserManagement.js',
@@ -54,6 +59,8 @@ export default defineConfig({
                 'resources/js/pages/user-update-info-profile.js',
                 'resources/js/pages/admin-insert.js',
                 'resources/js/pages/admin-stock-management.js',
+                'resources/js/pages/admin-stock-follow.js',
+                'resources/js/pages/admin-stock-suggest.js',
                 'resources/js/pages/admin-user-management.js',
                 'resources/js/pages/admin-upload-file.js',
                 'resources/js/pages/admin-update-risk.js',

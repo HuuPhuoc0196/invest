@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CacheService;
 use Illuminate\Database\Eloquent\Model;
 
 class StatusSync extends Model
@@ -11,6 +12,8 @@ class StatusSync extends Model
 
     public static function getStatusSync()
     {
-        return self::first();
+        return CacheService::remember('status_sync', CacheService::TTL_ONE_DAY, function () {
+            return self::first();
+        });
     }
 }

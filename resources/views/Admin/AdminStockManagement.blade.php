@@ -22,18 +22,36 @@
 
 @section('admin-body-content')
     <div class="admin-stocks-page">
-        @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu', 'level' => 1])
         @if (session('success'))
             <div class="admin-stock-flash admin-stock-flash--success">{{ session('success') }}</div>
         @endif
         @if (session('error'))
             <div class="admin-stock-flash admin-stock-flash--error">{{ session('error') }}</div>
         @endif
-        <div class="admin-stocks-main-actions">
-            <a href="{{ url('/admin/stocks/insert') }}" class="button-link btn-admin-main-action btn-admin-main-action--add">➕ Thêm cổ phiếu</a>
-            <a href="javascript:void(0)" class="button-link btn-admin-main-action btn-admin-main-action--export" onclick="confirmExportCsv()">📄 Xuất file csv</a>
-            <a href="javascript:void(0)" class="button-link btn-admin-main-action btn-admin-main-action--import" onclick="openImportModal()">📥 Nhập file csv</a>
+
+        {{-- Toolbar: buttons trước title --}}
+        <div class="admin-stocks-toolbar">
+            <div class="admin-stocks-toolbar__left">
+                <a href="{{ route('admin.stocks.insert') }}" class="btn-toolbar btn-toolbar--add">➕ Thêm cổ phiếu</a>
+                <a href="{{ route('admin.stocks.follow') }}" class="btn-toolbar btn-toolbar--follow">👁️ Admin theo dõi</a>
+                <a href="{{ route('admin.stocks.suggest') }}" class="btn-toolbar btn-toolbar--suggest">💡 Admin gợi ý</a>
+            </div>
+            <div class="admin-stocks-toolbar__right">
+                <a href="javascript:void(0)" class="btn-toolbar btn-toolbar--export" onclick="confirmExportCsv()">📄 Xuất file csv</a>
+                <a href="javascript:void(0)" class="btn-toolbar btn-toolbar--import" onclick="openImportModal()">📥 Nhập file csv</a>
+            </div>
         </div>
+
+        @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu', 'level' => 1])
+
+        {{-- Wrapper cho button và filter để dùng flexbox order trên mobile --}}
+        <div class="admin-stocks-filter-wrapper">
+            {{-- Button Thêm theo dõi --}}
+            <div class="admin-stocks-add-follow-bar">
+                <button type="button" class="btn-add-follow-admin" id="btnAddFollowAdmin" disabled onclick="submitAddFollowAdmin()">
+                    ➕ Thêm theo dõi
+                </button>
+            </div>
 
     <!-- Filter Panel -->
         <div class="filter-panel">
@@ -71,6 +89,14 @@
                     </div>
                 </div>
                 <div class="filter-group">
+                    <label>Khối lượng:</label>
+                    <div class="filter-range">
+                        <input type="text" inputmode="numeric" id="filterVolumeRawMin" placeholder="Từ">
+                        <span>~</span>
+                        <input type="text" inputmode="numeric" id="filterVolumeRawMax" placeholder="Đến">
+                    </div>
+                </div>
+                <div class="filter-group">
                     <label>KL trung bình:</label>
                     <div class="filter-range">
                         <input type="text" inputmode="numeric" id="filterVolumeMin" placeholder="Từ">
@@ -93,11 +119,15 @@
             </div>
         </div>
     </div>
+        </div>{{-- End admin-stocks-filter-wrapper --}}
 
         <div class="table-container">
         <table id="stock-table">
             <thead class="sticky-header">
                 <tr>
+                    <th class="col-select th-select-all-new" id="thSelectAll" onclick="toggleSelectAllAdmin()" title="Chọn tất cả">
+                        Theo dõi
+                    </th>
                     <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã CK <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="stocks_vn" onclick="sortByColumn('stocks_vn')">Thuộc VN <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="recommended_buy_price" onclick="sortByColumn('recommended_buy_price')">Giá mua tốt <span class="sort-icon">⇅</span></th>
@@ -108,7 +138,8 @@
                     <th data-sort-key="percent_buy" onclick="sortByColumn('percent_buy')">Tỉ lệ mua <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="percent_sell" onclick="sortByColumn('percent_sell')">Tỉ lệ bán <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="rating_stocks" onclick="sortByColumn('rating_stocks')">Điểm <span class="sort-icon">⇅</span></th>
-                    <th data-sort-key="volume_avg" onclick="sortByColumn('volume_avg')">Khối lượng trung bình <span class="sort-icon">⇅</span></th>
+                    <th data-sort-key="volume" onclick="sortByColumn('volume')">Khối lượng <span class="sort-icon">⇅</span></th>
+                    <th data-sort-key="volume_avg" onclick="sortByColumn('volume_avg')">Khối lượng TB<span class="sort-icon">⇅</span></th>
                     <th data-sort-key="valuation" onclick="sortByColumn('valuation')">% Định giá <span class="sort-icon">▲</span></th>
                     <th>Cập nhật</th>
                 </tr>
@@ -148,6 +179,18 @@
         </div>
         </div>
 
+        <!-- Modal Delete Stock Notice -->
+        <div id="deleteStockNoticeModal" class="modal-overlay" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeDeleteStockNoticeModal()">&times;</span>
+                <h2 id="deleteStockNoticeTitle">Thông báo</h2>
+                <div id="deleteStockNoticeMessage" class="delete-follow-notice-modal__message"></div>
+                <div class="modal-actions">
+                    <button class="btn-import" id="btnDeleteStockNoticeOk" onclick="closeDeleteStockNoticeModal()">Đóng</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal Import CSV -->
         <div id="importCsvModal" class="modal-overlay" style="display:none;">
         <div class="modal-content">
@@ -165,20 +208,38 @@
                 </div>
             </div>
             <div id="importResult" class="import-result" style="display:none;"></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeImportModal()">Huỷ</button>
+            <div class="modal-actions" id="importModalActions">
+                <button class="btn-cancel" id="btnCancelImport" onclick="closeImportModal()">Huỷ</button>
                 <button type="button" class="btn-import" id="btnImportCsvSubmit" onclick="submitImportCsv()" disabled>Nhập dữ liệu</button>
             </div>
+            <div class="modal-actions" id="importModalCloseAction" style="display:none;">
+                <button class="btn-import" id="btnCloseAfterImport" onclick="closeImportModalAndReload()">Đóng</button>
+            </div>
         </div>
+        </div>
+
+        <!-- Modal Add Follow Notice -->
+        <div id="addFollowNoticeModal" class="modal-overlay" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeAddFollowNoticeModal()">&times;</span>
+                <h2 id="addFollowNoticeTitle">Thông báo</h2>
+                <div id="addFollowNoticeMessage" class="delete-stock-modal__message"></div>
+                <div class="modal-actions">
+                    <button class="btn-import" type="button" onclick="closeAddFollowNoticeModal()">Đồng ý</button>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
 
 @section('admin-script')
     @vite('resources/js/AdminStockManagement.js')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        window.__pageData = { baseUrl: @json(url('')), stocks: @json($stocks) };
+        window.__pageData = { 
+            baseUrl: @json(url('')), 
+            stocks: @json($stocks),
+            adminFollowedStockIds: @json($adminFollowedStockIds)
+        };
     </script>
     @vite('resources/js/pages/admin-stock-management.js')
 @endsection

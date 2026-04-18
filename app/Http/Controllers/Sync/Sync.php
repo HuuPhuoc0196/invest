@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Sync;
 
 use App\Http\Controllers\Controller;
 use App\Models\Stock;
+use App\Services\CacheService;
 use App\Services\EmailService;
 use App\Services\SyncService;
 use Illuminate\Database\QueryException;
@@ -23,6 +24,10 @@ class Sync extends Controller
         try {
             set_time_limit(0);
             $result = $this->syncService->syncNewPrice();
+            
+            // Clear cache sau khi sync giá
+            CacheService::clearTableCache('stocks');
+            
             return response()->json($result);
         } catch (QueryException $e) {
             return $this->jsonServerError($e);
@@ -34,6 +39,10 @@ class Sync extends Controller
         try {
             set_time_limit(0);
             $result = $this->syncService->syncNewRisk();
+            
+            // Clear cache sau khi sync risk
+            CacheService::clearTableCache('stocks');
+            
             return response()->json($result);
         } catch (QueryException $e) {
             return $this->jsonServerError($e);
@@ -55,7 +64,13 @@ class Sync extends Controller
         if ($request->isMethod('post')) {
             try {
                 set_time_limit(0);
-                $result = $this->syncService->syncRiskForCode($request->validated()['code']);
+                $code = $request->validated()['code'];
+                $result = $this->syncService->syncRiskForCode($code);
+                
+                // Clear cache sau khi update risk cho code
+                CacheService::clearStockCache($code);
+                CacheService::forget('stocks_all');
+                
                 return response()->json($result);
             } catch (QueryException $e) {
                 return $this->jsonServerError($e);
@@ -138,6 +153,9 @@ class Sync extends Controller
         $userFollow->follow_price_sell = $stock->recommended_sell_price ?? null;
         $userFollow->notice_flag       = 1;
         $userFollow->save();
+
+        CacheService::forgetMany(["user_follow_1", "user_follow_notice_1"]);
+
         $result  = EmailService::sendSuggestStocksHave10tr($code);
         $message = "Hệ thống ghi nhận cổ phiếu {$code} đã có khối lượng giao dịch trên 10.000.000 và thêm vào table user_follow.";
         Log::info($message);
@@ -200,6 +218,12 @@ class Sync extends Controller
         $message = is_array($payload) && isset($payload['message'])
             ? (string) $payload['message']
             : 'Đã gửi yêu cầu cập nhật cho mã ' . $code . '.';
+
+        // Clear cache sau khi sync thành công
+        if ($response->successful()) {
+            CacheService::clearStockCache($code);
+            CacheService::forget('stocks_all');
+        }
 
         return response()->json(['status' => 'success', 'message' => $message, 'sync' => $payload]);
     }

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\UserCashFollow;
 use App\Models\UserCashIn;
 use App\Models\UserCashOut;
+use App\Services\CacheService;
 
 class CashService
 {
@@ -28,6 +29,12 @@ class CashService
         $userCashIn->cash_in   = $cashin;
         $userCashIn->cash_date = $data['cashDate'];
         $userCashIn->save();
+
+        // Clear cache sau khi nạp tiền
+        CacheService::forgetMany([
+            "user_cash_{$userId}",
+            "user_cashin_{$userId}",
+        ]);
 
         return ['status' => 'success', 'message' => 'Nap tiền thành công.', 'data' => $userCashIn];
     }
@@ -53,6 +60,12 @@ class CashService
         $userCashout->cash_out  = $cashout;
         $userCashout->cash_date = $data['cashDate'];
         $userCashout->save();
+
+        // Clear cache sau khi rút tiền
+        CacheService::forgetMany([
+            "user_cash_{$userId}",
+            "user_cashout_{$userId}",
+        ]);
 
         return ['status' => 'success', 'message' => 'Rút tiền thành công.', 'data' => $userCashout];
     }

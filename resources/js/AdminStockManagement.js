@@ -46,6 +46,11 @@ function getRatingBadge(rating) {
     return `<span class="rating-badge ${cls}">${val.toFixed(2)}</span>`;
 }
 
+// Export helpers for override scripts
+window.getRisk = getRisk;
+window.getRowClass = getRowClass;
+window.getRatingBadge = getRatingBadge;
+
 let pendingDeleteCode = '';
 
 window.renderStockTable = function(data) {
@@ -138,6 +143,9 @@ window.confirmDelete = function(code) {
     modal.style.display = 'flex';
 };
 
+// Alias for backward compatibility
+window.confirmDeleteStock = window.confirmDelete;
+
 window.closeDeleteStockModal = function() {
     const modal = document.getElementById('deleteStockModal');
     if (!modal) return;
@@ -155,16 +163,67 @@ window.runDeleteStock = function() {
         btn.disabled = true;
         btn.textContent = 'Đang xoá...';
     }
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = baseUrl + '/admin/delete/' + encodeURIComponent(code);
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = '_token';
-    input.value = token;
-    form.appendChild(input);
-    document.body.appendChild(form);
-    form.submit();
+
+    fetch(baseUrl + '/admin/delete/' + encodeURIComponent(code), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(async function(res) {
+        let payload = {};
+        try {
+            payload = await res.json();
+        } catch (_) {
+            payload = {};
+        }
+        return { ok: res.ok, payload };
+    })
+    .then(function(result) {
+        window.closeDeleteStockModal();
+        if (result.ok && result.payload && result.payload.success) {
+            showDeleteStockNoticeModal('success', '✅ ' + (result.payload.message || ('Đã xoá mã cổ phiếu ' + code + '.')));
+        } else {
+            const msg = (result.payload && result.payload.message) ? result.payload.message : 'Không thể xoá mã cổ phiếu.';
+            showDeleteStockNoticeModal('error', '❌ ' + msg);
+        }
+    })
+    .catch(function() {
+        window.closeDeleteStockModal();
+        showDeleteStockNoticeModal('error', '❌ Lỗi kết nối. Vui lòng thử lại.');
+    })
+    .finally(function() {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Xoá';
+        }
+    });
+};
+
+function showDeleteStockNoticeModal(type, message) {
+    const modal = document.getElementById('deleteStockNoticeModal');
+    const title = document.getElementById('deleteStockNoticeTitle');
+    const msg = document.getElementById('deleteStockNoticeMessage');
+    if (!modal || !title || !msg) return;
+
+    modal.classList.remove('is-success', 'is-error');
+    modal.classList.add(type === 'success' ? 'is-success' : 'is-error');
+    title.textContent = type === 'success' ? 'Thành công' : 'Lỗi';
+    msg.innerHTML = message;
+    modal.style.display = 'flex';
+}
+
+window.closeDeleteStockNoticeModal = function() {
+    const modal = document.getElementById('deleteStockNoticeModal');
+    if (!modal) return;
+    const isSuccess = modal.classList.contains('is-success');
+    modal.style.display = 'none';
+    if (isSuccess) {
+        window.location.reload();
+    }
 };
 
 window.confirmExportCsv = function() {
@@ -270,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         cloneTable = document.createElement('table');
         cloneTable.id = 'stock-table-clone';
-        cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:#34495e;margin:0;table-layout:fixed;';
+        cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:#34495e;margin:0;';
 
         const cloneThead = thead.cloneNode(true);
         cloneTable.appendChild(cloneThead);
@@ -286,18 +345,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!cloneTable) return;
         const origCells = thead.querySelectorAll('th');
         const cloneCells = cloneTable.querySelectorAll('th');
-        const tableWidth = table.getBoundingClientRect().width;
-        cloneTable.style.width = tableWidth + 'px';
 
+        // Calculate total width from sum of individual cell widths
+        // to avoid fractional pixel rounding mismatch with table.getBoundingClientRect()
+        let totalWidth = 0;
         origCells.forEach((cell, i) => {
+            const w = cell.getBoundingClientRect().width;
+            totalWidth += w;
             if (cloneCells[i]) {
-                const w = cell.getBoundingClientRect().width;
                 cloneCells[i].style.boxSizing = 'border-box';
                 cloneCells[i].style.width = w + 'px';
                 cloneCells[i].style.minWidth = w + 'px';
                 cloneCells[i].style.maxWidth = w + 'px';
             }
         });
+        cloneTable.style.width = totalWidth + 'px';
     }
 
     function syncScroll() {
@@ -370,10 +432,29 @@ window.openImportModal = function() {
         btn.textContent = 'Nhập dữ liệu';
         btn.disabled = true;
     }
+    
+    // Reset modal actions visibility
+    const modalActions = document.getElementById('importModalActions');
+    const closeAction = document.getElementById('importModalCloseAction');
+    if (modalActions) modalActions.style.display = 'flex';
+    if (closeAction) closeAction.style.display = 'none';
+    window.__shouldReloadAfterImport = false;
 };
 
 window.closeImportModal = function() {
     document.getElementById('importCsvModal').style.display = 'none';
+    if (window.__shouldReloadAfterImport) {
+        window.__shouldReloadAfterImport = false;
+        window.location.reload();
+    }
+};
+
+window.closeImportModalAndReload = function() {
+    document.getElementById('importCsvModal').style.display = 'none';
+    if (window.__shouldReloadAfterImport) {
+        window.__shouldReloadAfterImport = false;
+        window.location.reload();
+    }
 };
 
 // File selection & drag-drop
@@ -422,6 +503,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (deleteModal) {
         deleteModal.addEventListener('click', function(e) {
             if (e.target === this) closeDeleteStockModal();
+        });
+    }
+    const deleteNoticeModal = document.getElementById('deleteStockNoticeModal');
+    if (deleteNoticeModal) {
+        deleteNoticeModal.addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteStockNoticeModal();
         });
     }
 
@@ -475,6 +562,9 @@ window.submitImportCsv = function() {
 
     // Client-side: read file and validate header
     const reader = new FileReader();
+    reader.onerror = function() {
+        showImportResult('error', '❌ Không thể đọc file. Vui lòng thử lại.');
+    };
     reader.onload = function(e) {
         const text = e.target.result;
         const lines = text.trim().split('\n');
@@ -483,11 +573,14 @@ window.submitImportCsv = function() {
             return;
         }
 
-        const expectedHeaders = ['code', 'prive_avg', 'percent_buy', 'percent_sell', 'recommended_buy_price', 'recommended_sell_price', 'ratting_stocks', 'risk_level'];
-        const actualHeaders = lines[0].replace(/\uFEFF/g, '').split(',').map(h => h.trim().toLowerCase());
+        const expectedHeaders = ['code', 'prive_avg', 'percent_buy', 'percent_sell', 'recommended_buy_price', 'recommended_sell_price', 'ratting_stocks', 'risk_level', 'current_price', 'percent_stock', 'stocks_vn', 'volume', 'volume_avg', 'recommended_date', 'event_date'];
+        const oldHeaders = expectedHeaders.slice(0, 8);
+        const rawHeader = lines[0].replace(/\uFEFF/g, '');
+        const actualHeaders = rawHeader.split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
 
-        const headersMatch = expectedHeaders.every((h, i) => actualHeaders[i] === h);
-        if (!headersMatch) {
+        const matchFull = expectedHeaders.every((h, i) => actualHeaders[i] === h);
+        const matchOld = !matchFull && oldHeaders.every((h, i) => actualHeaders[i] === h) && actualHeaders.length === 8;
+        if (!matchFull && !matchOld) {
             showImportResult('error', '❌ Header không đúng cấu trúc.<br>Yêu cầu: <b>' + expectedHeaders.join(', ') + '</b><br>Nhận được: <b>' + actualHeaders.join(', ') + '</b>');
             return;
         }
@@ -495,7 +588,8 @@ window.submitImportCsv = function() {
         // Validation passed, send to server
         const formData = new FormData();
         formData.append('csv_file', file);
-        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const token = csrfMeta ? csrfMeta.getAttribute('content') : '';
 
         const btn = document.getElementById('btnImportCsvSubmit');
         if (btn) {
@@ -504,40 +598,53 @@ window.submitImportCsv = function() {
             btn.textContent = 'Đang xử lý...';
         }
 
-        $.ajax({
-            url: (window.__pageData && window.__pageData.baseUrl ? window.__pageData.baseUrl : '') + '/admin/stocks/import-csv',
-            type: 'POST',
-            headers: { 'X-CSRF-TOKEN': token },
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (btn) {
-                    btn.removeAttribute('data-busy');
-                    btn.textContent = 'Nhập dữ liệu';
-                    updateImportCsvSubmitButton();
-                }
-                if (response.status === 'success') {
-                    let html = '✅ ' + response.message;
-                    if (response.details) {
-                        html += '<br>' + response.details;
-                    }
-                    showImportResult('success', html);
-                    // Reload page after 2s to show updated data
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    showImportResult('error', '❌ ' + response.message);
-                }
+        const baseUrl = (window.__pageData && window.__pageData.baseUrl) ? window.__pageData.baseUrl : '';
+        fetch(baseUrl + '/admin/stocks/import-csv', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
             },
-            error: function(xhr) {
-                if (btn) {
-                    btn.removeAttribute('data-busy');
-                    btn.textContent = 'Nhập dữ liệu';
-                    updateImportCsvSubmitButton();
+            body: formData
+        })
+        .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+        .then(function(result) {
+            if (btn) {
+                btn.removeAttribute('data-busy');
+                btn.textContent = 'Nhập dữ liệu';
+                updateImportCsvSubmitButton();
+            }
+            if (result.ok && result.data.status === 'success') {
+                let html = '✅ ' + result.data.message;
+                if (result.data.details) {
+                    html += '<br>' + result.data.details;
                 }
-                const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Lỗi không xác định';
+                showImportResult('success', html);
+                
+                // Hide cancel and import buttons, show close button
+                const modalActions = document.getElementById('importModalActions');
+                const closeAction = document.getElementById('importModalCloseAction');
+                if (modalActions) modalActions.style.display = 'none';
+                if (closeAction) closeAction.style.display = 'flex';
+                
+                // Set flag to reload on close
+                window.__shouldReloadAfterImport = true;
+            } else {
+                let msg = result.data.message || 'Lỗi không xác định';
+                if (result.data.errors) {
+                    const errs = Object.values(result.data.errors).flat();
+                    if (errs.length) msg += '<br>' + errs.join('<br>');
+                }
                 showImportResult('error', '❌ ' + msg);
             }
+        })
+        .catch(function(err) {
+            if (btn) {
+                btn.removeAttribute('data-busy');
+                btn.textContent = 'Nhập dữ liệu';
+                updateImportCsvSubmitButton();
+            }
+            showImportResult('error', '❌ Lỗi kết nối. Vui lòng thử lại.');
         });
     };
     reader.readAsText(file);

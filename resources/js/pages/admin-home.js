@@ -218,6 +218,7 @@
             const currentPrice = parseFloat(stock.current_price) || 0;
             const sellPrice = stock.recommended_sell_price ? Number(stock.recommended_sell_price).toLocaleString('vi-VN') : 'N/A';
             const volume = stock.volume ? Number(stock.volume).toLocaleString('vi-VN') : 'N/A';
+            const volumeAvg = stock.volume_avg ? Number(stock.volume_avg).toLocaleString('vi-VN') : 'N/A';
             const valuation = buyPrice !== 0 ? ((currentPrice / buyPrice) * 100 - 100).toFixed(2) : 0;
 
             let valuationColor = 'yellow';
@@ -241,6 +242,7 @@
                 <td>${stock.percent_sell != null ? parseFloat(stock.percent_sell) + '%' : 'N/A'}</td>
                 <td>${getRatingBadge(stock.rating_stocks)}</td>
                 <td>${volume}</td>
+                <td>${volumeAvg}</td>
                 <td style="color: ${valuationColor}; font-weight: bold;">${sign}${valuation}%</td>
             `;
             tbody.appendChild(row);
@@ -255,6 +257,8 @@
         const ratingMax = document.getElementById('filterRatingMax').value;
         const volumeMin = document.getElementById('filterVolumeMin').value.replace(/\./g, '');
         const volumeMax = document.getElementById('filterVolumeMax').value.replace(/\./g, '');
+        const volumeAvgMin = document.getElementById('filterVolumeAvgMin').value.replace(/\./g, '');
+        const volumeAvgMax = document.getElementById('filterVolumeAvgMax').value.replace(/\./g, '');
         const valuationMin = document.getElementById('filterValuationMin').value;
         const valuationMax = document.getElementById('filterValuationMax').value;
 
@@ -275,6 +279,10 @@
             const vol = parseFloat(stock.volume) || 0;
             if (volumeMin !== '' && vol < parseFloat(volumeMin)) return false;
             if (volumeMax !== '' && vol > parseFloat(volumeMax)) return false;
+
+            const volAvg = parseFloat(stock.volume_avg) || 0;
+            if (volumeAvgMin !== '' && volAvg < parseFloat(volumeAvgMin)) return false;
+            if (volumeAvgMax !== '' && volAvg > parseFloat(volumeAvgMax)) return false;
 
             const buyPrice = parseFloat(stock.recommended_buy_price) || 0;
             const currentPrice = parseFloat(stock.current_price) || 0;
@@ -311,6 +319,8 @@
         document.getElementById('filterRatingMax').value = '';
         document.getElementById('filterVolumeMin').value = '';
         document.getElementById('filterVolumeMax').value = '';
+        document.getElementById('filterVolumeAvgMin').value = '';
+        document.getElementById('filterVolumeAvgMax').value = '';
         document.getElementById('filterValuationMin').value = '';
         document.getElementById('filterValuationMax').value = '';
         document.getElementById('searchInput').value = '';
@@ -356,7 +366,7 @@
             });
         });
 
-        ['filterVolumeMin', 'filterVolumeMax'].forEach(function(id) {
+        ['filterVolumeMin', 'filterVolumeMax', 'filterVolumeAvgMin', 'filterVolumeAvgMax'].forEach(function(id) {
             const el = document.getElementById(id);
             if (!el) return;
             el.addEventListener('keydown', function(e) {

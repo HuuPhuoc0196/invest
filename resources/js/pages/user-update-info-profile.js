@@ -33,11 +33,20 @@ function submitForm() {
     else if (name.length < 2) { document.getElementById('errorNameLength').style.display = 'block'; isValid = false; }
 
     if (isValid) {
+        if (btnFormSubmit) {
+            btnFormSubmit.dataset.originalText = btnFormSubmit.innerHTML;
+            btnFormSubmit.innerHTML = '⏳ Đang cập nhật...';
+            btnFormSubmit.disabled = true;
+        }
         $.ajax({
             url: updateInfoProfileUrl || (baseUrl + '/user/updateInfoProfile/'), type: 'PUT',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
             data: JSON.stringify({ name }),
             success: function (response) {
+                if (btnFormSubmit) {
+                    btnFormSubmit.innerHTML = btnFormSubmit.dataset.originalText || 'Cập nhật';
+                    btnFormSubmit.disabled = false;
+                }
                 if (response.status === 'success') {
                     showNotifyModal('success', 'Đã cập nhật thành công');
                 } else {
@@ -45,6 +54,10 @@ function submitForm() {
                 }
             },
             error: function (xhr) {
+                if (btnFormSubmit) {
+                    btnFormSubmit.innerHTML = btnFormSubmit.dataset.originalText || 'Cập nhật';
+                    btnFormSubmit.disabled = false;
+                }
                 showNotifyModal('error', 'Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Lỗi kết nối'));
             }
         });

@@ -211,7 +211,7 @@ window.submitUpdateForm = function() {
             stocksVn: stocksVn || null
         };
 
-        $.ajax({
+        window.$.ajax({
             url: baseUrl + '/admin/update/' + encodeURIComponent(code),
             type: 'PUT',
             headers: {

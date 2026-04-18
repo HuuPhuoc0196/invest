@@ -6,6 +6,7 @@ use App\Models\Stock;
 use App\Models\UserCashFollow;
 use App\Models\UserPortfolio;
 use App\Models\UserPortfolioSell;
+use App\Services\CacheService;
 
 class PortfolioService
 {
@@ -34,6 +35,9 @@ class PortfolioService
 
         $cashFollow->cash -= $cashBuy;
         $cashFollow->save();
+
+        // Clear cache sau khi mua
+        CacheService::clearUserCache($userId);
 
         return ['status' => 'success', 'message' => 'Mua thành công.', 'data' => $userPortfolio];
     }
@@ -71,6 +75,9 @@ class PortfolioService
         $userPortfolioSell->sell_date = $data['sell_date'];
         $userPortfolioSell->save();
 
+        // Clear cache sau khi bán
+        CacheService::clearUserCache($userId);
+
         return ['status' => 'success', 'message' => 'Bán thành công.', 'data' => $userPortfolio];
     }
 
@@ -86,6 +93,8 @@ class PortfolioService
                 $item['session_closed_flag'] ? 1 : 0
             );
         }
+        
+        // Cache đã được clear trong UserPortfolio::updateSessionClosedFlag()
     }
 
     /**

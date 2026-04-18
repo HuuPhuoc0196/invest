@@ -315,8 +315,14 @@ class User extends Controller
 
     public function saveSessionClosedFlags(Request $request)
     {
+        $validated = $request->validate([
+            'items'                    => ['required', 'array', 'max:200'],
+            'items.*.stock_id'         => ['required', 'integer', 'min:1'],
+            'items.*.session_closed_flag' => ['required', 'boolean'],
+        ]);
+
         try {
-            $this->portfolioService->saveSessionClosedFlags(auth()->id(), $request->input('items', []));
+            $this->portfolioService->saveSessionClosedFlags(auth()->id(), $validated['items']);
             return response()->json(['status' => 'success', 'message' => 'Lưu cài đặt thành công.']);
         } catch (QueryException $e) {
             return $this->jsonServerError($e);
@@ -325,11 +331,17 @@ class User extends Controller
 
     public function saveEmailSettingsFollow(Request $request)
     {
+        $validated = $request->validate([
+            'items'                => ['required', 'array', 'max:200'],
+            'items.*.id'           => ['required', 'integer', 'min:1'],
+            'items.*.notice_buy'   => ['required', 'boolean'],
+            'items.*.notice_sell'  => ['required', 'boolean'],
+        ]);
+
         $userId = auth()->id();
-        $items  = $request->input('items', []);
         try {
-            foreach ($items as $item) {
-                UserFollow::updateNoticeFlag($item['id'], $userId, $item['notice_flag'] ? 1 : 0);
+            foreach ($validated['items'] as $item) {
+                UserFollow::updateNoticeBuySell((int) $item['id'], $userId, $item['notice_buy'] ? 1 : 0, $item['notice_sell'] ? 1 : 0);
             }
             return response()->json(['status' => 'success', 'message' => 'Lưu cài đặt thành công.']);
         } catch (QueryException $e) {

@@ -17,8 +17,8 @@
     function runSyncStock() {
         const btn = document.getElementById('btnSyncStock');
         btn.disabled = true;
-        btn.textContent = 'Đang xử lý...';
-        $.ajax({
+        btn.textContent = 'Đang cập nhật...';
+        window.$.ajax({
             url: baseUrl + '/admin/sync/run-update-stock/' + encodeURIComponent(stockData.code),
             type: 'POST',
             headers: { 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },

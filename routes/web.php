@@ -6,8 +6,10 @@ use App\Http\Controllers\Login\Login;
 use App\Http\Controllers\User\User;
 use App\Models\User as UserModel;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use App\Http\Controllers\Sync\Sync;
+use App\Services\CacheService;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,24 +39,29 @@ Route::get('/robots.txt', function () {
 })->name('site.robots');
 
 Route::get('/sitemap.xml', function () {
-    $urls = [
-        ['loc' => route('home'), 'changefreq' => 'daily', 'priority' => '1.0'],
-        ['loc' => route('login'), 'changefreq' => 'monthly', 'priority' => '0.7'],
-        ['loc' => route('register'), 'changefreq' => 'monthly', 'priority' => '0.6'],
-        ['loc' => route('forgotPassword'), 'changefreq' => 'monthly', 'priority' => '0.4'],
-    ];
-    $lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'];
-    foreach ($urls as $u) {
-        $loc = htmlspecialchars($u['loc'], ENT_XML1 | ENT_QUOTES, 'UTF-8');
-        $lines[] = '<url>';
-        $lines[] = '<loc>' . $loc . '</loc>';
-        $lines[] = '<changefreq>' . e($u['changefreq']) . '</changefreq>';
-        $lines[] = '<priority>' . e($u['priority']) . '</priority>';
-        $lines[] = '</url>';
-    }
-    $lines[] = '</urlset>';
+    $xml = Cache::remember('sitemap_xml', 86400, function () {
+        $today = now()->toDateString();
+        $urls = [
+            ['loc' => route('home'),          'lastmod' => $today, 'changefreq' => 'daily',   'priority' => '1.0'],
+            ['loc' => route('login'),         'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.7'],
+            ['loc' => route('register'),      'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => route('forgotPassword'),'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.4'],
+        ];
+        $lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'];
+        foreach ($urls as $u) {
+            $loc = htmlspecialchars($u['loc'], ENT_XML1 | ENT_QUOTES, 'UTF-8');
+            $lines[] = '<url>';
+            $lines[] = '<loc>' . $loc . '</loc>';
+            $lines[] = '<lastmod>' . e($u['lastmod']) . '</lastmod>';
+            $lines[] = '<changefreq>' . e($u['changefreq']) . '</changefreq>';
+            $lines[] = '<priority>' . e($u['priority']) . '</priority>';
+            $lines[] = '</url>';
+        }
+        $lines[] = '</urlset>';
+        return implode("\n", $lines);
+    });
 
-    return response(implode("\n", $lines), 200)->header('Content-Type', 'application/xml; charset=UTF-8');
+    return response($xml, 200)->header('Content-Type', 'application/xml; charset=UTF-8');
 })->name('site.sitemap');
 
 Route::middleware('guest')->group(function () {
@@ -89,11 +96,13 @@ Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Http\Request $requ
         // active không nằm trong $fillable → không dùng update([...]); gán trực tiếp
         $user->active = 1;
         $user->save();
+        CacheService::forget("user_{$user->id}");
         return redirect()->route('login')->with('message', 'Email đã được xác thực trước đó. Bạn có thể đăng nhập.');
     }
     $user->markEmailAsVerified();
     $user->active = 1;
     $user->save();
+    CacheService::forget("user_{$user->id}");
     return redirect()->route('login')->with('message', 'Email đã được xác thực. Bạn có thể đăng nhập.');
 })->middleware(['signed'])->name('verification.verify');
 
@@ -171,6 +180,16 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/stocks/export-csv', [Admin::class, 'exportStocksCsv'])->name('admin.stocks.exportCsv');
     Route::post('/admin/stocks/import-csv', [Admin::class, 'importStocksCsv'])->name('admin.stocks.importCsv');
     Route::match(['get', 'post'], '/admin/stocks/insert', [Admin::class, 'stockInsert'])->name('admin.stocks.insert');
+    
+    // Admin theo dõi & gợi ý
+    Route::get('/admin/stocks/follow', [Admin::class, 'adminFollow'])->name('admin.stocks.follow');
+    Route::post('/admin/stocks/follow/batch', [Admin::class, 'addFollowBatch'])->name('admin.stocks.follow.batch');
+    Route::delete('/admin/stocks/follow/{stockId}', [Admin::class, 'deleteFollow'])->name('admin.stocks.follow.delete');
+    
+    Route::get('/admin/stocks/suggest', [Admin::class, 'adminSuggest'])->name('admin.stocks.suggest');
+    Route::post('/admin/stocks/suggest/batch', [Admin::class, 'addSuggestBatch'])->name('admin.stocks.suggest.batch');
+    Route::delete('/admin/stocks/suggest/{stockId}', [Admin::class, 'deleteSuggest'])->name('admin.stocks.suggest.delete');
+    Route::post('/admin/stocks/suggest/batch-delete', [Admin::class, 'deleteSuggestBatch'])->name('admin.stocks.suggest.batch-delete');
 
     // Quản lý user
     Route::get('/admin/users', [Admin::class, 'userManagement'])->name('admin.users');
@@ -187,11 +206,23 @@ Route::middleware(['auth', 'admin'])->group(function () {
         $logFile = storage_path('logs/laravel.log');
 
         if (!File::exists($logFile)) {
-            return "Không tìm thấy file log!";
+            return response('Không tìm thấy file log!', 200)
+                ->header('Content-Type', 'text/html; charset=UTF-8');
         }
 
-        $logs = File::get($logFile);
-        return "<pre>" . htmlspecialchars($logs) . "</pre>";
+        $limit    = 100 * 1024; // chỉ đọc 100 KB cuối để tránh OOM trên file log lớn
+        $size     = filesize($logFile);
+        $offset   = max(0, $size - $limit);
+        $handle   = fopen($logFile, 'rb');
+        fseek($handle, $offset);
+        $logs = fread($handle, $limit);
+        fclose($handle);
+
+        $prefix = $offset > 0 ? "...[Chỉ hiển thị " . round($limit / 1024) . "KB cuối — tổng: " . round($size / 1024) . "KB]...\n\n" : '';
+
+        return response('<pre>' . htmlspecialchars($prefix . $logs, ENT_QUOTES, 'UTF-8') . '</pre>', 200)
+            ->header('Content-Type', 'text/html; charset=UTF-8')
+            ->header('X-Content-Type-Options', 'nosniff');
     });
     Route::get('/admin/logsVPS', [Sync::class, 'getLogsVPS']);
      Route::match(['get', 'post'], '/admin/uploadFile', [Sync::class, 'uploadFile'])->name('uploadFile');

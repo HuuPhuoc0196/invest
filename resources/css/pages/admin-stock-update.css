@@ -104,14 +104,14 @@
     margin: 0 28px 14px 0;
     font-size: 19px;
     line-height: 1.35;
-    color: #f8fafc;
+    color: #a3c1e0;
 }
 
 #updateNoticeModal .modal-content h2 {
     margin: 0 28px 14px 0;
     font-size: 19px;
     line-height: 1.35;
-    color: #f8fafc;
+    color: #a3c1e0;
 }
 
 #syncStockModal .sync-stock-modal__message {
@@ -196,8 +196,12 @@
     cursor: not-allowed;
 }
 
+#updateNoticeModal .modal-content {
+    width: min(92vw, 420px);
+}
+
 #updateNoticeModal .update-notice-modal__message {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
     line-height: 1.5;
     color: #cbd5e1;
 }

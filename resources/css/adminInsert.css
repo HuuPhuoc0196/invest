@@ -75,6 +75,14 @@ button {
 button:hover {
     background-color: #2980b9;
 }
+
+/* Keep notify modal close button compact (not full-width). */
+.home-notify-modal__close {
+    width: auto;
+    min-width: 112px;
+    padding: 9px 20px;
+    align-self: center;
+}
 .toast {
     visibility: hidden;
     min-width: 200px;

@@ -145,6 +145,11 @@
         }
 
         if (isValid) {
+            if (btnFormSubmit) {
+                btnFormSubmit.dataset.originalText = btnFormSubmit.innerHTML;
+                btnFormSubmit.innerHTML = '⏳ Đang cập nhật...';
+                btnFormSubmit.disabled = true;
+            }
             const data = {
                 code: code,
                 followPriceBuy: followPriceBuy,
@@ -160,17 +165,21 @@
                 },
                 data: JSON.stringify(data),
                 success: function (response) {
+                    if (btnFormSubmit) {
+                        btnFormSubmit.innerHTML = btnFormSubmit.dataset.originalText || 'Cập nhật';
+                        btnFormSubmit.disabled = false;
+                    }
                     if (response.status == "success") {
                         showModal('success', '✅', `Đã cập nhật thành công mã <b>${code}</b>`);
-                        modalClose.addEventListener('click', function onClose() {
-                            window.location.href = baseUrl + '/user/follow';
-                            modalClose.removeEventListener('click', onClose);
-                        }, { once: true });
                     } else {
                         showModal('error', '❌', response.message || 'Có lỗi xảy ra.');
                     }
                 },
                 error: function (xhr) {
+                    if (btnFormSubmit) {
+                        btnFormSubmit.innerHTML = btnFormSubmit.dataset.originalText || 'Cập nhật';
+                        btnFormSubmit.disabled = false;
+                    }
                     const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi kết nối.';
                     showModal('error', '❌', msg);
                 }

@@ -1934,11 +1934,11 @@ body.theme-invest-app #importCsvModal .modal-close:hover {
 }
 
 body.theme-invest-app #importCsvModal .modal-content h2 {
-    color: var(--inv-text);
     font-size: 1.15rem;
     font-weight: 700;
     letter-spacing: 0.02em;
     font-family: "Be Vietnam Pro", sans-serif;
+    color: #a3c1e0;
 }
 
 body.theme-invest-app #importCsvModal .drop-zone {
@@ -1985,6 +1985,7 @@ body.theme-invest-app #importCsvModal .import-result.result-error {
 
 body.theme-invest-app #importCsvModal .modal-actions {
     margin-top: 4px;
+    justify-content: center;
 }
 
 body.theme-invest-app #importCsvModal .btn-cancel {
@@ -2044,11 +2045,11 @@ body.theme-invest-app #exportCsvModal .modal-close:hover {
 }
 
 body.theme-invest-app #exportCsvModal .modal-content h2 {
-    color: var(--inv-text);
     font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: 0.02em;
     font-family: "Be Vietnam Pro", sans-serif;
+    color: #a3c1e0;
 }
 
 body.theme-invest-app #exportCsvModal .export-csv-modal__message {
@@ -2112,7 +2113,7 @@ body.theme-invest-app #deleteStockModal .modal-close:hover {
 }
 
 body.theme-invest-app #deleteStockModal .modal-content h2 {
-    color: var(--inv-text);
+    color: #a3c1e0;
     font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -2120,7 +2121,7 @@ body.theme-invest-app #deleteStockModal .modal-content h2 {
 }
 
 body.theme-invest-app #deleteStockModal .delete-stock-modal__message {
-    color: var(--inv-muted);
+    color: #b7bdc5;
 }
 
 body.theme-invest-app #deleteStockModal .delete-stock-modal__message b {
@@ -2175,6 +2176,72 @@ body.theme-invest-app .admin-stock-flash--error {
     background: rgba(248, 113, 113, 0.12);
     border-color: rgba(248, 113, 113, 0.45);
     color: #fca5a5;
+}
+
+/* —— Modal Add Follow Notice (admin/stocks) —— */
+body.theme-invest-app #addFollowNoticeModal.modal-overlay {
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 10000;
+}
+
+body.theme-invest-app #addFollowNoticeModal .modal-content {
+    background: var(--inv-surface2);
+    border: 1px solid var(--inv-border);
+    border-radius: 14px;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55);
+    color: var(--inv-text);
+}
+
+body.theme-invest-app #addFollowNoticeModal .modal-close {
+    color: var(--inv-muted);
+}
+
+body.theme-invest-app #addFollowNoticeModal .modal-close:hover {
+    color: #fca5a5;
+}
+
+body.theme-invest-app #addFollowNoticeModal .modal-content h2 {
+    color: #a3c1e0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+body.theme-invest-app #addFollowNoticeModal .delete-stock-modal__message {
+    color: var(--inv-muted);
+    line-height: 1.6;
+}
+
+body.theme-invest-app #addFollowNoticeModal.is-success .modal-content {
+    border-color: rgba(52, 211, 153, 0.45);
+}
+
+body.theme-invest-app #addFollowNoticeModal.is-success #addFollowNoticeTitle {
+    color: #6ee7b7;
+}
+
+body.theme-invest-app #addFollowNoticeModal.is-error .modal-content {
+    border-color: rgba(248, 113, 113, 0.45);
+}
+
+body.theme-invest-app #addFollowNoticeModal.is-error #addFollowNoticeTitle {
+    color: #fca5a5;
+}
+
+body.theme-invest-app #addFollowNoticeModal .btn-import {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    padding: 10px 24px;
+}
+
+body.theme-invest-app #addFollowNoticeModal .btn-import:hover {
+    filter: brightness(1.08);
 }
 
 /* Toast (adminInsert.css): căn giữa viewport, z-index trên header/drawer */

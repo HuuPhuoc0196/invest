@@ -9,6 +9,7 @@
 @section('header-css')
     @vite('resources/css/app.css')
     @vite('resources/css/adminInsert.css')
+    @vite('resources/css/pages/user-update-info-profile.css')
 @endsection
 
 @section('header-js')

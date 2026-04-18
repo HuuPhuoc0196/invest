@@ -2,29 +2,35 @@
 
 namespace App\Models;
 
+use App\Services\CacheService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class Stock extends Model
 {
-    protected $fillable = ['code', 'recommended_buy_price', 'current_price', 'recommended_sell_price', 'price_avg', 'percent_buy', 'percent_sell', 'risk_level', 'rating_stocks', 'stocks_vn', 'volume'];
+    protected $fillable = ['code', 'recommended_buy_price', 'current_price', 'recommended_sell_price', 'price_avg', 'percent_buy', 'percent_sell', 'risk_level', 'rating_stocks', 'stocks_vn', 'volume', 'volume_avg'];
     protected $table = 'stocks';
 
     // Lấy toàn bộ stocks (tuỳ chỉnh thêm điều kiện nếu muốn)
     public static function getAllStocks()
     {
-        return self::orderBy('code')->get();
+        return CacheService::remember('stocks_all', CacheService::TTL_ONE_DAY, function () {
+            return self::orderBy('code')->get();
+        });
     }
 
     public static function getInvestmentPerformance()
     {
-        return self::orderBy('code')->get();
+        return self::getAllStocks();
     }
 
     // Lấy stock theo mã code
     public static function getByCode(string $code): ?Stock
     {
-        return self::where('code', strtoupper($code))->first();
+        $code = strtoupper($code);
+        return CacheService::remember("stock_code_{$code}", CacheService::TTL_ONE_DAY, function () use ($code) {
+            return self::where('code', $code)->first();
+        });
     }
 
     // Lấy theo ID
@@ -39,7 +45,13 @@ class Stock extends Model
         $stock = self::where('code', $code)->first();
 
         if ($stock) {
-            return $stock->delete();
+            $deleted = $stock->delete();
+            if ($deleted) {
+                // Clear cache sau khi delete
+                CacheService::clearStockCache($code);
+                CacheService::forget('stocks_all');
+            }
+            return $deleted;
         }
 
         return false; // Không tìm thấy
@@ -68,8 +80,11 @@ class Stock extends Model
     // Lấy stock theo mã code
     public static function getRiskLevelFromCode(string $code): ?Stock
     {
-        return self::where('code', $code)
-            ->select('code', 'risk_level')
-            ->first();
+        $code = strtoupper($code);
+        return CacheService::remember("stock_risk_{$code}", CacheService::TTL_ONE_DAY, function () use ($code) {
+            return self::where('code', $code)
+                ->select('code', 'risk_level')
+                ->first();
+        });
     }
 }

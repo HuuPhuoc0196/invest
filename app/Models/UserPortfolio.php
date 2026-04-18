@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CacheService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -18,13 +19,14 @@ class UserPortfolio extends Model
 
     public static function getProfileUser($userId)
     {
-        // 1. Lấy danh sách các mã cổ phiếu mà user đã từng mua
-        /** @var \Illuminate\Support\Collection<int, \stdClass> $stocks */
-        $stocks = DB::table('user_portfolios')
-            ->where('user_id', $userId)
-            ->select('stock_id')
-            ->groupBy('stock_id')
-            ->get();
+        return CacheService::remember("user_portfolio_profile_{$userId}", CacheService::TTL_ONE_DAY, function () use ($userId) {
+            // 1. Lấy danh sách các mã cổ phiếu mà user đã từng mua
+            /** @var \Illuminate\Support\Collection<int, \stdClass> $stocks */
+            $stocks = DB::table('user_portfolios')
+                ->where('user_id', $userId)
+                ->select('stock_id')
+                ->groupBy('stock_id')
+                ->get();
 
         $result = [];
 
@@ -102,6 +104,7 @@ class UserPortfolio extends Model
         }
 
         return $result;
+        });
     }
 
     /**
@@ -188,29 +191,32 @@ class UserPortfolio extends Model
 
     public static function getPortfolioWithStockInfo($userId)
     {
-        return DB::table('user_portfolios as up')
-            ->join('stocks as s', 'up.stock_id', '=', 's.id')
-            ->where('up.user_id', $userId)
-            ->select(
-                's.code',
-                'up.buy_price',
-                'up.quantity',
-                's.current_price',
-                's.risk_level',
-                'up.buy_date'
-            )
-            ->get();
+        return CacheService::remember("user_portfolio_stock_info_{$userId}", CacheService::TTL_ONE_DAY, function () use ($userId) {
+            return DB::table('user_portfolios as up')
+                ->join('stocks as s', 'up.stock_id', '=', 's.id')
+                ->where('up.user_id', $userId)
+                ->select(
+                    's.code',
+                    'up.buy_price',
+                    'up.quantity',
+                    's.current_price',
+                    's.risk_level',
+                    'up.buy_date'
+                )
+                ->get();
+        });
     }
 
     public static function getPortfolioWithUserBuy($userId)
     {
-        // 1. Lấy tất cả stock user đã mua
-        /** @var \Illuminate\Support\Collection<int, \stdClass> $stocks */
-        $stocks = DB::table('user_portfolios')
-            ->where('user_id', $userId)
-            ->select('stock_id')
-            ->groupBy('stock_id')
-            ->get();
+        return CacheService::remember("user_portfolio_buy_{$userId}", CacheService::TTL_ONE_DAY, function () use ($userId) {
+            // 1. Lấy tất cả stock user đã mua
+            /** @var \Illuminate\Support\Collection<int, \stdClass> $stocks */
+            $stocks = DB::table('user_portfolios')
+                ->where('user_id', $userId)
+                ->select('stock_id')
+                ->groupBy('stock_id')
+                ->get();
 
         $result = [];
 
@@ -275,6 +281,7 @@ class UserPortfolio extends Model
         }
 
         return collect($result);
+        });
     }
 
     /**
@@ -283,12 +290,13 @@ class UserPortfolio extends Model
      */
     public static function getSessionClosedByUser(int $userId)
     {
-        // Lấy danh sách mã đang nắm giữ (total > 0)
-        $stocks = DB::table('user_portfolios')
-            ->where('user_id', $userId)
-            ->select('stock_id')
-            ->groupBy('stock_id')
-            ->get();
+        return CacheService::remember("user_portfolio_session_{$userId}", CacheService::TTL_ONE_DAY, function () use ($userId) {
+            // Lấy danh sách mã đang nắm giữ (total > 0)
+            $stocks = DB::table('user_portfolios')
+                ->where('user_id', $userId)
+                ->select('stock_id')
+                ->groupBy('stock_id')
+                ->get();
 
         $result = [];
 
@@ -327,6 +335,7 @@ class UserPortfolio extends Model
         }
 
         return collect($result)->sortBy('code')->values();
+        });
     }
 
     /**
@@ -334,9 +343,16 @@ class UserPortfolio extends Model
      */
     public static function updateSessionClosedFlag(int $userId, int $stockId, int $flag)
     {
-        return DB::table('user_portfolios')
+        $result = DB::table('user_portfolios')
             ->where('user_id', $userId)
             ->where('stock_id', $stockId)
             ->update(['session_closed_flag' => $flag]);
+        
+        // Clear cache sau khi update
+        if ($result > 0) {
+            CacheService::forget("user_portfolio_session_{$userId}");
+        }
+        
+        return $result;
     }
 }

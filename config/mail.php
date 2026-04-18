@@ -99,7 +99,7 @@ return [
     /*
     | Email nhận thông báo hệ thống (rủi ro, lỗi, gợi ý...). Cấu hình qua MAIL_NOTIFICATION_TO trong .env
     */
-    'notification_to' => env('MAIL_NOTIFICATION_TO', 'lehuuphuoc0196@gmail.com'),
+    'notification_to' => env('MAIL_NOTIFICATION_TO', env('MAIL_FROM_ADDRESS', 'lehuuphuoc0196investment@gmail.com')),
 
     /*
     |--------------------------------------------------------------------------

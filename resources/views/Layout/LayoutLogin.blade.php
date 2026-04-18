@@ -1,16 +1,18 @@
+@php $logoVer = file_exists(public_path('icon/investment_logo.svg')) ? filemtime(public_path('icon/investment_logo.svg')) : 0; @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="vi">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @yield('csrf-token')
-    <title>@yield('title', 'Invest')</title>
+    <title>@yield('title', config('app.name', 'Invest'))</title>
 
     @yield('seo')
 
     @include('partials.favicon')
 
     <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
     <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
     @yield('header-css')
@@ -24,7 +26,7 @@
     <div class="mobile-topbar">
         <div class="mobile-topbar-brand">
             <a href="{{ route('home') }}" class="mobile-topbar-logo" aria-label="Trang chủ">
-                <img src="{{ route('site.logo') }}?v={{ file_exists(public_path('icon/investment_logo.svg')) ? filemtime(public_path('icon/investment_logo.svg')) : 0 }}" alt="Logo" width="36" height="36" decoding="async">
+                <img src="{{ route('site.logo') }}?v={{ $logoVer }}" alt="Logo" width="36" height="36" decoding="async">
             </a>
             <div class="mobile-topbar-title">Quản lý đầu tư cá nhân</div>
         </div>
@@ -33,14 +35,14 @@
     <div class="mobile-menu-overlay" onclick="toggleMobileMenu(false)"></div>
     <div class="actions">
         <a href="{{ route('home') }}" class="site-brand site-brand--desktop" aria-label="Trang chủ — Quản lý đầu tư cá nhân">
-            <img src="{{ route('site.logo') }}?v={{ file_exists(public_path('icon/investment_logo.svg')) ? filemtime(public_path('icon/investment_logo.svg')) : 0 }}" alt="Logo" class="site-brand__img" width="44" height="44" decoding="async">
+            <img src="{{ route('site.logo') }}?v={{ $logoVer }}" alt="Logo" class="site-brand__img" width="44" height="44" decoding="async">
             <span class="site-brand__text">Quản lý đầu tư cá nhân</span>
         </a>
         <div class="actions-left mobile-menu-drawer" id="mobileMenuDrawer" role="dialog" aria-modal="true" aria-label="Menu điều hướng">
             <div class="mobile-menu-header">
                 <div class="mobile-menu-header-brand">
                     <a href="{{ route('home') }}" class="mobile-menu-header-logo" aria-label="Trang chủ">
-                        <img src="{{ route('site.logo') }}?v={{ file_exists(public_path('icon/investment_logo.svg')) ? filemtime(public_path('icon/investment_logo.svg')) : 0 }}" alt="Logo" width="36" height="36" decoding="async">
+                        <img src="{{ route('site.logo') }}?v={{ $logoVer }}" alt="Logo" width="36" height="36" decoding="async">
                     </a>
                     <span class="mobile-menu-title">Quản lý đầu tư cá nhân</span>
                 </div>

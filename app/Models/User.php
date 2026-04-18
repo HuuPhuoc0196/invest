@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Mail\VerifyEmailMail;
+use App\Services\CacheService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -69,7 +70,9 @@ class User extends Authenticatable implements MustVerifyEmail
     // Lấy theo ID
     public static function getUserById(int $id): ?User
     {
-        return self::find($id);
+        return CacheService::remember("user_{$id}", CacheService::TTL_ONE_DAY, function () use ($id) {
+            return self::find($id);
+        });
     }
 
     /**

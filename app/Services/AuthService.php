@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Services\CacheService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -128,6 +129,8 @@ class AuthService
         $user->save();
         DB::table('password_resets')->where('email', $data['email'])->delete();
 
+        CacheService::forget("user_{$user->id}");
+
         return 'success';
     }
 
@@ -139,6 +142,10 @@ class AuthService
         }
         $user->name = trim($name);
         $user->save();
+        
+        // Clear cache sau khi update
+        CacheService::forget("user_{$userId}");
+        
         return ['status' => 'success', 'message' => 'Cập nhật thông tin thành công.', 'data' => $user];
     }
 
@@ -154,6 +161,9 @@ class AuthService
         }
         $user->password = Hash::make($newPassword);
         $user->save();
+
+        CacheService::forget("user_{$userId}");
+
         return ['status' => 'success', 'message' => 'Đổi mật khẩu thành công.', 'data' => $user];
     }
 

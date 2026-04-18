@@ -16,6 +16,10 @@ use App\Http\Requests\UpdateInfoProfileRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Models\User as UserModel;
 use App\Services\AuthService;
+use App\Models\AdminFollow;
+use App\Models\AdminSuggest;
+use App\Services\CacheService;
+use Illuminate\Support\Facades\DB;
 
 class Admin extends Controller
 {
@@ -61,11 +65,17 @@ class Admin extends Controller
         return view('Admin.AdminUpdate', compact('stock'));
     }
 
-    public function delete(string $code)
+    public function delete(Request $request, string $code)
     {
         $code = strtoupper($code);
         $stock = Stock::getByCode($code);
         if (!$stock) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Không tìm thấy mã cổ phiếu {$code}.",
+                ], 404);
+            }
             return redirect('/admin/stocks')->with('error', "Không tìm thấy mã cổ phiếu {$code}.");
         }
 
@@ -77,17 +87,41 @@ class Admin extends Controller
                 . "Lịch sử bán: {$deps['user_portfolios_sell']}, "
                 . "Danh sách theo dõi: {$deps['user_follows']}.";
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                ], 422);
+            }
             return redirect('/admin/stocks')->with('error', $message);
         }
 
         try {
             $deleted = Stock::deleteByCode($code);
             if ($deleted) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => "Đã xoá mã cổ phiếu {$code}.",
+                    ]);
+                }
                 return redirect('/admin/stocks')->with('success', "Đã xoá mã cổ phiếu {$code}.");
             }
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Không thể xoá mã cổ phiếu {$code}.",
+                ], 500);
+            }
             return redirect('/admin/stocks')->with('error', "Không thể xoá mã cổ phiếu {$code}.");
         } catch (QueryException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Không thể xoá mã {$code}: dữ liệu đang được sử dụng.",
+                ], 422);
+            }
             return redirect('/admin/stocks')->with('error', "Không thể xoá mã {$code}: dữ liệu đang được sử dụng.");
         }
     }
@@ -140,7 +174,11 @@ class Admin extends Controller
     public function stockManagement()
     {
         $stocks = Stock::getAllStocks();
-        return view('Admin.AdminStockManagement', compact('stocks'));
+        
+        // Lấy danh sách stock_id đã được theo dõi (DISTINCT, tất cả admin) - sử dụng cache
+        $adminFollowedStockIds = AdminFollow::getFollowedStockIds();
+        
+        return view('Admin.AdminStockManagement', compact('stocks', 'adminFollowedStockIds'));
     }
 
     public function exportStocksCsv()
@@ -157,6 +195,8 @@ class Admin extends Controller
         $columns = [
             'code', 'prive_avg', 'percent_buy', 'percent_sell',
             'recommended_buy_price', 'recommended_sell_price', 'ratting_stocks', 'risk_level',
+            'current_price', 'percent_stock', 'stocks_vn', 'volume', 'volume_avg',
+            'recommended_date', 'event_date',
         ];
 
         $callback = function () use ($stocks, $columns) {
@@ -173,6 +213,13 @@ class Admin extends Controller
                     $stock->recommended_sell_price,
                     $stock->rating_stocks,
                     $stock->risk_level,
+                    $stock->current_price,
+                    $stock->percent_stock,
+                    $stock->stocks_vn,
+                    $stock->volume,
+                    $stock->volume_avg,
+                    $stock->recommended_date,
+                    $stock->event_date,
                 ]);
             }
             fclose($handle);
@@ -237,6 +284,8 @@ class Admin extends Controller
             $user->email_verified_at = ((int) $validated['email_verified'] === 1) ? now() : null;
             $user->save();
 
+            CacheService::forget("user_{$user->id}");
+
             return redirect()->route('admin.users.update', ['id' => $user->id])
                 ->with('success', 'Đã cập nhật thông tin user thành công.');
         }
@@ -256,10 +305,173 @@ class Admin extends Controller
         }
 
         try {
+            $userId = $user->id;
             $user->delete();
+            CacheService::clearUserCache($userId);
             return redirect()->route('admin.users')->with('success', 'Đã xoá user thành công.');
         } catch (QueryException $e) {
             return redirect()->route('admin.users')->with('error', 'Không thể xoá user vì đang có dữ liệu liên quan.');
         }
+    }
+
+    /**
+     * Màn hình danh sách Admin theo dõi
+     */
+    public function adminFollow()
+    {
+        // Lấy tất cả stocks được theo dõi bởi bất kỳ admin nào (DISTINCT stock_id) - sử dụng cache
+        $stocks = CacheService::remember('admin_follow_stocks', CacheService::TTL_ONE_DAY, function () {
+            return DB::table('admin_follow')
+                ->join('stocks', 'admin_follow.stock_id', '=', 'stocks.id')
+                ->select('stocks.*')
+                ->distinct()
+                ->get();
+        });
+
+        // Lấy danh sách stock_id đã được gợi ý (DISTINCT) - sử dụng cache
+        $adminSuggestedStockIds = AdminSuggest::getSuggestedStockIds();
+
+        return view('Admin.AdminStockFollow', compact('stocks', 'adminSuggestedStockIds'));
+    }
+
+    /**
+     * Thêm nhiều mã vào danh sách theo dõi
+     */
+    public function addFollowBatch(Request $request)
+    {
+        $validated = $request->validate([
+            'stock_ids'   => ['required', 'array', 'max:500'],
+            'stock_ids.*' => ['required', 'integer', 'min:1'],
+        ]);
+        $stockIds = $validated['stock_ids'];
+        $userId = auth()->id();
+
+        $added = 0;
+        foreach ($stockIds as $stockId) {
+            $created = AdminFollow::firstOrCreate([
+                'user_id' => $userId,
+                'stock_id' => $stockId,
+            ]);
+            if ($created->wasRecentlyCreated) {
+                $added++;
+            }
+        }
+
+        CacheService::clearTableCache('admin_follow'); // clears admin_follow_stock_ids + admin_follow_stocks
+
+        return response()->json([
+            'success' => true,
+            'message' => "Đã thêm {$added} mã vào danh sách theo dõi",
+            'added' => $added
+        ]);
+    }
+
+    /**
+     * Xóa 1 mã khỏi danh sách theo dõi
+     */
+    public function deleteFollow($stockId)
+    {
+        $deleted = AdminFollow::where('stock_id', $stockId)
+            ->where('user_id', auth()->id())
+            ->delete();
+
+        CacheService::clearTableCache('admin_follow'); // clears admin_follow_stock_ids + admin_follow_stocks
+
+        return response()->json([
+            'success' => true,
+            'message' => $deleted > 0 ? 'Đã xóa khỏi danh sách theo dõi' : 'Không tìm thấy',
+            'deleted' => $deleted
+        ]);
+    }
+
+    /**
+     * Màn hình danh sách Admin gợi ý
+     */
+    public function adminSuggest()
+    {
+        // Lấy tất cả stocks được gợi ý bởi bất kỳ admin nào (DISTINCT stock_id) - sử dụng cache
+        $stocks = CacheService::remember('admin_suggest_stocks', CacheService::TTL_ONE_DAY, function () {
+            return DB::table('admin_suggest')
+                ->join('stocks', 'admin_suggest.stock_id', '=', 'stocks.id')
+                ->select('stocks.*')
+                ->distinct()
+                ->get();
+        });
+
+        return view('Admin.AdminStockSuggest', compact('stocks'));
+    }
+
+    /**
+     * Thêm nhiều mã vào danh sách gợi ý
+     */
+    public function addSuggestBatch(Request $request)
+    {
+        $validated = $request->validate([
+            'stock_ids'   => ['required', 'array', 'max:500'],
+            'stock_ids.*' => ['required', 'integer', 'min:1'],
+        ]);
+        $stockIds = $validated['stock_ids'];
+        $userId = auth()->id();
+
+        $added = 0;
+        foreach ($stockIds as $stockId) {
+            $created = AdminSuggest::firstOrCreate([
+                'user_id' => $userId,
+                'stock_id' => $stockId,
+            ]);
+            if ($created->wasRecentlyCreated) {
+                $added++;
+            }
+        }
+
+        CacheService::clearTableCache('admin_suggest');
+
+        return response()->json([
+            'success' => true,
+            'message' => "Đã thêm {$added} mã vào danh sách gợi ý",
+            'added' => $added
+        ]);
+    }
+
+    /**
+     * Xóa 1 mã khỏi danh sách gợi ý
+     */
+    public function deleteSuggest($stockId)
+    {
+        $deleted = AdminSuggest::where('stock_id', $stockId)
+            ->where('user_id', auth()->id())
+            ->delete();
+
+        CacheService::clearTableCache('admin_suggest');
+
+        return response()->json([
+            'success' => true,
+            'message' => $deleted > 0 ? 'Đã xóa khỏi danh sách gợi ý' : 'Không tìm thấy',
+            'deleted' => $deleted
+        ]);
+    }
+
+    /**
+     * Xóa nhiều mã khỏi danh sách gợi ý
+     */
+    public function deleteSuggestBatch(Request $request)
+    {
+        $validated = $request->validate([
+            'stock_ids'   => ['required', 'array', 'min:1', 'max:500'],
+            'stock_ids.*' => ['required', 'integer', 'min:1'],
+        ]);
+        $stockIds = $validated['stock_ids'];
+
+        $deleted = AdminSuggest::whereIn('stock_id', $stockIds)
+            ->where('user_id', auth()->id())
+            ->delete();
+
+        CacheService::clearTableCache('admin_suggest');
+
+        return response()->json([
+            'success' => true,
+            'message' => "Đã xóa {$deleted} mã khỏi danh sách gợi ý",
+            'deleted' => $deleted
+        ]);
     }
 }

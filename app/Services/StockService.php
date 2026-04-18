@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Stock;
+use App\Services\CacheService;
 
 class StockService
 {
@@ -17,6 +18,10 @@ class StockService
         $stock->current_price         = $data['currentPrice'];
         $stock->risk_level            = $data['risk'];
         $stock->save();
+        
+        // Clear cache sau khi insert
+        CacheService::clearTableCache('stocks');
+        
         return ['status' => 'success', 'message' => 'Insert thành công.', 'data' => $stock];
     }
 
@@ -40,6 +45,9 @@ class StockService
         $stock->volume                 = 0;
         $stock->save();
 
+        // Clear cache sau khi insert
+        CacheService::clearTableCache('stocks');
+
         return ['status' => 'success', 'message' => 'Thêm cổ phiếu thành công.', 'data' => $stock];
     }
 
@@ -61,6 +69,10 @@ class StockService
         $stock->stocks_vn              = $data['stocksVn'] ?? $stock->stocks_vn;
         $stock->save();
 
+        // Clear cache sau khi update
+        CacheService::clearStockCache($code);
+        CacheService::forget('stocks_all');
+
         return ['status' => 'success', 'message' => 'Update thành công.'];
     }
 
@@ -74,12 +86,15 @@ class StockService
             return ['status' => 'error', 'message' => 'File CSV phải có ít nhất 2 dòng (header + data).'];
         }
 
-        $expectedHeaders = ['code', 'prive_avg', 'percent_buy', 'percent_sell', 'recommended_buy_price', 'recommended_sell_price', 'ratting_stocks', 'risk_level'];
+        $expectedHeaders = ['code', 'prive_avg', 'percent_buy', 'percent_sell', 'recommended_buy_price', 'recommended_sell_price', 'ratting_stocks', 'risk_level', 'current_price', 'percent_stock', 'stocks_vn', 'volume', 'volume_avg', 'recommended_date', 'event_date'];
         $actualHeaders   = array_map('trim', array_map('strtolower', str_getcsv($lines[0])));
 
-        if ($actualHeaders !== $expectedHeaders) {
+        // Chấp nhận cả file export cũ (8 cột) và mới (15 cột)
+        $oldHeaders = array_slice($expectedHeaders, 0, 8);
+        if ($actualHeaders !== $expectedHeaders && $actualHeaders !== $oldHeaders) {
             return ['status' => 'error', 'message' => 'Header CSV không đúng cấu trúc.'];
         }
+        $columnCount = count($actualHeaders);
 
         $updated = 0;
         $created = 0;
@@ -106,6 +121,15 @@ class StockService
             $ratingStocks         = is_numeric(trim($row[6])) ? floatval(trim($row[6])) : null;
             $riskLevel            = is_numeric(trim($row[7])) ? intval(trim($row[7])) : null;
 
+            // Các field mở rộng (cột 8-14, chỉ có khi file 15 cột)
+            $currentPrice     = ($columnCount > 8 && isset($row[8])  && is_numeric(trim($row[8])))  ? floatval(trim($row[8]))  : null;
+            $percentStock     = ($columnCount > 8 && isset($row[9])  && is_numeric(trim($row[9])))  ? floatval(trim($row[9]))  : null;
+            $stocksVn         = ($columnCount > 8 && isset($row[10]) && is_numeric(trim($row[10]))) ? intval(trim($row[10]))   : null;
+            $volume           = ($columnCount > 8 && isset($row[11]) && is_numeric(trim($row[11]))) ? floatval(trim($row[11])) : null;
+            $volumeAvg        = ($columnCount > 8 && isset($row[12]) && is_numeric(trim($row[12]))) ? floatval(trim($row[12])) : null;
+            $recommendedDate  = ($columnCount > 8 && isset($row[13]) && !empty(trim($row[13])))     ? trim($row[13])           : null;
+            $eventDate        = ($columnCount > 8 && isset($row[14]) && !empty(trim($row[14])))     ? trim($row[14])           : null;
+
             if ($priceAvg !== null && $priceAvg > 0) {
                 if ($percentBuy !== null) {
                     $recommendedBuyPrice = $priceAvg * $percentBuy / 100;
@@ -125,6 +149,13 @@ class StockService
                     if ($recommendedSellPrice !== null) $stock->recommended_sell_price = $recommendedSellPrice;
                     if ($ratingStocks !== null)         $stock->rating_stocks          = $ratingStocks;
                     if ($riskLevel !== null)            $stock->risk_level             = $riskLevel;
+                    if ($currentPrice !== null)         $stock->current_price          = $currentPrice;
+                    if ($percentStock !== null)         $stock->percent_stock          = $percentStock;
+                    if ($stocksVn !== null)             $stock->stocks_vn              = $stocksVn;
+                    if ($volume !== null)               $stock->volume                 = $volume;
+                    if ($volumeAvg !== null)            $stock->volume_avg             = $volumeAvg;
+                    if ($recommendedDate !== null)      $stock->recommended_date       = $recommendedDate;
+                    if ($eventDate !== null)            $stock->event_date             = $eventDate;
                     $stock->save();
                     $updated++;
                 } else {
@@ -138,6 +169,13 @@ class StockService
                     $stock->recommended_sell_price = $recommendedSellPrice ?? 0;
                     $stock->risk_level             = $riskLevel ?? 1;
                     $stock->rating_stocks          = $ratingStocks ?? 0;
+                    $stock->current_price          = $currentPrice ?? 0;
+                    $stock->percent_stock          = $percentStock;
+                    $stock->stocks_vn              = $stocksVn;
+                    $stock->volume                 = $volume ?? 0;
+                    $stock->volume_avg             = $volumeAvg ?? 0;
+                    $stock->recommended_date       = $recommendedDate;
+                    $stock->event_date             = $eventDate;
                     $stock->save();
                     $created++;
                 }
@@ -151,6 +189,9 @@ class StockService
         if (count($errors) > 0) {
             $details .= '<br>Lỗi:<br>' . implode('<br>', $errors);
         }
+
+        // Clear cache sau khi import
+        CacheService::clearTableCache('stocks');
 
         return ['status' => 'success', 'message' => 'Import CSV hoàn tất.', 'details' => $details];
     }

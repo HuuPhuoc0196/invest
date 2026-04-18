@@ -60,7 +60,7 @@
                 cloneWrap = document.createElement('div');
                 cloneWrap.className = 'sticky-clone';
                 cloneTable = document.createElement('table');
-                cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:#34495e;margin:0;table-layout:fixed;';
+                cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;background:#34495e;margin:0;';
                 const theadClone = thead.cloneNode(true);
                 // Strip ids and inline handlers to avoid duplicate-id warnings
                 theadClone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
@@ -100,17 +100,18 @@
                 if (!cloneTable) return;
                 const origCells = thead.querySelectorAll('th');
                 const cloneCells = cloneTable.querySelectorAll('th');
-                const tableWidth = stickyTable.getBoundingClientRect().width;
-                cloneTable.style.width = tableWidth + 'px';
+                let totalWidth = 0;
                 origCells.forEach((cell, i) => {
+                    const w = cell.getBoundingClientRect().width;
+                    totalWidth += w;
                     if (cloneCells[i]) {
-                        const w = cell.getBoundingClientRect().width;
                         cloneCells[i].style.boxSizing = 'border-box';
                         cloneCells[i].style.width = w + 'px';
                         cloneCells[i].style.minWidth = w + 'px';
                         cloneCells[i].style.maxWidth = w + 'px';
                     }
                 });
+                cloneTable.style.width = totalWidth + 'px';
             }
 
             function headerInset() {

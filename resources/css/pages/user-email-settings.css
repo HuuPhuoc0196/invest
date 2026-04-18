@@ -119,3 +119,12 @@ th, td {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     pointer-events: auto;
 }
+/* Sticky clone nằm ngoài .email-settings-page nên phải khai báo lại accent-color để checkbox
+   trông giống hệt bảng gốc */
+body.theme-invest-app .sticky-clone input[type="checkbox"] {
+    accent-color: var(--inv-accent);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    vertical-align: middle;
+}

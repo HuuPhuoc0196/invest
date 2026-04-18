@@ -1,4 +1,4 @@
-﻿@extends('Layout.Layout')
+@extends('Layout.Layout')
 
 @section('csrf-token')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -29,82 +29,87 @@
 @section('user-body-content')
     @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu theo dõi', 'level' => 1])
 
-    <!-- Filter Panel -->
-    <div class="filter-panel">
-        <div class="filter-header" onclick="toggleFilter()">
-            <span>🔧 Bộ lọc dữ liệu</span>
-            <span id="filterToggleIcon">▼</span>
+    {{-- Wrapper cho filter và button xoá (giống AdminStockSuggest) --}}
+    <div class="admin-stocks-filter-wrapper">
+        {{-- Button Xoá đã chọn --}}
+        <div class="admin-stocks-add-suggest-bar">
+            <button type="button"
+                class="btn-add-suggest-admin"
+                id="btnDeleteFollowBatch"
+                disabled
+                onclick="confirmDeleteFollowBatch()"
+                style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                🗑️ Xoá tất cả
+            </button>
         </div>
-        <div id="filterBody" class="filter-body" style="display:none;">
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label>Trạng thái:</label>
-                    <select id="filterRisk">
-                        <option value="">-- Tất cả --</option>
-                        <option value="1">An toàn</option>
-                        <option value="2">Cảnh báo</option>
-                        <option value="3">Hạn chế GD</option>
-                        <option value="4">Đình chỉ/Huỷ</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Thuộc VN:</label>
-                    <select id="filterStocksVn">
-                        <option value="">-- Tất cả --</option>
-                        <option value="30">30</option>
-                        <option value="100">100</option>
-                        <option value="ALL">ALL</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Điểm:</label>
-                    <div class="filter-range">
-                        <input type="text" inputmode="numeric" id="filterRatingMin" placeholder="1-10">
-                        <span>~</span>
-                        <input type="text" inputmode="numeric" id="filterRatingMax" placeholder="1-10">
-                    </div>
-                </div>
-                <div class="filter-group">
-                    <label>Khối lượng:</label>
-                    <div class="filter-range">
-                        <input type="text" inputmode="numeric" id="filterVolumeMin" placeholder="Từ">
-                        <span>~</span>
-                        <input type="text" inputmode="numeric" id="filterVolumeMax" placeholder="Đến">
-                    </div>
-                </div>
-                <div class="filter-group">
-                    <label>% Định giá:</label>
-                    <div class="filter-range">
-                        <input type="number" id="filterValuationMin" placeholder="Từ" step="0.01">
-                        <span>~</span>
-                        <input type="number" id="filterValuationMax" placeholder="Đến" step="0.01">
-                    </div>
-                </div>
-            </div>
-            <div class="filter-actions">
-                <button class="btn-filter" onclick="applyFilter()">🔍 Lọc</button>
-                <button class="btn-filter-reset" onclick="resetFilter()">🔄 Đặt lại</button>
-            </div>
-        </div>
-    </div>
 
-    <div class="table-top-bar">
-        <button
-            id="btnDeleteAllFollow"
-            class="btn-delete"
-            type="button"
-            disabled
-            style="opacity:.6;cursor:not-allowed;"
-            onclick="openDeleteAllModal()"
-        >
-            🗑️ Xoá tất cả
-        </button>
-    </div>
+        {{-- Filter Panel --}}
+        <div class="filter-panel">
+            <div class="filter-header" onclick="toggleFilter()">
+                <span>🔧 Bộ lọc dữ liệu</span>
+                <span id="filterToggleIcon">▼</span>
+            </div>
+            <div id="filterBody" class="filter-body" style="display:none;">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>Trạng thái:</label>
+                        <select id="filterRisk">
+                            <option value="">-- Tất cả --</option>
+                            <option value="1">An toàn</option>
+                            <option value="2">Cảnh báo</option>
+                            <option value="3">Hạn chế GD</option>
+                            <option value="4">Đình chỉ/Huỷ</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Thuộc VN:</label>
+                        <select id="filterStocksVn">
+                            <option value="">-- Tất cả --</option>
+                            <option value="30">30</option>
+                            <option value="100">100</option>
+                            <option value="ALL">ALL</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Điểm:</label>
+                        <div class="filter-range">
+                            <input type="text" inputmode="numeric" id="filterRatingMin" placeholder="1-10">
+                            <span>~</span>
+                            <input type="text" inputmode="numeric" id="filterRatingMax" placeholder="1-10">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Khối lượng:</label>
+                        <div class="filter-range">
+                            <input type="text" inputmode="numeric" id="filterVolumeMin" placeholder="Từ">
+                            <span>~</span>
+                            <input type="text" inputmode="numeric" id="filterVolumeMax" placeholder="Đến">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>% Định giá:</label>
+                        <div class="filter-range">
+                            <input type="number" id="filterValuationMin" placeholder="Từ" step="0.01">
+                            <span>~</span>
+                            <input type="number" id="filterValuationMax" placeholder="Đến" step="0.01">
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn-filter" onclick="applyFilter()">🔍 Lọc</button>
+                    <button class="btn-filter-reset" onclick="resetFilter()">🔄 Đặt lại</button>
+                </div>
+            </div>
+        </div>
+    </div>{{-- End admin-stocks-filter-wrapper --}}
 
     <div class="table-container">
         <table id="stock-table">
             <thead class="sticky-header">
                 <tr>
+                    <th class="col-select th-select-all" id="thSelectAll" onclick="toggleSelectAllFollow()" title="Chọn tất cả">
+                        Chọn
+                    </th>
                     <th class="col-code-sticky" data-sort-key="code" onclick="sortByColumn('code')">Mã CK <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="stocks_vn" onclick="sortByColumn('stocks_vn')">Thuộc VN <span class="sort-icon">⇅</span></th>
                     <th data-sort-key="recommended_buy_price" onclick="sortByColumn('recommended_buy_price')">Giá mua tốt <span class="sort-icon">⇅</span></th>
@@ -123,43 +128,44 @@
     </div>
 
     {{-- Modal xác nhận xoá từng mã --}}
-    <div id="confirmModal" style="display: none; position: fixed; inset: 0; background: rgba(10, 14, 26, 0.65); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: #1e293b; border: 1px solid rgba(248, 113, 113, 0.25); padding: 28px 24px 20px; border-radius: 16px; width: min(90vw, 320px); text-align: center; box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; align-items: center; gap: 14px;">
-            <span style="font-size: 2rem; line-height: 1;">🗑️</span>
-            <p style="margin: 0; color: #e2e8f0; font-size: 15px; font-weight: 500; line-height: 1.5;">Bạn có chắc chắn muốn xoá?</p>
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button id="confirmYes" style="padding: 9px 24px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: #fff; font-family: inherit; transition: filter .15s;">Xoá</button>
-                <button id="confirmNo" style="padding: 9px 24px; border-radius: 10px; border: 1px solid rgba(99, 179, 237, 0.2); font-size: 14px; font-weight: 600; cursor: pointer; background: #2a3a52; color: #e2e8f0; font-family: inherit; transition: filter .15s;">Không</button>
+    <div id="deleteFollowSingleModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeDeleteFollowSingleModal()">&times;</span>
+            <h2>Xác nhận xoá theo dõi</h2>
+            <div class="delete-follow-modal__message">
+                Bạn có chắc chắn muốn xoá mã <b id="deleteFollowSingleCode"></b> khỏi danh sách theo dõi?
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeDeleteFollowSingleModal()">Huỷ</button>
+                <button type="button" class="btn-delete-confirm" id="btnDeleteFollowSingleConfirm" onclick="runDeleteFollowSingle()">Đồng ý</button>
             </div>
         </div>
     </div>
 
-    {{-- Modal xác nhận xoá tất cả --}}
-    <div id="confirmDeleteAllModal" style="display: none; position: fixed; inset: 0; background: rgba(10, 14, 26, 0.65); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: #1e293b; border: 1px solid rgba(248, 113, 113, 0.25); padding: 28px 24px 20px; border-radius: 16px; width: min(90vw, 360px); text-align: center; box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; align-items: center; gap: 14px;">
-            <span style="font-size: 2rem; line-height: 1;">🗑️</span>
-            <p id="deleteAllModalMsg" style="margin: 0; color: #e2e8f0; font-size: 15px; font-weight: 500; line-height: 1.5;">Bạn có chắc muốn xoá tất cả mã đã theo dõi không?</p>
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button id="confirmDeleteAllYes" style="padding: 9px 24px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: #fff; font-family: inherit; transition: filter .15s;">Xác nhận</button>
-                <button id="confirmDeleteAllNo" style="padding: 9px 24px; border-radius: 10px; border: 1px solid rgba(99, 179, 237, 0.2); font-size: 14px; font-weight: 600; cursor: pointer; background: #2a3a52; color: #e2e8f0; font-family: inherit; transition: filter .15s;">Huỷ bỏ</button>
+    {{-- Modal xác nhận xoá hàng loạt --}}
+    <div id="deleteFollowBatchModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeDeleteFollowBatchModal()">&times;</span>
+            <h2>Xác nhận xoá theo dõi</h2>
+            <div class="delete-follow-modal__message">
+                Bạn có chắc chắn muốn xoá <b id="deleteFollowBatchCount">0</b> mã đã chọn khỏi danh sách theo dõi?
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeDeleteFollowBatchModal()">Huỷ</button>
+                <button type="button" class="btn-delete-confirm" id="btnDeleteFollowBatchConfirm" onclick="runDeleteFollowBatch()">Đồng ý</button>
             </div>
         </div>
     </div>
-    {{-- Modal thông báo lỗi --}}
-    <div id="errorNotifyModal" style="display: none; position: fixed; inset: 0; background: rgba(10, 14, 26, 0.65); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: #1e293b; border: 1px solid rgba(248, 113, 113, 0.25); padding: 28px 24px 20px; border-radius: 16px; width: min(90vw, 340px); text-align: center; box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; align-items: center; gap: 14px;">
-            <span style="font-size: 2rem; line-height: 1;">❌</span>
-            <p id="errorNotifyMsg" style="margin: 0; color: #fca5a5; font-size: 15px; font-weight: 500; line-height: 1.5;"></p>
-            <button id="errorNotifyClose" style="padding: 9px 28px; border-radius: 10px; border: 1px solid rgba(99, 179, 237, 0.2); font-size: 14px; font-weight: 600; cursor: pointer; background: #2a3a52; color: #e2e8f0; font-family: inherit; transition: filter .15s;">Đóng</button>
-        </div>
-    </div>
 
-    {{-- Modal thông báo thành công --}}
-    <div id="successNotifyModal" style="display: none; position: fixed; inset: 0; background: rgba(10, 14, 26, 0.65); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
-        <div style="background: #1e293b; border: 1px solid rgba(74, 222, 128, 0.25); padding: 28px 24px 20px; border-radius: 16px; width: min(90vw, 340px); text-align: center; box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; align-items: center; gap: 14px;">
-            <span style="font-size: 2rem; line-height: 1;">✅</span>
-            <p id="successNotifyMsg" style="margin: 0; color: #86efac; font-size: 15px; font-weight: 500; line-height: 1.5;"></p>
-            <button id="successNotifyClose" style="padding: 9px 28px; border-radius: 10px; border: 1px solid rgba(99, 179, 237, 0.2); font-size: 14px; font-weight: 600; cursor: pointer; background: #2a3a52; color: #e2e8f0; font-family: inherit; transition: filter .15s;">Đóng</button>
+    {{-- Modal thông báo (dùng chung success/error) --}}
+    <div id="deleteFollowNoticeModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeDeleteFollowNoticeModal()">&times;</span>
+            <h2 id="deleteFollowNoticeTitle">Thông báo</h2>
+            <div id="deleteFollowNoticeMessage" class="delete-follow-notice-modal__message"></div>
+            <div class="modal-actions">
+                <button class="btn-import" id="btnDeleteFollowNoticeOk" onclick="closeDeleteFollowNoticeModal()">Đóng</button>
+            </div>
         </div>
     </div>
 @endsection

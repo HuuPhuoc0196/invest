@@ -85,7 +85,7 @@
             const btnText = document.getElementById('btnRegisterText');
             btnRegister.disabled = true;
             btnSpinner.classList.add('is-loading');
-            btnText.textContent = 'Đang xử lý...';
+            btnText.textContent = 'Đang đăng ký...';
 
             const data = {
                 name: name,

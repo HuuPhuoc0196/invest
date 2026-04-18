@@ -217,7 +217,9 @@ button:hover {
 
 .home-notify-modal__close {
     margin-top: 4px;
-    padding: 9px 28px;
+    padding: 9px 20px;
+    min-width: 112px;
+    width: auto;
     border-radius: 10px;
     border: none;
     font-size: 14px;

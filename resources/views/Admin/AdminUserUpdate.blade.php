@@ -82,8 +82,8 @@
             <span class="modal-close" onclick="closeUserUpdateNoticeModal()">&times;</span>
             <h2 id="userUpdateNoticeTitle">Thông báo</h2>
             <div id="userUpdateNoticeMessage" class="user-update-notice-modal__message"></div>
-            <div class="sync-stock-modal__actions">
-                <button class="btn-import" type="button" onclick="closeUserUpdateNoticeModal()">Đồng ý</button>
+            <div class="modal-actions">
+                <button class="btn-import" type="button" onclick="closeUserUpdateNoticeModal()">Đóng</button>
             </div>
         </div>
     </div>

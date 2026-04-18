@@ -44,7 +44,8 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+            // Laravel tự động log exception với level ERROR
+            // Không cần log thêm để tránh duplicate
         });
     }
 }

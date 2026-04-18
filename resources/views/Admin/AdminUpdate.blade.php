@@ -114,7 +114,7 @@
             <span class="modal-close" onclick="closeUpdateNoticeModal()">&times;</span>
             <h2 id="updateNoticeTitle">Thông báo</h2>
             <div id="updateNoticeMessage" class="update-notice-modal__message"></div>
-            <div class="sync-stock-modal__actions">
+            <div class="modal-actions">
                 <button class="btn-import" id="btnUpdateNoticeOk" onclick="closeUpdateNoticeModal()">Đồng ý</button>
             </div>
         </div>
@@ -122,7 +122,6 @@
 @endsection
 
 @section('admin-script')
-    @vite('resources/js/AdminStockUpdate.js')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         window.__pageData = {
@@ -130,5 +129,6 @@
             stockData: @json($stock)
         };
     </script>
+    @vite('resources/js/AdminStockUpdate.js')
     @vite('resources/js/pages/admin-stock-update.js')
 @endsection

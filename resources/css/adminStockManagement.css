@@ -251,6 +251,7 @@ th {
 #invest-table th:last-child,
 #invest-table td:last-child {
     border-right: none;
+    text-align: center;
 }
 
 .sticky-header th {
@@ -266,6 +267,7 @@ th {
 .sticky-clone th:last-child,
 .sticky-clone-total td:last-child {
     border-right: none;
+    text-align: center;
 }
 
 .sticky-clone {
@@ -448,6 +450,17 @@ tr.red {
 
 .btn-delete:hover {
     background-color: #610d0d;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Remove white outline/border on all buttons when focused */
+.admin-stocks-page button:focus,
+.admin-stocks-page button:active,
+.admin-stocks-page a:focus,
+.admin-stocks-page a:active {
+    outline: none;
+    box-shadow: none;
 }
 
 .table-container:active {
@@ -475,13 +488,23 @@ tr.red {
 }
 
 .modal-content {
-    background: #fff;
+    background: var(--bg-darker, #1a2332);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 30px;
     width: 500px;
     max-width: 90%;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     position: relative;
+    color: #fff;
+}
+
+.modal-content h2 {
+    margin: 0 28px 14px 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #a3c1e0;
+    line-height: 1.35;
 }
 
 .modal-close {
@@ -489,7 +512,7 @@ tr.red {
     top: 12px;
     right: 16px;
     font-size: 28px;
-    color: #95a5a6;
+    color: #888;
     cursor: pointer;
     line-height: 1;
     font-weight: bold;
@@ -497,10 +520,10 @@ tr.red {
 }
 
 .modal-close:hover {
-    color: #e74c3c;
+    color: #ff6b6b;
 }
 
-.modal-content h2 {
+.modal-contefff{
     text-align: center;
     color: #2c3e50;
     margin-top: 0;
@@ -564,16 +587,16 @@ tr.red {
 
 .btn-cancel {
     padding: 10px 24px;
-    border: 1px solid #bdc3c7;
-    background: #ecf0f1;
-    color: #2c3e50;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: #ddd;
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
 }
 
 .btn-cancel:hover {
-    background: #d5dbdb;
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .btn-import {
@@ -605,6 +628,7 @@ tr.red {
     margin: 0 24px 10px 0;
     text-align: left;
     line-height: 1.4;
+    color: #a3c1e0;
 }
 
 #importCsvModal #dropZone {
@@ -634,7 +658,7 @@ tr.red {
 }
 
 #importCsvModal .modal-actions {
-    justify-content: flex-end;
+    justify-content: center;
     margin-top: 14px;
 }
 
@@ -655,6 +679,7 @@ tr.red {
     margin: 0 24px 12px 0;
     text-align: left;
     line-height: 1.35;
+    color: #a3c1e0;
 }
 
 #exportCsvModal .export-csv-modal__message {
@@ -663,7 +688,7 @@ tr.red {
 }
 
 #exportCsvModal .modal-actions {
-    justify-content: flex-end;
+    justify-content: center;
 }
 
 #exportCsvModal .btn-cancel,
@@ -683,6 +708,7 @@ tr.red {
     margin: 0 24px 12px 0;
     text-align: left;
     line-height: 1.35;
+    color: #a3c1e0;
 }
 
 #deleteStockModal .delete-stock-modal__message {
@@ -691,7 +717,7 @@ tr.red {
 }
 
 #deleteStockModal .modal-actions {
-    justify-content: flex-end;
+    justify-content: center;
 }
 
 #deleteStockModal .btn-cancel,
@@ -705,6 +731,24 @@ tr.red {
     padding: 10px 24px;
     border: none;
     cursor: pointer;
+}
+
+/* Delete Stock Notice Modal */
+#deleteStockNoticeModal .modal-content {
+    width: min(92vw, 420px);
+}
+
+#deleteStockNoticeModal .delete-follow-notice-modal__message {
+    margin-bottom: 18px;
+    line-height: 1.5;
+}
+
+#deleteStockNoticeModal.is-success .modal-content {
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+#deleteStockNoticeModal.is-error .modal-content {
+    border-color: rgba(239, 68, 68, 0.4);
 }
 
 @media (max-width: 768px) {
@@ -739,6 +783,177 @@ tr.red {
 
     #deleteStockModal .btn-cancel,
     #deleteStockModal .btn-delete-confirm {
+        flex: 1 1 150px;
+    }
+}
+
+/* Delete Follow Modal */
+#deleteFollowModal .modal-content {
+    width: min(92vw, 420px);
+}
+
+#deleteFollowModal .modal-content h2 {
+    margin: 0 28px 14px 0;
+    color: #a3c1e0;
+}
+
+#deleteFollowModal .delete-follow-modal__message {
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+#deleteFollowModal .modal-actions {
+    justify-content: center;
+}
+
+#deleteFollowModal .btn-cancel,
+#deleteFollowModal .btn-delete-confirm {
+    min-width: 112px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+#deleteFollowModal .btn-delete-confirm {
+    padding: 10px 24px;
+    border: none;
+    cursor: pointer;
+    background: #dc2626;
+    color: #fff;
+}
+
+#deleteFollowModal .btn-delete-confirm:hover {
+    background: #b91c1c;
+}
+
+/* Delete Follow Notice Modal */
+#deleteFollowNoticeModal .modal-content {
+    width: min(92vw, 420px);
+}
+
+#deleteFollowNoticeModal .modal-content h2 {
+    margin: 0 28px 14px 0;
+    color: #a3c1e0;
+}
+
+#deleteFollowNoticeModal .delete-follow-notice-modal__message {
+    margin-bottom: 18px;
+    line-height: 1.5;
+}
+
+#deleteFollowNoticeModal .modal-actions {
+    justify-content: center;
+}
+
+#deleteFollowNoticeModal.is-success .modal-content {
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+#deleteFollowNoticeModal.is-error .modal-content {
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Add Follow Notice Modal */
+#addFollowNoticeModal .modal-content {
+    width: min(92vw, 420px);
+}
+
+#addFollowNoticeModal .modal-content h2 {
+    margin: 0 28px 14px 0;
+    color: #a3c1e0;
+}
+
+#addFollowNoticeModal .delete-stock-modal__message {
+    margin-bottom: 18px;
+    line-height: 1.5;
+}
+
+#addFollowNoticeModal .modal-actions {
+    justify-content: center;
+}
+
+#addFollowNoticeModal.is-success .modal-content {
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+#addFollowNoticeModal.is-error .modal-content {
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+@media (max-width: 768px) {
+    #deleteFollowModal .modal-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    #deleteFollowModal .btn-cancel,
+    #deleteFollowModal .btn-delete-confirm {
+        flex: 1 1 150px;
+    }
+}
+
+/* Delete Suggest Modal */
+#deleteSuggestModal .modal-content,
+#deleteSuggestBatchModal .modal-content {
+    width: min(92vw, 420px);
+}
+
+#deleteSuggestModal .delete-follow-modal__message,
+#deleteSuggestBatchModal .delete-follow-modal__message {
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+#deleteSuggestModal .btn-cancel,
+#deleteSuggestModal .btn-delete-confirm,
+#deleteSuggestBatchModal .btn-cancel,
+#deleteSuggestBatchModal .btn-delete-confirm {
+    min-width: 112px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+#deleteSuggestModal .btn-delete-confirm,
+#deleteSuggestBatchModal .btn-delete-confirm {
+    padding: 10px 24px;
+    border: none;
+    cursor: pointer;
+    background: #dc2626;
+    color: #fff;
+}
+
+#deleteSuggestModal .btn-delete-confirm:hover,
+#deleteSuggestBatchModal .btn-delete-confirm:hover {
+    background: #b91c1c;
+}
+
+/* Delete Suggest Notice Modal */
+#deleteSuggestNoticeModal .modal-content {
+    width: min(92vw, 420px);
+}
+
+#deleteSuggestNoticeModal .delete-follow-notice-modal__message {
+    margin-bottom: 18px;
+    line-height: 1.5;
+}
+
+#deleteSuggestNoticeModal.is-success .modal-content {
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+#deleteSuggestNoticeModal.is-error .modal-content {
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+@media (max-width: 768px) {
+    #deleteSuggestModal .modal-actions,
+    #deleteSuggestBatchModal .modal-actions {
+        flex-wrap: wrap;
+    }
+
+    #deleteSuggestModal .btn-cancel,
+    #deleteSuggestModal .btn-delete-confirm,
+    #deleteSuggestBatchModal .btn-cancel,
+    #deleteSuggestBatchModal .btn-delete-confirm {
         flex: 1 1 150px;
     }
 }
@@ -778,5 +993,487 @@ th[data-sort-key].sort-desc .sort-icon {
     .admin-stocks-main-actions .btn-admin-main-action {
         flex: 1 1 calc(50% - 4px);
         min-width: 150px;
+    }
+}
+
+/* ========================================
+   TOOLBAR STYLES (PHASE 2)
+   ======================================== */
+.admin-stocks-toolbar,
+.admin-follow-toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.admin-stocks-toolbar__left,
+.admin-stocks-toolbar__right {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.admin-stocks-toolbar__right {
+    flex-wrap: nowrap; /* Không xuống dòng */
+}
+
+.admin-follow-toolbar {
+    justify-content: flex-start;
+}
+
+.btn-toolbar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #333;
+    white-space: nowrap;
+}
+
+.btn-toolbar:hover,
+.btn-toolbar:focus,
+.btn-toolbar:active {
+    background: #f5f5f5;
+    border-color: #bbb;
+    outline: none;
+    box-shadow: none;
+}
+
+.btn-toolbar--add {
+    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+    color: #fff;
+    border-color: #0ea5e9;
+}
+
+.btn-toolbar--add:hover,
+.btn-toolbar--add:focus,
+.btn-toolbar--add:active {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    outline: none;
+    box-shadow: none;
+    border-color: #0ea5e9;
+}
+
+.btn-toolbar--follow {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: #fff;
+    border-color: #7c3aed;
+}
+
+.btn-toolbar--follow:hover,
+.btn-toolbar--follow:focus,
+.btn-toolbar--follow:active {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    outline: none;
+    box-shadow: none;
+    border-color: #7c3aed;
+}
+
+.btn-toolbar--suggest {
+    background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+    color: #fff;
+    border-color: #ea580c;
+}
+
+.btn-toolbar--suggest:hover,
+.btn-toolbar--suggest:focus,
+.btn-toolbar--suggest:active {
+    background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+    outline: none;
+    box-shadow: none;
+    border-color: #ea580c;
+}
+
+.btn-toolbar--export {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #fff;
+    border-color: #16a34a;
+}
+
+.btn-toolbar--export:hover,
+.btn-toolbar--export:focus,
+.btn-toolbar--export:active {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    outline: none;
+    box-shadow: none;
+    border-color: #16a34a;
+}
+
+.btn-toolbar--import {
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    color: #fff;
+    border-color: #8b5cf6;
+}
+
+.btn-toolbar--import:hover,
+.btn-toolbar--import:focus,
+.btn-toolbar--import:active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    outline: none;
+    box-shadow: none;
+    border-color: #8b5cf6;
+}
+
+.btn-back,
+.btn-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #333;
+    font-size: 13px;
+}
+
+.btn-back:hover {
+    background: #f5f5f5;
+}
+
+.btn-nav {
+    background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+    color: #fff;
+    border-color: #ea580c;
+}
+
+.btn-nav:hover {
+    background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+}
+
+/* Buy-back bar (navigation buttons for follow/suggest pages) */
+.buy-back-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.buy-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid rgba(99, 179, 237, 0.2);
+    background: var(--inv-surface2);
+    color: var(--inv-text);
+    transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.buy-back-btn:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(56, 189, 248, 0.08);
+    color: var(--inv-accent);
+    transform: translateY(-1px);
+}
+
+/* Filter wrapper for mobile reordering */
+.admin-stocks-filter-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-panel {
+    order: 1; /* Filter trước */
+}
+
+/* Add Follow/Suggest Bar */
+.admin-stocks-add-follow-bar,
+.admin-stocks-add-suggest-bar {
+    margin: 1rem 0 1.5rem;
+    display: flex;
+    justify-content: flex-start;
+    order: 2; /* Button sau filter */
+}
+
+.btn-add-follow-admin,
+.btn-add-suggest-admin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.btn-add-follow-admin:disabled,
+.btn-add-suggest-admin:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.btn-add-follow-admin:not(:disabled):hover,
+.btn-add-suggest-admin:not(:disabled):hover {
+    background: linear-gradient(135deg, #7dd3fc, #a5b4fc);
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
+    outline: none;
+}
+
+/* Delete icon in table */
+.btn-delete-row {
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #f44336;
+    padding: 0.25rem 0.5rem;
+    transition: opacity 0.2s;
+}
+
+.btn-delete-row:hover {
+    opacity: 0.7;
+}
+
+/* Status icons */
+.status-icon {
+    font-size: 1.1rem;
+    cursor: default;
+}
+
+.status-icon--checked {
+    color: #4caf50;
+}
+
+.status-icon--add {
+    color: #2196f3;
+    cursor: pointer;
+}
+
+.status-icon--add:hover {
+    opacity: 0.7;
+}
+
+/* Checkbox styles for follow/suggest */
+.col-select {
+    width: 60px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.th-select-all-new {
+    padding: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Admin follow checkbox in col-select (same as trang-chu) */
+#stock-table td.col-select {
+    width: 3.5em;
+    min-width: 3.5em;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#stock-table td.col-select .cell-label-select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 12px 16px;
+    margin: -12px -16px;
+    min-height: 2.5em;
+}
+
+.th-checkbox-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* Select-all header state (Theo doi) */
+.th-select-all-new .th-select-all__inner,
+.th-select-all .th-select-all__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    line-height: 1.15;
+}
+.th-select-all-new .th-select-all__label,
+.th-select-all .th-select-all__label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #e2e8f0;
+}
+.th-select-all-new .th-select-all__state,
+.th-select-all .th-select-all__state {
+    font-size: 16px;
+    line-height: 1;
+    display: inline-block;
+    color: #94a3b8;
+    min-height: 1em;
+    transition: color 0.15s;
+}
+.th-select-all-new .th-select-all__state:empty,
+.th-select-all .th-select-all__state:empty {
+    display: none;
+}
+.th-select-all--partial .th-select-all__state { color: #fbbf24; }
+.th-select-all--active .th-select-all__state { color: #38bdf8; }
+
+/* Hide native checkbox and render custom visual via label::before */
+#stock-table td.col-select .cell-label-select {
+    position: relative;
+}
+#stock-table td.col-select .cell-label-select::before {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(148, 163, 184, 0.45);
+    border-radius: 4px;
+    background: transparent;
+    transition: background 0.15s, border-color 0.15s;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+#stock-table td.col-select .cell-label-select:has(.follow-checkbox:checked)::before,
+#stock-table td.col-select .cell-label-select:has(.suggest-checkbox:checked)::before,
+#stock-table td.col-select .cell-label-select:has(.select-checkbox:checked)::before {
+    background: #38bdf8;
+    border-color: #38bdf8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8l3.5 3.5 6.5-7' stroke='%230f172a' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 12px 12px;
+}
+#stock-table td.col-select .cell-label-select:has(.follow-checkbox:disabled)::before,
+#stock-table td.col-select .cell-label-select:has(.suggest-checkbox:disabled)::before,
+#stock-table td.col-select .cell-label-select:has(.select-checkbox:disabled)::before {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+#stock-table td.col-select .cell-label-select:has(.follow-checkbox:checked:disabled)::before,
+#stock-table td.col-select .cell-label-select:has(.suggest-checkbox:checked:disabled)::before,
+#stock-table td.col-select .cell-label-select:has(.select-checkbox:checked:disabled)::before {
+    background: #d1d5db;
+    border-color: #9ca3af;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8l3.5 3.5 6.5-7' stroke='%236b7280' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+#stock-table td.col-select input.follow-checkbox,
+#stock-table td.col-select input.suggest-checkbox,
+#stock-table td.col-select input.select-checkbox {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+#stock-table td.col-select input.follow-checkbox:disabled,
+#stock-table td.col-select input.suggest-checkbox:disabled,
+#stock-table td.col-select input.select-checkbox:disabled {
+    cursor: not-allowed;
+}
+#stock-table td.col-select .cell-label-select:has(.follow-checkbox:disabled),
+#stock-table td.col-select .cell-label-select:has(.suggest-checkbox:disabled),
+#stock-table td.col-select .cell-label-select:has(.select-checkbox:disabled) {
+    opacity: 1;
+}
+
+.status-icon--disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.status-icon--disabled:hover {
+    cursor: not-allowed;
+}
+
+.th-checkbox-label {
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .admin-stocks-toolbar {
+        flex-direction: column;
+    }
+
+    .admin-stocks-toolbar__left,
+    .admin-stocks-toolbar__right {
+        width: 100%;
+    }
+
+    .btn-toolbar {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 120px;
+    }
+
+    /* Reorder elements on mobile: Filter → Search → Button */
+    .filter-panel {
+        order: 1;
+    }
+
+    /* actions-right được inject bởi layout JS, cần đảm bảo nó ở giữa */
+    .actions-right {
+        order: 2 !important;
+        margin: 1rem 0 !important;
+        width: 100% !important;
+    }
+
+    .admin-stocks-add-follow-bar,
+    .admin-stocks-add-suggest-bar {
+        order: 3;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .admin-follow-toolbar {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .btn-back,
+    .btn-nav,
+    .buy-back-btn {
+        flex: 0 0 auto;
+        text-align: center;
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .buy-back-bar {
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    /* User home: button "Thêm theo dõi" xuống dưới search */
+    .home-add-follow-bar {
+        order: 3;
+        margin: 0 0 1.5rem;
     }
 }
