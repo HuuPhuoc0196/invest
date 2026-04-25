@@ -19,46 +19,6 @@ class Sync extends Controller
 {
     public function __construct(private SyncService $syncService) {}
 
-    public function getNewPrice()
-    {
-        try {
-            set_time_limit(0);
-            $result = $this->syncService->syncNewPrice();
-            
-            // Clear cache sau khi sync giá
-            CacheService::clearTableCache('stocks');
-            
-            return response()->json($result);
-        } catch (QueryException $e) {
-            return $this->jsonServerError($e);
-        }
-    }
-
-    public function getNewRisk()
-    {
-        try {
-            set_time_limit(0);
-            $result = $this->syncService->syncNewRisk();
-            
-            // Clear cache sau khi sync risk
-            CacheService::clearTableCache('stocks');
-            
-            return response()->json($result);
-        } catch (QueryException $e) {
-            return $this->jsonServerError($e);
-        }
-    }
-
-    public function suggestInvestment()
-    {
-        try {
-            $result = $this->syncService->suggestInvestment();
-            return response()->json($result);
-        } catch (QueryException $e) {
-            return $this->jsonServerError($e);
-        }
-    }
-
     public function updateRiskForCode(UpdateRiskForCodeRequest $request)
     {
         if ($request->isMethod('post')) {
@@ -81,25 +41,25 @@ class Sync extends Controller
 
     public function deleteLogs()
     {
-        $logPath = storage_path('logs/laravel.log');
-        if (File::exists($logPath)) {
-            file_put_contents($logPath, '');
-            return response()->json(['status' => 'success', 'message' => 'Logs đã được xóa thành công!']);
-        }
-        return response()->json(['status' => 'error', 'message' => 'Không tìm thấy file log!'], 404);
-    }
+        $logPath   = storage_path('logs');
+        $cutoff    = time() - (30 * 86400);
+        $files     = glob($logPath . '/laravel-*.log') ?: [];
+        $deleted   = 0;
+        $failed    = 0;
 
-    public function sendEmailRisk(Request $request)
-    {
-        $code      = $request->query('code');
-        $risk_level = $request->query('risk_level');
-        $date      = $request->query('date');
-        $newRisk   = $request->query('newRisk');
-        $result    = EmailService::sendRiskChangeNotification($code, $risk_level, $newRisk, $date);
-        $message   = "Hệ thống ghi nhận cổ phiếu {$code} có thay đổi mức độ rủi ro. Chuyển từ {$risk_level} Thành {$newRisk} Ngày thực hiện {$date}";
-        Log::info($message);
-        Log::info("Send mail: " . $result);
-        return response()->json(['status' => 'success', 'message' => 'Send mail thành công.']);
+        foreach ($files as $file) {
+            if (!is_file($file) || filemtime($file) >= $cutoff) {
+                continue;
+            }
+            File::delete($file) ? $deleted++ : $failed++;
+        }
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => "Đã xóa {$deleted} file log cũ hơn 30 ngày." . ($failed ? " Thất bại: {$failed}." : ''),
+            'deleted' => $deleted,
+            'failed'  => $failed,
+        ]);
     }
 
     public function sendEmailVnindex(Request $request)
@@ -108,16 +68,6 @@ class Sync extends Controller
         $index_suggest = $request->query('index_suggest');
         $result        = EmailService::sendVnindexChangeNotification($index_current, $index_suggest);
         $message       = "Hệ thống ghi nhận Vnindex có mức điều chỉnh về vùng mua tốt. Vnindex hiện tại: {$index_current} Vindex vùng mua tốt: {$index_suggest}";
-        Log::info($message);
-        Log::info("Send mail: " . $result);
-        return response()->json(['status' => 'success', 'message' => 'Send mail thành công.']);
-    }
-
-    public function sendEmailStocks(Request $request)
-    {
-        $code    = $request->query('code');
-        $result  = EmailService::sendSuggestStocksHave1tr($code);
-        $message = "Hệ thống ghi nhận cổ phiếu {$code} đã có khối lượng giao dịch trên 1.000.000 và chưa được thêm vào hệ thống.";
         Log::info($message);
         Log::info("Send mail: " . $result);
         return response()->json(['status' => 'success', 'message' => 'Send mail thành công.']);
@@ -230,24 +180,34 @@ class Sync extends Controller
 
     public function getLogsVPS()
     {
+        return view('Admin.AdminLogsVPS');
+    }
+
+    public function getLogsVPSData(Request $request)
+    {
         $baseUrl = rtrim((string) config('services.sync.base_url'), '/');
         if ($baseUrl === '') {
-            return response('<pre>Chưa cấu hình SYNC_SERVICE_URL.</pre>', 503);
+            return response()->json(['error' => 'Chưa cấu hình SYNC_SERVICE_URL.'], 503);
         }
 
-        try {
-            $response = Http::timeout(120)->get($baseUrl . '/get-logs');
-        } catch (\Exception $e) {
-            Log::error('Request error getLogsVPS: ' . $e->getMessage());
+        $params = $request->only(['date', 'level', 'search', 'page', 'per_page']);
 
-            return response('<pre>' . e('Không lấy được log VPS: ' . (config('app.debug') ? $e->getMessage() : 'lỗi kết nối')) . '</pre>', 502);
+        try {
+            $response = Http::timeout(30)->get($baseUrl . '/get-logs', $params);
+        } catch (\Exception $e) {
+            Log::error('Request error getLogsVPSData: ' . $e->getMessage());
+            return response()->json([
+                'error' => config('app.debug') ? $e->getMessage() : 'Không lấy được log VPS: lỗi kết nối',
+            ], 502);
         }
 
         if (! $response->successful()) {
-            return response('<pre>' . e('Dịch vụ log trả HTTP ' . $response->status()) . '</pre>', 502);
+            return response()->json([
+                'error' => 'Dịch vụ log trả HTTP ' . $response->status(),
+            ], $response->status());
         }
 
-        return response('<pre>' . e($response->body()) . '</pre>');
+        return response()->json($response->json());
     }
 
     public function uploadFile(Request $request)

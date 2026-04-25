@@ -114,10 +114,6 @@ Route::get('/', function () {
     return $user->role == 1 ? redirect('/admin') : redirect()->route('home');
 });
 
-// Profile: chỉ user đã đăng nhập (nếu cần public thì chuyển vào nhóm guest)
-Route::get('/profile', [Login::class, 'profile'])->name('profile')->middleware('auth');
-
-Route::get('/user/get-risk-level/{code}', [User::class, 'getRiskLevel'])->name('user.getRiskLevel');
 
 // Logo: không dùng file tĩnh public/logo.svg (tránh <?xml bị PHP short_open_tag hiểu nhầm trên XAMPP).
 // Xóa public/logo.svg nếu còn — request /logo.svg luôn vào Laravel và trả đúng image/svg+xml.
@@ -169,6 +165,7 @@ Route::post('/logout', function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     // Admin
     Route::get('/admin', [Admin::class, 'show'])->name('admin.home');
+    Route::get('/admin/logs', [Admin::class, 'logs'])->name('admin.logs');
     Route::post('/admin/delete/{code}', [Admin::class, 'delete'])->name('admin.delete');
     Route::match(['get', 'post'], '/admin/insert', [Admin::class, 'insert'])->name('insert');
     Route::match(['get', 'put'], '/admin/update/{code}', [Admin::class, 'update'])->name('admin.update');
@@ -201,30 +198,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::match(['get', 'put'], '/admin/updateInfoProfile', [Admin::class, 'updateInfoProfile'])->name('admin.updateInfoProfile');
     Route::match(['get', 'put'], '/admin/changePassword', [Admin::class, 'changePassword'])->name('admin.changePassword');
 
-    // Log có thể chứa thông tin nhạy cảm; chỉ admin mới truy cập được. Production nên cân nhắc giới hạn độ dài hoặc phân quyền chặt hơn.
-    Route::get('/admin/logs', function () {
-        $logFile = storage_path('logs/laravel.log');
-
-        if (!File::exists($logFile)) {
-            return response('Không tìm thấy file log!', 200)
-                ->header('Content-Type', 'text/html; charset=UTF-8');
-        }
-
-        $limit    = 100 * 1024; // chỉ đọc 100 KB cuối để tránh OOM trên file log lớn
-        $size     = filesize($logFile);
-        $offset   = max(0, $size - $limit);
-        $handle   = fopen($logFile, 'rb');
-        fseek($handle, $offset);
-        $logs = fread($handle, $limit);
-        fclose($handle);
-
-        $prefix = $offset > 0 ? "...[Chỉ hiển thị " . round($limit / 1024) . "KB cuối — tổng: " . round($size / 1024) . "KB]...\n\n" : '';
-
-        return response('<pre>' . htmlspecialchars($prefix . $logs, ENT_QUOTES, 'UTF-8') . '</pre>', 200)
-            ->header('Content-Type', 'text/html; charset=UTF-8')
-            ->header('X-Content-Type-Options', 'nosniff');
-    });
-    Route::get('/admin/logsVPS', [Sync::class, 'getLogsVPS']);
+    Route::get('/admin/logsVPS', [Sync::class, 'getLogsVPS'])->name('admin.logsVPS');
+    Route::get('/admin/logsVPS/data', [Sync::class, 'getLogsVPSData'])->name('admin.logsVPS.data');
      Route::match(['get', 'post'], '/admin/uploadFile', [Sync::class, 'uploadFile'])->name('uploadFile');
 });
 

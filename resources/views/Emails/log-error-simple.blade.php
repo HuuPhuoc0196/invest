@@ -16,7 +16,7 @@
     </div>
 
     <div style="background: white; border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-        <h3 style="margin-top: 0; color: {{ $levelColor }};">Thông điệp:</h3>
+        <h3 style="margin-top: 0; color: {{ $levelColor }};">Nội dung:</h3>
         <p style="margin: 0; white-space: pre-wrap;">{{ $logMessage }}</p>
     </div>
 

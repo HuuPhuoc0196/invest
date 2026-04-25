@@ -1,0 +1,271 @@
+/* ── Toolbar ── */
+.lvps-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 12px 16px;
+}
+
+.lvps-toolbar__left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.lvps-toolbar__right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.lvps-select,
+.lvps-input {
+    background: var(--inv-bg, #0f1117);
+    color: var(--inv-text, #e2e8f0);
+    border: 1px solid var(--inv-border, rgba(255,255,255,0.1));
+    border-radius: 7px;
+    padding: 7px 11px;
+    font-size: 0.82rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    line-height: 1.4;
+}
+
+.lvps-select:focus,
+.lvps-input:focus {
+    border-color: var(--inv-accent, #6366f1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.lvps-input {
+    width: 200px;
+}
+
+.lvps-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: var(--inv-accent, #6366f1);
+    color: #fff;
+    text-decoration: none;
+    transition: opacity 0.18s, transform 0.1s;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.lvps-btn:hover  { opacity: 0.82; transform: translateY(-1px); color: #fff; }
+.lvps-btn:active { transform: translateY(0); }
+.lvps-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.lvps-status {
+    font-size: 0.78rem;
+    color: var(--inv-muted, #94a3b8);
+    white-space: nowrap;
+}
+
+/* ── Error box ── */
+.lvps-error {
+    padding: 11px 15px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    border-radius: 7px;
+    color: #f87171;
+    font-size: 0.84rem;
+    margin-bottom: 12px;
+}
+
+/* ── Table card ── */
+.lvps-table-wrap {
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+
+/* ── Table ── */
+.lvps-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    background-color: #131313;
+}
+
+.lvps-th {
+    padding: 9px 14px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--inv-text, #e2e8f0);
+    border-bottom: 1px solid var(--inv-border, rgba(255,255,255,0.08));
+    background: rgba(0,0,0,0.18);
+    white-space: nowrap;
+}
+
+.lvps-th--time  { width: 148px; }
+.lvps-th--level { width: 82px;  text-align: center;}
+.lvps-th--msg   { text-align: center;}
+
+.lvps-table tbody tr {
+    border-bottom: 1px solid var(--inv-border, rgba(255,255,255,0.05));
+    transition: background 0.1s;
+}
+
+.lvps-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.lvps-table tbody tr:hover {
+    background: rgba(255,255,255,0.035);
+}
+
+/* Subtle level row tints */
+.lvps-row--warning { background: rgba(251,191,36,0.03); }
+.lvps-row--error   { background: rgba(239,68,68,0.04);  }
+.lvps-row--critical{ background: rgba(220,38,38,0.07);  }
+
+.lvps-row--warning:hover { background: rgba(251,191,36,0.07); }
+.lvps-row--error:hover   { background: rgba(239,68,68,0.07);  }
+.lvps-row--critical:hover{ background: rgba(220,38,38,0.1);   }
+
+.lvps-td {
+    padding: 7px 14px;
+    vertical-align: top;
+}
+
+.lvps-td--time {
+    color:var(--inv-text, #e2e8f0);
+    white-space: nowrap;
+    font-size: 0.77rem;
+    padding-top: 8px;
+}
+
+.lvps-td--msg {
+    font-family: ui-monospace, 'SFMono-Regular', 'Cascadia Code', Consolas, monospace;
+    font-size: 0.79rem;
+    line-height: 1.6;
+    color: var(--inv-text, #e2e8f0);
+    word-break: break-word;
+}
+
+/* ── Level badges ── */
+.lvps-badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+.lvps-badge--info     { background: rgba(99,102,241,0.16); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.28); }
+.lvps-badge--warning  { background: rgba(251,191,36,0.14); color: #fbbf24; border: 1px solid rgba(251,191,36,0.28); }
+.lvps-badge--error    { background: rgba(239,68,68,0.14);  color: #f87171; border: 1px solid rgba(239,68,68,0.28); }
+.lvps-badge--debug    { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.18); }
+.lvps-badge--critical { background: rgba(220,38,38,0.22);  color: #fca5a5; border: 1px solid rgba(220,38,38,0.38); }
+
+.lvps-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--inv-muted, #94a3b8);
+    font-size: 0.875rem;
+}
+
+/* ── Pagination ── */
+.lvps-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 4px;
+}
+
+.lvps-page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 9px;
+    border-radius: 6px;
+    border: 1px solid var(--inv-border, rgba(255,255,255,0.1));
+    background: transparent;
+    color: var(--inv-text, #e2e8f0);
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.14s, border-color 0.14s, color 0.14s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lvps-page-btn:hover:not(:disabled):not(.lvps-page-btn--active) {
+    border-color: var(--inv-accent, #6366f1);
+    color: var(--inv-accent, #6366f1);
+    background: rgba(99,102,241,0.08);
+}
+
+.lvps-page-btn--active {
+    background: var(--inv-accent, #6366f1);
+    border-color: var(--inv-accent, #6366f1);
+    color: #fff;
+    font-weight: 700;
+    cursor: default;
+}
+
+.lvps-page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.lvps-page-info {
+    font-size: 0.77rem;
+    color: var(--inv-muted, #94a3b8);
+    margin: 0 4px;
+    white-space: nowrap;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .lvps-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .lvps-toolbar__left {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .lvps-toolbar__right {
+        justify-content: flex-end;
+    }
+
+    .lvps-select,
+    .lvps-input {
+        width: 100%;
+    }
+
+    .lvps-th--time  { width: 100px; }
+    .lvps-th--level { width: 66px; text-align: center; }
+
+    .lvps-td--time {
+        font-size: 0.72rem;
+    }
+}

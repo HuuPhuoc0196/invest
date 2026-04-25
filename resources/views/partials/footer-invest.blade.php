@@ -55,8 +55,7 @@
             <p class="ft-col-title">@if ($area === 'admin') Hệ thống @else Tài khoản @endif</p>
             <ul class="ft-links">
                 @if ($area === 'admin')
-                    <li><a href="{{ url('/admin/logs') }}" target="_blank" rel="noopener noreferrer">👁️ Logs hosting</a></li>
-                    <li><a href="{{ url('/admin/logsVPS') }}" target="_blank" rel="noopener noreferrer">👁️ Logs VPS</a></li>
+                    <li><a href="{{ route('admin.logs') }}">📋 Logs</a></li>
                     <li><a href="{{ route('home') }}">📊 Xem trang người dùng</a></li>
                 @elseif ($area === 'guest')
                     <li><a href="{{ route('forgotPassword') }}">🔒 Quên mật khẩu</a></li>

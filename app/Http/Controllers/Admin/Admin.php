@@ -35,6 +35,11 @@ class Admin extends Controller
         return view('Admin.AdminView', compact('stocks', 'statusSync'));
     }
 
+    public function logs()
+    {
+        return view('Admin.AdminLogs');
+    }
+
     public function insert(InsertStockBasicRequest $request)
     {
         if ($request->isMethod('post')) {

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Stock;
 use App\Models\StatusSync;
-use App\Models\UserFollow;
 use App\Models\UserPortfolio;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -12,75 +11,6 @@ use App\Services\CacheService;
 
 class SyncService
 {
-    public function syncNewPrice(): array
-    {
-        $stocks     = Stock::getAllStocks();
-        $statusSync = StatusSync::getStatusSync();
-
-        Log::info("Start cập nhật giá của cổ phiếu");
-        Log::info("Tổng số lượng cổ phiếu cần cập nhật là: " . $stocks->count());
-
-        $statusSync->status_sync_price = 1;
-        $statusSync->save();
-        CacheService::forget('status_sync');
-
-        foreach ($stocks as $stock) {
-            $newPrice = $this->collectPrice($stock->code);
-            Log::info("Call api lấy giá của mã chứng khoán {$stock->code} từ {$stock->current_price} thành " . round($newPrice, 2));
-            if (!is_numeric($newPrice)) {
-                Log::error("Không thể lấy giá mới sau khi run getNewPrice với {$stock->code}");
-                continue;
-            }
-            if ($stock->current_price != $newPrice) {
-                $stock->current_price = $newPrice;
-                $stock->save();
-            }
-        }
-
-        $statusSync->status_sync_price = 0;
-        $statusSync->save();
-        CacheService::forget('status_sync');
-        Log::info("End cập nhật giá cổ phiếu");
-
-        return ['status' => 'success', 'message' => 'Update thành công.'];
-    }
-
-    public function syncNewRisk(): array
-    {
-        $stocks     = Stock::getAllStocks();
-        $statusSync = StatusSync::getStatusSync();
-
-        Log::info("Start cập nhật mức độ rủi ro của cổ phiếu");
-        Log::info("Tổng số lượng cổ phiếu cần cập nhật là: " . $stocks->count());
-
-        $statusSync->status_sync_risk = 1;
-        $statusSync->save();
-        CacheService::forget('status_sync');
-
-        foreach ($stocks as $stock) {
-            $newRisk = $this->collectRisk($stock->code);
-            Log::info("Call api mức độ rủi ro của mã chứng khoán {$stock->code} từ {$stock->risk_level} thành {$newRisk}");
-            if (!is_numeric($newRisk)) {
-                Log::error("Không thể lấy risk mới sau khi run getNewRisk với {$stock->code}");
-                continue;
-            }
-            if ($stock->risk_level != $newRisk) {
-                $result = EmailService::sendRiskChangeNotification($stock->code, $stock->risk_level, $newRisk);
-                Log::info("Send mail: " . $result);
-                Log::info("cập nhật mức độ rủi ro của mã chứng khoán {$stock->code} từ {$stock->risk_level} thành {$newRisk}");
-                $stock->risk_level = $newRisk;
-                $stock->save();
-            }
-        }
-
-        $statusSync->status_sync_risk = 0;
-        $statusSync->save();
-        CacheService::forget('status_sync');
-        Log::info("End cập nhật mức độ rủi ro của cổ phiếu");
-
-        return ['status' => 'success', 'message' => 'Update thành công.'];
-    }
-
     public function syncRiskForCode(string $code): array
     {
         $stock = Stock::getByCode($code);
@@ -120,24 +50,6 @@ class SyncService
         Log::info("End cập nhật mức độ rủi ro của cổ phiếu");
 
         return ['status' => 'success', 'message' => 'Cập nhật rủi ro ' . $stock->code . ' thành công.'];
-    }
-
-    public function suggestInvestment(): array
-    {
-        $stocks = Stock::getAllStocks();
-        foreach ($stocks as $stock) {
-            $result = EmailService::sendSuggestInvestment(
-                $stock->code,
-                $stock->current_price,
-                $stock->recommended_buy_price,
-                $stock->risk_level
-            );
-            if ($result) {
-                Log::info("Send mail Suggest cổ phiếu: " . $stock->code);
-                Log::info("Có giá hiện tại là: {$stock->current_price} và Giá đề xuất là {$stock->recommended_buy_price}");
-            }
-        }
-        return ['status' => 'success', 'message' => 'Suggest Price Code Success.'];
     }
 
     public function followStocksEveryDay(): array
@@ -206,43 +118,4 @@ class SyncService
         return $newRisk;
     }
 
-    public function collectPrice(string $symbol): mixed
-    {
-        $finalPrice  = null;
-        $maxAttempts = 5;
-        $attempt     = 0;
-
-        while (!is_numeric($finalPrice) && $attempt < $maxAttempts) {
-            try {
-                $attempt++;
-                $baseUrl  = config('services.sync.base_url');
-                $response = Http::timeout(120)->get($baseUrl . "/getPriceFromHTML", ['symbol' => $symbol]);
-                Log::info($response);
-                sleep(1);
-            } catch (\Exception $e) {
-                Log::error("Request error collectPrice for symbol {$symbol}: " . $e->getMessage());
-                continue;
-            }
-
-            $data = $response->json();
-            if (isset($data)) {
-                $price1 = $data['owner_priceClose_1'] ?? null;
-                $price2 = $data['owner_priceClose_2'] ?? null;
-
-                if ($price1 != null && $price1 != '0' && $price1 != 0 && $price1 != '--') {
-                    $finalPrice = $price1;
-                } else {
-                    $finalPrice = $price2;
-                }
-
-                if (is_numeric($finalPrice)) {
-                    $finalPrice = floatval($finalPrice) * 1000;
-                    break;
-                } else {
-                    $finalPrice = null;
-                }
-            }
-        }
-        return $finalPrice;
-    }
 }

@@ -36,6 +36,10 @@ class User extends Controller
 
     public function show()
     {
+        if (auth()->check() && auth()->user()->role == 1) {
+            return redirect('/admin');
+        }
+
         $stocks = Stock::getAllStocks();
         if (auth()->check()) {
             $userId            = auth()->id();
@@ -267,12 +271,6 @@ class User extends Controller
                 'recommended_sell_price' => $stock->recommended_sell_price,
             ],
         ]);
-    }
-
-    public function getRiskLevel($code)
-    {
-        $stock = Stock::getRiskLevelFromCode($code);
-        return view('User.ShowRiskLevel', compact('stock'));
     }
 
     public function cashIn(CashInRequest $request)

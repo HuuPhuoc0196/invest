@@ -87,8 +87,4 @@ class Login extends Controller
         return redirect()->route('login')->with('message', 'Đã đặt lại mật khẩu. Vui lòng đăng nhập.');
     }
 
-    public function profile()
-    {
-        return view('Login.Profile');
-    }
 }

@@ -27,10 +27,9 @@ class CustomDailyLogger
     {
         $logger = new Logger($config['name'] ?? 'daily_custom');
         
-        // Tạo log filename với format custom: laravel_YYYYMMDD.log
+        // Tạo log filename với format chuẩn Laravel: laravel-YYYY-MM-DD.log
         $logPath = storage_path('logs');
-        $logDate = date('Ymd');
-        $logFile = $logPath . '/laravel_' . $logDate . '.log';
+        $logFile = $logPath . '/laravel-' . date('Y-m-d') . '.log';
         
         // Tạo stream handler với file theo ngày
         $handler = new StreamHandler(
@@ -91,7 +90,7 @@ class CustomDailyLogger
     protected function cleanupOldLogs(string $logPath, int $days): void
     {
         try {
-            $files = glob($logPath . '/laravel_*.log');
+            $files = glob($logPath . '/laravel-*.log');
             $cutoffTime = time() - ($days * 86400);
             
             foreach ($files as $file) {

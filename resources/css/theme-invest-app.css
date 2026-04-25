@@ -723,6 +723,12 @@ body.theme-invest-app .invest-narrow-wrap {
     box-sizing: border-box;
 }
 
+body.theme-invest-app .invest-narrow-wrap-full {
+    margin: 0 auto 40px;
+    padding: 0 4px;
+    box-sizing: border-box;
+}
+
 /* Form trong invest-narrow-wrap (adminInsert.css gốc full-width / nền sáng) */
 body.theme-invest-app .invest-narrow-wrap .form-container {
     margin: 0;
