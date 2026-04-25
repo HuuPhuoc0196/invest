@@ -9,7 +9,7 @@ h1 {
 }
 
 table {
-    min-width: 600px;
+    /* min-width: 600px; */
     border-collapse: collapse;
     margin-top: 20px;
     background-color: #fff;

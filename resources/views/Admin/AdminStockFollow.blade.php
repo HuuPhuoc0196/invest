@@ -41,6 +41,9 @@
                 <button type="button" class="btn-add-suggest-admin" id="btnAddSuggestAdmin" disabled onclick="submitAddSuggestAdmin()">
                     💡 Thêm gợi ý
                 </button>
+                <button type="button" class="btn-add-suggest-admin btn-delete-all-follow" id="btnDeleteFollowBatch" disabled onclick="confirmDeleteFollowBatch()">
+                    🗑️ Xoá tất cả
+                </button>
             </div>
 
             {{-- Filter Panel --}}
@@ -143,6 +146,23 @@
                 <div class="modal-actions">
                     <button class="btn-cancel" onclick="closeDeleteFollowModal()">Huỷ</button>
                     <button type="button" class="btn-delete-confirm" id="btnDeleteFollowConfirm" onclick="runDeleteFollow()">Đồng ý</button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Modal Confirm Batch Delete Follow --}}
+        <div id="deleteFollowBatchModal" class="modal-overlay" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeDeleteFollowBatchModal()">&times;</span>
+                <h2>Xác nhận xoá theo dõi</h2>
+                <div class="delete-follow-modal__message">
+                    Bạn có chắc chắn muốn xoá <b id="deleteFollowBatchCount">0</b> mã theo filter hiện tại khỏi danh sách theo dõi?
+                    <br>
+                    Các mã gợi ý tương ứng cũng sẽ bị xoá.
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-cancel" onclick="closeDeleteFollowBatchModal()">Huỷ</button>
+                    <button type="button" class="btn-delete-confirm" id="btnDeleteFollowBatchConfirm" onclick="runDeleteFollowBatch()">Đồng ý</button>
                 </div>
             </div>
         </div>

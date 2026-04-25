@@ -62,6 +62,42 @@
     const getRisk = window.getRisk || function(l) { return { label: '', color: '' }; };
     const getRatingBadge = window.getRatingBadge || function() { return '-'; };
 
+    function removeStocksByIds(stockIds) {
+        const removeSet = new Set((stockIds || []).map(Number));
+        if (!removeSet.size || !Array.isArray(stocks)) return;
+
+        for (let i = stocks.length - 1; i >= 0; i--) {
+            if (removeSet.has(Number(stocks[i].id))) {
+                stocks.splice(i, 1);
+            }
+        }
+
+        if (Array.isArray(adminSuggestedStockIds)) {
+            for (let i = adminSuggestedStockIds.length - 1; i >= 0; i--) {
+                if (removeSet.has(Number(adminSuggestedStockIds[i]))) {
+                    adminSuggestedStockIds.splice(i, 1);
+                }
+            }
+        }
+    }
+
+    function addSuggestedByIds(stockIds) {
+        if (!Array.isArray(adminSuggestedStockIds)) return;
+        const existing = new Set(adminSuggestedStockIds.map(Number));
+        (stockIds || []).forEach((id) => {
+            const numId = Number(id);
+            if (!existing.has(numId)) {
+                adminSuggestedStockIds.push(numId);
+                existing.add(numId);
+            }
+        });
+    }
+
+    function refreshCurrentView() {
+        clearSelection();
+        renderTable(getFilteredStocks());
+    }
+
     function renderTable(data) {
         dynamicSort(data);
         const tbody = document.getElementById('stockTableBody');
@@ -145,6 +181,7 @@
 
         // Sync button & header state after every render
         updateAddSuggestButtonState();
+        updateDeleteBatchButtonState();
         updateSelectAllState();
     }
 
@@ -154,6 +191,13 @@
             btn.disabled = selectedStockIds.size === 0;
         }
     }
+
+function updateDeleteBatchButtonState() {
+    const btn = document.getElementById('btnDeleteFollowBatch');
+    if (btn) {
+        btn.disabled = allStockIds.length === 0;
+    }
+}
 
     function updateSelectAllState() {
         const thSelectAll = document.getElementById('thSelectAll');
@@ -191,6 +235,7 @@
         });
 
         updateAddSuggestButtonState();
+        updateDeleteBatchButtonState();
         updateSelectAllState();
     };
 
@@ -218,6 +263,9 @@
             const result = await response.json();
 
             if (result.success) {
+                addSuggestedByIds(stockIds);
+                refreshCurrentView();
+                btn.textContent = '💡 Thêm gợi ý';
                 showNoticeModal('success', `✅ ${result.message}`);
             } else {
                 showNoticeModal('error', '❌ Có lỗi xảy ra. Vui lòng thử lại.');
@@ -271,6 +319,8 @@
             closeDeleteFollowModal();
 
             if (result.success) {
+                removeStocksByIds([stockId]);
+                refreshCurrentView();
                 showNoticeModal('success', '✅ Đã xóa khỏi danh sách theo dõi');
             } else {
                 showNoticeModal('error', '❌ Không thể xóa. Vui lòng thử lại.');
@@ -278,6 +328,59 @@
         } catch (error) {
             console.error('Error:', error);
             closeDeleteFollowModal();
+            showNoticeModal('error', '❌ Không thể kết nối server.');
+        }
+    };
+
+    // ========== Batch Delete Follow (filtered set) ==========
+    window.confirmDeleteFollowBatch = function() {
+        if (!allStockIds.length) return;
+
+        const modal = document.getElementById('deleteFollowBatchModal');
+        const countEl = document.getElementById('deleteFollowBatchCount');
+        const btn = document.getElementById('btnDeleteFollowBatchConfirm');
+        if (!modal) return;
+
+        if (countEl) countEl.textContent = allStockIds.length;
+        if (btn) { btn.disabled = false; btn.textContent = 'Đồng ý'; }
+        modal.style.display = 'flex';
+    };
+
+    window.closeDeleteFollowBatchModal = function() {
+        const modal = document.getElementById('deleteFollowBatchModal');
+        if (modal) modal.style.display = 'none';
+    };
+
+    window.runDeleteFollowBatch = async function() {
+        const btn = document.getElementById('btnDeleteFollowBatchConfirm');
+        const stockIds = [...allStockIds];
+        if (stockIds.length === 0) return;
+
+        if (btn) { btn.disabled = true; btn.textContent = 'Đang xoá...'; }
+
+        try {
+            const response = await fetch(`${baseUrl}/admin/stocks/follow/batch-delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ stock_ids: stockIds })
+            });
+            const result = await response.json();
+            closeDeleteFollowBatchModal();
+
+            if (result.success) {
+                removeStocksByIds(stockIds);
+                refreshCurrentView();
+                showNoticeModal('success', `✅ ${result.message}`);
+            } else {
+                showNoticeModal('error', '❌ Không thể xoá theo filter hiện tại. Vui lòng thử lại.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            closeDeleteFollowBatchModal();
             showNoticeModal('error', '❌ Không thể kết nối server.');
         }
     };
@@ -299,9 +402,6 @@
         const modal = document.getElementById('deleteFollowNoticeModal');
         if (!modal) return;
         modal.style.display = 'none';
-        if (modal.classList.contains('is-success')) {
-            window.location.reload();
-        }
     };
 
     // ========== Filter Logic (matching admin/stocks) ==========
@@ -350,6 +450,7 @@
     function clearSelection() {
         selectedStockIds.clear();
         updateAddSuggestButtonState();
+        updateDeleteBatchButtonState();
         updateSelectAllState();
     }
 
@@ -394,6 +495,7 @@
         updateSortIcons();
         renderTable(stocks || []);
         updateAddSuggestButtonState();
+        updateDeleteBatchButtonState();
         updateSelectAllState();
 
         // Filter input validation (matching admin/stocks)
@@ -440,6 +542,13 @@
         if (noticeModal) {
             noticeModal.addEventListener('click', function(e) {
                 if (e.target === this) closeDeleteFollowNoticeModal();
+            });
+        }
+
+        const batchDeleteModal = document.getElementById('deleteFollowBatchModal');
+        if (batchDeleteModal) {
+            batchDeleteModal.addEventListener('click', function(e) {
+                if (e.target === this) closeDeleteFollowBatchModal();
             });
         }
     });

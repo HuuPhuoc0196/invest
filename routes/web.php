@@ -181,6 +181,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Admin theo dõi & gợi ý
     Route::get('/admin/stocks/follow', [Admin::class, 'adminFollow'])->name('admin.stocks.follow');
     Route::post('/admin/stocks/follow/batch', [Admin::class, 'addFollowBatch'])->name('admin.stocks.follow.batch');
+    Route::post('/admin/stocks/follow/batch-delete', [Admin::class, 'deleteFollowBatch'])->name('admin.stocks.follow.batch-delete');
     Route::delete('/admin/stocks/follow/{stockId}', [Admin::class, 'deleteFollow'])->name('admin.stocks.follow.delete');
     
     Route::get('/admin/stocks/suggest', [Admin::class, 'adminSuggest'])->name('admin.stocks.suggest');

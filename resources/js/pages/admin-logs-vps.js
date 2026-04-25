@@ -1,3 +1,5 @@
+import '../stickyHeaderInset';
+
 const API_URL = window.LVPS_DATA_URL || '/admin/logsVPS/data';
 
 const elDate    = document.getElementById('lvps-date');
@@ -12,6 +14,7 @@ const elError   = document.getElementById('lvps-error');
 let currentPage = 1;
 let perPage     = 250;
 let debounceTimer;
+let stickyCloneController = null;
 
 function levelBadge(level) {
     const l = (level || '').toLowerCase();
@@ -42,6 +45,10 @@ function renderRows(rows) {
             <td class="lvps-td lvps-td--msg">${escHtml(r.message || '')}</td>
         </tr>`;
     }).join('');
+
+    if (stickyCloneController && typeof stickyCloneController.refresh === 'function') {
+        stickyCloneController.refresh();
+    }
 }
 
 function escHtml(str) {
@@ -139,6 +146,100 @@ async function loadLogs(page = 1) {
     }
 }
 
+function setupStickyHeaderClone() {
+    const table = document.querySelector('.lvps-table');
+    const container = document.querySelector('.lvps-table-wrap');
+    if (!table || !container) return null;
+
+    const thead = table.querySelector('thead');
+    if (!thead) return null;
+
+    function headerInset() {
+        return typeof window.getStickyHeaderInset === 'function'
+            ? window.getStickyHeaderInset()
+            : (window.innerWidth <= 768 ? 56 : 0);
+    }
+
+    let cloneWrap = null;
+    let cloneTable = null;
+
+    function createClone() {
+        if (cloneWrap) cloneWrap.remove();
+
+        cloneWrap = document.createElement('div');
+        cloneWrap.className = 'lvps-sticky-clone';
+
+        cloneTable = document.createElement('table');
+        cloneTable.className = 'lvps-table';
+        cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;margin:0;table-layout:auto;';
+
+        const cloneThead = thead.cloneNode(true);
+        cloneTable.appendChild(cloneThead);
+        cloneWrap.appendChild(cloneTable);
+        document.body.appendChild(cloneWrap);
+
+        syncWidths();
+        syncScroll();
+        cloneWrap.style.display = 'none';
+    }
+
+    function syncWidths() {
+        if (!cloneTable) return;
+        const origCells = thead.querySelectorAll('th');
+        const cloneCells = cloneTable.querySelectorAll('th');
+
+        let totalWidth = 0;
+        origCells.forEach((cell, i) => {
+            const w = cell.getBoundingClientRect().width;
+            totalWidth += w;
+            if (cloneCells[i]) {
+                cloneCells[i].style.boxSizing = 'border-box';
+                cloneCells[i].style.width = w + 'px';
+                cloneCells[i].style.minWidth = w + 'px';
+                cloneCells[i].style.maxWidth = w + 'px';
+            }
+        });
+        cloneTable.style.width = totalWidth + 'px';
+    }
+
+    function syncScroll() {
+        if (!cloneWrap || !cloneTable) return;
+        const containerRect = container.getBoundingClientRect();
+        const inset = headerInset();
+        cloneWrap.style.left = containerRect.left + 'px';
+        cloneWrap.style.width = containerRect.width + 'px';
+        cloneWrap.style.top = inset + 'px';
+        cloneTable.style.marginLeft = -container.scrollLeft + 24 + 'px';
+    }
+
+    function onScroll() {
+        if (!cloneWrap) return;
+        const tableRect = table.getBoundingClientRect();
+        const theadHeight = thead.offsetHeight;
+        const inset = headerInset();
+
+        if (tableRect.top < inset && tableRect.bottom > (inset + theadHeight)) {
+            cloneWrap.style.display = 'block';
+            syncScroll();
+        } else {
+            cloneWrap.style.display = 'none';
+        }
+    }
+
+    function refresh() {
+        createClone();
+        onScroll();
+    }
+
+    createClone();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', refresh);
+    container.addEventListener('scroll', syncScroll, { passive: true });
+    onScroll();
+
+    return { refresh };
+}
+
 elPager.addEventListener('click', e => {
     const btn = e.target.closest('[data-page]');
     if (!btn || btn.disabled) return;
@@ -155,6 +256,8 @@ elSearch.addEventListener('input', () => {
 });
 
 elRefresh.addEventListener('click', () => loadLogs(currentPage));
+
+stickyCloneController = setupStickyHeaderClone();
 
 // Initial load
 loadLogs(1);

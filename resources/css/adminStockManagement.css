@@ -788,32 +788,39 @@ tr.red {
 }
 
 /* Delete Follow Modal */
-#deleteFollowModal .modal-content {
+#deleteFollowModal .modal-content,
+#deleteFollowBatchModal .modal-content {
     width: min(92vw, 420px);
 }
 
-#deleteFollowModal .modal-content h2 {
+#deleteFollowModal .modal-content h2,
+#deleteFollowBatchModal .modal-content h2 {
     margin: 0 28px 14px 0;
     color: #a3c1e0;
 }
 
-#deleteFollowModal .delete-follow-modal__message {
+#deleteFollowModal .delete-follow-modal__message,
+#deleteFollowBatchModal .delete-follow-modal__message {
     margin-bottom: 14px;
     line-height: 1.5;
 }
 
-#deleteFollowModal .modal-actions {
+#deleteFollowModal .modal-actions,
+#deleteFollowBatchModal .modal-actions {
     justify-content: center;
 }
 
 #deleteFollowModal .btn-cancel,
-#deleteFollowModal .btn-delete-confirm {
+#deleteFollowModal .btn-delete-confirm,
+#deleteFollowBatchModal .btn-cancel,
+#deleteFollowBatchModal .btn-delete-confirm {
     min-width: 112px;
     border-radius: 10px;
     font-weight: 700;
 }
 
-#deleteFollowModal .btn-delete-confirm {
+#deleteFollowModal .btn-delete-confirm,
+#deleteFollowBatchModal .btn-delete-confirm {
     padding: 10px 24px;
     border: none;
     cursor: pointer;
@@ -821,7 +828,8 @@ tr.red {
     color: #fff;
 }
 
-#deleteFollowModal .btn-delete-confirm:hover {
+#deleteFollowModal .btn-delete-confirm:hover,
+#deleteFollowBatchModal .btn-delete-confirm:hover {
     background: #b91c1c;
 }
 
@@ -880,13 +888,16 @@ tr.red {
 }
 
 @media (max-width: 768px) {
-    #deleteFollowModal .modal-actions {
+    #deleteFollowModal .modal-actions,
+    #deleteFollowBatchModal .modal-actions {
         justify-content: center;
         flex-wrap: wrap;
     }
 
     #deleteFollowModal .btn-cancel,
-    #deleteFollowModal .btn-delete-confirm {
+    #deleteFollowModal .btn-delete-confirm,
+    #deleteFollowBatchModal .btn-cancel,
+    #deleteFollowBatchModal .btn-delete-confirm {
         flex: 1 1 150px;
     }
 }
@@ -1201,6 +1212,7 @@ th[data-sort-key].sort-desc .sort-icon {
 .admin-stocks-add-suggest-bar {
     margin: 1rem 0 1.5rem;
     display: flex;
+    gap: 10px;
     justify-content: flex-start;
     order: 2; /* Button sau filter */
 }
@@ -1233,6 +1245,16 @@ th[data-sort-key].sort-desc .sort-icon {
     background: linear-gradient(135deg, #7dd3fc, #a5b4fc);
     box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
     outline: none;
+}
+
+.btn-delete-all-follow {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    margin-left: auto;
+}
+
+.btn-delete-all-follow:not(:disabled):hover {
+    background: linear-gradient(135deg, #f87171, #ef4444);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
 }
 
 /* Delete icon in table */

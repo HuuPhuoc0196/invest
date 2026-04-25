@@ -185,6 +185,25 @@ window.runDeleteStock = function() {
     .then(function(result) {
         window.closeDeleteStockModal();
         if (result.ok && result.payload && result.payload.success) {
+            const pageData = window.__pageData || {};
+            if (Array.isArray(pageData.stocks)) {
+                const idx = pageData.stocks.findIndex(function(stock) {
+                    return String(stock.code || '').toUpperCase() === String(code).toUpperCase();
+                });
+                if (idx !== -1) {
+                    pageData.stocks.splice(idx, 1);
+                }
+            }
+
+            if (typeof window.clearFollowSelection === 'function') {
+                window.clearFollowSelection();
+            }
+            if (typeof window.searchStock === 'function') {
+                window.searchStock();
+            } else if (typeof window.renderStockTable === 'function' && Array.isArray(pageData.stocks)) {
+                window.renderStockTable(pageData.stocks);
+            }
+
             showDeleteStockNoticeModal('success', '✅ ' + (result.payload.message || ('Đã xoá mã cổ phiếu ' + code + '.')));
         } else {
             const msg = (result.payload && result.payload.message) ? result.payload.message : 'Không thể xoá mã cổ phiếu.';
@@ -219,11 +238,7 @@ function showDeleteStockNoticeModal(type, message) {
 window.closeDeleteStockNoticeModal = function() {
     const modal = document.getElementById('deleteStockNoticeModal');
     if (!modal) return;
-    const isSuccess = modal.classList.contains('is-success');
     modal.style.display = 'none';
-    if (isSuccess) {
-        window.location.reload();
-    }
 };
 
 window.confirmExportCsv = function() {

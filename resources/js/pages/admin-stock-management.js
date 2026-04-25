@@ -201,6 +201,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const { adminFollowedStockIds } = window.__pageData || {};
     let selectedStockIds = new Set();
 
+    function addFollowedByIds(stockIds) {
+        if (!Array.isArray(adminFollowedStockIds)) return;
+        const existing = new Set(adminFollowedStockIds.map(Number));
+        (stockIds || []).forEach((id) => {
+            const numId = Number(id);
+            if (!existing.has(numId)) {
+                adminFollowedStockIds.push(numId);
+                existing.add(numId);
+            }
+        });
+    }
+
+    function refreshCurrentView() {
+        selectedStockIds.clear();
+        renderStockTable(getFilteredStocks());
+    }
+
     // Override renderStockTable to include follow checkbox
     const originalRender = window.renderStockTable;
     const tbody = document.getElementById('stockTableBody');
@@ -370,6 +387,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
 
             if (result.success) {
+                addFollowedByIds(stockIds);
+                refreshCurrentView();
+                btn.textContent = '➕ Thêm theo dõi';
                 showAddFollowNotice('success', `✅ ${result.message}`);
             } else {
                 showAddFollowNotice('error', '❌ Có lỗi xảy ra. Vui lòng thử lại.');
@@ -400,11 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.closeAddFollowNoticeModal = function() {
         const modal = document.getElementById('addFollowNoticeModal');
         if (!modal) return;
-        const isSuccess = modal.classList.contains('is-success');
         modal.style.display = 'none';
-        if (isSuccess) {
-            window.location.reload();
-        }
     };
 
     function formatNumber(num) {

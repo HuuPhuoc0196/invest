@@ -9,7 +9,7 @@ h1 {
 }
 
 table {
-    min-width: 600px;
+    /* min-width: 600px; */
     border-collapse: separate; /* dùng separate thay collapse vì collapse phá sticky */
     border-spacing: 0;
     margin-top: 20px;
@@ -18,9 +18,9 @@ table {
     border-radius: 8px;
 }
 
-.table-wide {
+/* .table-wide {
     min-width: 900px;
-}
+} */
 
 .table-container {
     width: 100%;

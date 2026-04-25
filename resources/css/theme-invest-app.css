@@ -1577,7 +1577,7 @@ body.theme-invest-app .email-settings-page #notice-table-session {
     border-collapse: separate;
     border-spacing: 0;
     width: 100%;
-    min-width: 600px;
+    /* min-width: 600px; */
 }
 
 body.theme-invest-app .email-settings-page #notice-table-follow th,
@@ -2217,7 +2217,7 @@ body.theme-invest-app #addFollowNoticeModal .modal-content h2 {
 }
 
 body.theme-invest-app #addFollowNoticeModal .delete-stock-modal__message {
-    color: var(--inv-muted);
+    color: #c9d0db;
     line-height: 1.6;
 }
 

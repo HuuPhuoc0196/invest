@@ -61,6 +61,22 @@
     const getRisk = window.getRisk || function(l) { return { label: '', color: '' }; };
     const getRatingBadge = window.getRatingBadge || function() { return '-'; };
 
+    function removeStocksByIds(stockIds) {
+        const removeSet = new Set((stockIds || []).map(Number));
+        if (!removeSet.size || !Array.isArray(stocks)) return;
+
+        for (let i = stocks.length - 1; i >= 0; i--) {
+            if (removeSet.has(Number(stocks[i].id))) {
+                stocks.splice(i, 1);
+            }
+        }
+    }
+
+    function refreshCurrentView() {
+        clearSelection();
+        renderTable(getFilteredStocks());
+    }
+
     function renderTable(data) {
         dynamicSort(data);
         const tbody = document.getElementById('stockTableBody');
@@ -229,6 +245,8 @@
             closeDeleteSuggestBatchModal();
 
             if (result.success) {
+                removeStocksByIds(stockIds);
+                refreshCurrentView();
                 selectedStockIds.clear();
                 showNoticeModal('success', `✅ ${result.message}`);
             } else {
@@ -280,6 +298,8 @@
             closeDeleteSuggestModal();
 
             if (result.success) {
+                removeStocksByIds([stockId]);
+                refreshCurrentView();
                 showNoticeModal('success', '✅ Đã xóa khỏi danh sách gợi ý');
             } else {
                 showNoticeModal('error', '❌ Không thể xóa. Vui lòng thử lại.');
@@ -308,9 +328,6 @@
         const modal = document.getElementById('deleteSuggestNoticeModal');
         if (!modal) return;
         modal.style.display = 'none';
-        if (modal.classList.contains('is-success')) {
-            window.location.reload();
-        }
     };
 
     // ========== Filter Logic (matching admin/stocks) ==========

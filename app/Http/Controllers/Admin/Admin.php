@@ -380,12 +380,43 @@ class Admin extends Controller
             ->where('user_id', auth()->id())
             ->delete();
 
+        // Khi xoá theo dõi 1 mã thì xoá luôn gợi ý tương ứng của mã đó.
+        $deletedSuggest = AdminSuggest::where('stock_id', $stockId)->delete();
+
         CacheService::clearTableCache('admin_follow'); // clears admin_follow_stock_ids + admin_follow_stocks
+        CacheService::clearTableCache('admin_suggest');
 
         return response()->json([
             'success' => true,
             'message' => $deleted > 0 ? 'Đã xóa khỏi danh sách theo dõi' : 'Không tìm thấy',
-            'deleted' => $deleted
+            'deleted' => $deleted,
+            'deleted_suggest' => $deletedSuggest,
+        ]);
+    }
+
+    /**
+     * Xóa nhiều mã khỏi danh sách theo dõi (theo filter hiện tại)
+     * Đồng thời xóa gợi ý tương ứng cho các mã này.
+     */
+    public function deleteFollowBatch(Request $request)
+    {
+        $validated = $request->validate([
+            'stock_ids'   => ['required', 'array', 'min:1', 'max:500'],
+            'stock_ids.*' => ['required', 'integer', 'min:1'],
+        ]);
+        $stockIds = $validated['stock_ids'];
+
+        $deletedFollow = AdminFollow::whereIn('stock_id', $stockIds)->delete();
+        $deletedSuggest = AdminSuggest::whereIn('stock_id', $stockIds)->delete();
+
+        CacheService::clearTableCache('admin_follow');
+        CacheService::clearTableCache('admin_suggest');
+
+        return response()->json([
+            'success' => true,
+            'message' => "Đã xoá {$deletedFollow} bản ghi theo dõi và {$deletedSuggest} bản ghi gợi ý tương ứng",
+            'deleted_follow' => $deletedFollow,
+            'deleted_suggest' => $deletedSuggest,
         ]);
     }
 

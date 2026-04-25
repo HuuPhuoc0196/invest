@@ -91,14 +91,16 @@
 /* ── Table card ── */
 .lvps-table-wrap {
     padding: 0;
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     margin-bottom: 0;
 }
 
 /* ── Table ── */
 .lvps-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 0.82rem;
     background-color: #131313;
 }
@@ -119,6 +121,17 @@
 .lvps-th--time  { width: 148px; }
 .lvps-th--level { width: 82px;  text-align: center;}
 .lvps-th--msg   { text-align: center;}
+
+.lvps-sticky-clone {
+    position: fixed;
+    top: 0;
+    z-index: 1002;
+    overflow: hidden;
+}
+
+.lvps-sticky-clone th {
+    border-bottom: 1px solid var(--inv-border, rgba(255,255,255,0.08));
+}
 
 .lvps-table tbody tr {
     border-bottom: 1px solid var(--inv-border, rgba(255,255,255,0.05));
