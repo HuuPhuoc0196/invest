@@ -1,11 +1,13 @@
 // Moved from UserView.blade.php <script> block
 (function () {
-    const { baseUrl, stocks, userFollowedCodes, isLoggedIn } = window.__pageData || {};
+    const { baseUrl, stocks, adminSuggestedStocks, userFollowedCodes, isLoggedIn } = window.__pageData || {};
 
     // Sort state
     let currentSortKey = 'valuation';
     let currentSortDir = 'asc';
     let stockTableEnterAnimationPending = true;
+    let selectedSuggestedCodes = new Set();
+    let suggestStickyCleanup = null;
 
     function getSiteHeaderTopOffset() {
         return typeof window.getStickyHeaderInset === 'function'
@@ -24,6 +26,19 @@
         renderTable(getFilteredStocks());
     }
     window.sortByColumn = sortByColumn;
+
+    function normalizeCode(code) {
+        return String(code || '').toUpperCase();
+    }
+
+    function addFollowedCodes(codes) {
+        (codes || []).forEach(function(code) {
+            const norm = normalizeCode(code);
+            if (!userFollowedCodes.includes(norm)) {
+                userFollowedCodes.push(norm);
+            }
+        });
+    }
 
     function updateSortIcons() {
         document.querySelectorAll('th[data-sort-key]').forEach(th => {
@@ -63,6 +78,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         updateSortIcons();
         renderTable(stocks);
+        bindHomeSuggestModalEvents();
 
         // Click vào ô Mã cổ phiếu = toggle checkbox
         document.getElementById('stockTableBody').addEventListener('click', function(e) {
@@ -356,13 +372,295 @@
         document.getElementById('homeNotifyBackdrop').addEventListener('click', closeModal);
     }
 
-    function submitAddFollowBatch() {
-        const checked = document.querySelectorAll('#stockTableBody .follow-checkbox:checked:not(:disabled)');
-        const codes = Array.from(checked).map(el => el.getAttribute('data-code'));
-        if (codes.length === 0) return;
+    function renderSuggestTable() {
+        const tbody = document.getElementById('homeSuggestTableBody');
+        if (!tbody) return;
 
-        const btn = document.getElementById('btnAddFollow');
-        btn.disabled = true;
+        selectedSuggestedCodes.clear();
+        const suggested = Array.isArray(adminSuggestedStocks) ? adminSuggestedStocks.slice() : [];
+        dynamicSort(suggested);
+        tbody.innerHTML = '';
+
+        if (suggested.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" class="lvps-empty">Hiện chưa có mã được admin gợi ý.</td></tr>';
+            updateSuggestAddButtonState();
+            return;
+        }
+
+        suggested.forEach(stock => {
+            const buyPrice = parseFloat(stock.recommended_buy_price) || 0;
+            const currentPrice = parseFloat(stock.current_price) || 0;
+            const sellPrice = stock.recommended_sell_price ? Number(stock.recommended_sell_price).toLocaleString('vi-VN') : 'N/A';
+            const volume = stock.volume ? Number(stock.volume).toLocaleString('vi-VN') : 'N/A';
+            const valuation = buyPrice !== 0 ? ((currentPrice / buyPrice) * 100 - 100).toFixed(2) : 0;
+            const valuationColor = valuation > 0 ? 'green' : (valuation < 0 ? 'red' : 'yellow');
+            const sign = valuation > 0 ? '+' : '';
+            const isFollowed = userFollowedCodes.includes(normalizeCode(stock.code));
+            const checkboxAttrs = isFollowed ? ' checked disabled' : '';
+
+            const row = document.createElement('tr');
+            row.className = getRowClass(buyPrice, currentPrice);
+            row.innerHTML = `
+                <td class="col-select"><label class="cell-label-select"><input type="checkbox" class="suggest-follow-checkbox" data-code="${stock.code}"${checkboxAttrs}></label></td>
+                <td class="col-code-sticky td-code-toggle col-code-color-suggest">${stock.code}</td>
+                <td>${[30, 100].includes(Number(stock.stocks_vn)) ? Number(stock.stocks_vn) : 'ALL'}</td>
+                <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
+                <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
+                <td>${sellPrice}</td>
+                <td style="color: ${getRisk(stock.risk_level).color}">${getRisk(stock.risk_level).label}</td>
+                <td>${getRatingBadge(stock.rating_stocks)}</td>
+                <td>${volume}</td>
+                <td style="color: ${valuationColor}; font-weight: bold;">${sign}${valuation}%</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        tbody.querySelectorAll('.suggest-follow-checkbox:not(:disabled)').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const code = normalizeCode(this.dataset.code);
+                if (this.checked) selectedSuggestedCodes.add(code);
+                else selectedSuggestedCodes.delete(code);
+                updateSuggestAddButtonState();
+                updateSuggestSelectAllState();
+            });
+        });
+
+        tbody.querySelectorAll('.td-code-toggle').forEach(td => {
+            td.addEventListener('click', function(e) {
+                e.preventDefault();
+                const row = td.closest('tr');
+                const cb = row.querySelector('.suggest-follow-checkbox:not(:disabled)');
+                if (cb) {
+                    cb.checked = !cb.checked;
+                    cb.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+        updateSuggestAddButtonState();
+        updateSuggestSelectAllState();
+    }
+
+    function updateSuggestAddButtonState() {
+        const btn = document.getElementById('btnHomeSuggestAdd');
+        if (!btn) return;
+        btn.disabled = !isLoggedIn || selectedSuggestedCodes.size === 0;
+    }
+
+    function updateSuggestSelectAllState() {
+        const th = document.getElementById('homeSuggestThSelectAll');
+        if (!th) return;
+        const all = Array.from(document.querySelectorAll('#homeSuggestTableBody .suggest-follow-checkbox:not(:disabled)'));
+        const checked = all.filter(cb => cb.checked).length;
+        const allChecked = all.length > 0 && checked === all.length;
+        const someChecked = checked > 0 && checked < all.length;
+        th.classList.toggle('th-select-all--active', allChecked);
+        th.classList.toggle('th-select-all--partial', someChecked);
+        th.title = allChecked ? 'Bỏ chọn tất cả' : 'Chọn tất cả';
+    }
+
+    function toggleSuggestSelectAll() {
+        const all = Array.from(document.querySelectorAll('#homeSuggestTableBody .suggest-follow-checkbox:not(:disabled)'));
+        if (!all.length) return;
+        const allChecked = all.every(cb => cb.checked);
+        all.forEach(cb => {
+            cb.checked = !allChecked;
+            const code = normalizeCode(cb.dataset.code);
+            if (cb.checked) selectedSuggestedCodes.add(code);
+            else selectedSuggestedCodes.delete(code);
+        });
+        updateSuggestAddButtonState();
+        updateSuggestSelectAllState();
+    }
+
+    function openSuggestModal() {
+        const modal = document.getElementById('home-suggest-modal');
+        if (!modal) return;
+
+        if (!isLoggedIn) {
+            showNotifyModal('Vui lòng đăng nhập để sử dụng tính năng này.', 'error');
+            return;
+        }
+
+        renderSuggestTable();
+        modal.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(function() {
+            if (typeof suggestStickyCleanup === 'function') {
+                suggestStickyCleanup();
+            }
+            suggestStickyCleanup = setupSuggestStickyHeader();
+        });
+    }
+
+    function closeSuggestModal() {
+        const modal = document.getElementById('home-suggest-modal');
+        if (!modal) return;
+        modal.setAttribute('aria-hidden', 'true');
+        if (typeof suggestStickyCleanup === 'function') {
+            suggestStickyCleanup();
+            suggestStickyCleanup = null;
+        }
+    }
+
+    function setupSuggestStickyHeader() {
+        const modal = document.getElementById('home-suggest-modal');
+        const table = document.getElementById('home-suggest-table');
+        const container = document.querySelector('.home-suggest-table-wrap');
+        const scrollHost = document.querySelector('.home-suggest-modal__body');
+        if (!modal || !table || !container || !scrollHost) return null;
+
+        const thead = table.querySelector('thead');
+        if (!thead) return null;
+
+        let cloneWrap = null;
+        let cloneTable = null;
+
+        function createClone() {
+            if (cloneWrap) cloneWrap.remove();
+
+            cloneWrap = document.createElement('div');
+            cloneWrap.className = 'home-suggest-sticky-clone';
+
+            cloneTable = document.createElement('table');
+            cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;margin:0;background:transparent;';
+            cloneTable.appendChild(thead.cloneNode(true));
+
+            cloneWrap.appendChild(cloneTable);
+            document.body.appendChild(cloneWrap);
+
+            syncWidths();
+            syncScroll();
+            cloneWrap.style.display = 'none';
+        }
+
+        function syncWidths() {
+            if (!cloneTable) return;
+            const origCells = thead.querySelectorAll('th');
+            const cloneCells = cloneTable.querySelectorAll('th');
+
+            let totalWidth = 0;
+            origCells.forEach((cell, i) => {
+                const w = cell.getBoundingClientRect().width;
+                totalWidth += w;
+                if (cloneCells[i]) {
+                    cloneCells[i].style.boxSizing = 'border-box';
+                    cloneCells[i].style.width = w + 'px';
+                    cloneCells[i].style.minWidth = w + 'px';
+                    cloneCells[i].style.maxWidth = w + 'px';
+                }
+            });
+            cloneTable.style.width = totalWidth + 'px';
+        }
+
+        function syncScroll() {
+            if (!cloneWrap || !cloneTable) return;
+            const containerRect = container.getBoundingClientRect();
+            const hostRect = scrollHost.getBoundingClientRect();
+            cloneWrap.style.left = containerRect.left + 'px';
+            cloneWrap.style.width = containerRect.width + 'px';
+            cloneWrap.style.top = hostRect.top + 'px';
+            cloneTable.style.marginLeft = -container.scrollLeft + 'px';
+        }
+
+        function onScroll() {
+            if (!cloneWrap || modal.getAttribute('aria-hidden') !== 'false') return;
+            const tableRect = table.getBoundingClientRect();
+            const hostRect = scrollHost.getBoundingClientRect();
+            const theadHeight = thead.offsetHeight;
+            const stickyTop = hostRect.top;
+
+            if (tableRect.top < stickyTop && tableRect.bottom > (stickyTop + theadHeight)) {
+                cloneWrap.style.display = 'block';
+                syncScroll();
+            } else {
+                cloneWrap.style.display = 'none';
+            }
+        }
+
+        createClone();
+        onScroll();
+
+        scrollHost.addEventListener('scroll', onScroll, { passive: true });
+        container.addEventListener('scroll', syncScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+
+        return function cleanup() {
+            scrollHost.removeEventListener('scroll', onScroll);
+            container.removeEventListener('scroll', syncScroll);
+            window.removeEventListener('resize', onScroll);
+            if (cloneWrap) cloneWrap.remove();
+        };
+    }
+
+    function bindHomeSuggestModalEvents() {
+        const trigger = document.getElementById('btnHomeSuggestTrigger');
+        const close = document.getElementById('btnHomeSuggestClose');
+        const closeX = document.getElementById('homeSuggestCloseX');
+        const backdrop = document.getElementById('homeSuggestBackdrop');
+        const addBtn = document.getElementById('btnHomeSuggestAdd');
+        const thSelectAll = document.getElementById('homeSuggestThSelectAll');
+        const suggestContainer = document.querySelector('.home-suggest-table-wrap');
+        let isDown = false;
+        let startX = 0;
+        let scrollLeft = 0;
+
+        if (trigger) trigger.addEventListener('click', openSuggestModal);
+        if (close) close.addEventListener('click', closeSuggestModal);
+        if (closeX) closeX.addEventListener('click', closeSuggestModal);
+        if (backdrop) backdrop.addEventListener('click', closeSuggestModal);
+        if (thSelectAll) thSelectAll.addEventListener('click', toggleSuggestSelectAll);
+        if (suggestContainer) {
+            suggestContainer.addEventListener('mousedown', function(e) {
+                if (e.target.closest('a, button, input, select')) return;
+                isDown = true;
+                suggestContainer.style.cursor = 'grabbing';
+                startX = e.pageX - suggestContainer.offsetLeft;
+                scrollLeft = suggestContainer.scrollLeft;
+                e.preventDefault();
+            });
+            suggestContainer.addEventListener('mouseleave', function() {
+                isDown = false;
+                suggestContainer.style.cursor = 'grab';
+            });
+            suggestContainer.addEventListener('mouseup', function() {
+                isDown = false;
+                suggestContainer.style.cursor = 'grab';
+            });
+            suggestContainer.addEventListener('mousemove', function(e) {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - suggestContainer.offsetLeft;
+                const walk = (x - startX) * 2;
+                suggestContainer.scrollLeft = scrollLeft - walk;
+            });
+        }
+        if (addBtn) {
+            addBtn.addEventListener('click', function() {
+                const codes = Array.from(selectedSuggestedCodes);
+                if (!codes.length) return;
+                submitFollowCodes(codes, function() {
+                    addFollowedCodes(codes);
+                    renderTable(getFilteredStocks());
+                    renderSuggestTable();
+                }, {
+                    button: addBtn,
+                    loadingText: 'Đang thêm theo dõi...',
+                    defaultText: '➕ Thêm theo dõi'
+                });
+            });
+        }
+    }
+
+    function submitFollowCodes(codes, onSuccess, options) {
+        const opts = options || {};
+        const actionBtn = opts.button || null;
+        const loadingText = opts.loadingText || 'Đang thêm theo dõi...';
+        const defaultText = opts.defaultText || '➕ Thêm theo dõi';
+
+        if (actionBtn) {
+            actionBtn.disabled = true;
+            actionBtn.textContent = loadingText;
+        }
 
         $.ajax({
             url: baseUrl + '/user/addFollowBatch',
@@ -375,17 +673,43 @@
             data: JSON.stringify({ codes: codes }),
             success: function (res) {
                 if (res.status === 'success') {
-                    showNotifyModal(res.message, 'success', function () { location.reload(); });
+                    if (actionBtn) actionBtn.textContent = defaultText;
+                    if (typeof onSuccess === 'function') onSuccess();
+                    showNotifyModal(res.message, 'success');
                 } else {
+                    if (actionBtn) actionBtn.textContent = defaultText;
                     showNotifyModal(res.message || 'Có lỗi xảy ra.', 'error', function () {
                         updateAddFollowButtonState();
+                        updateSuggestAddButtonState();
                     });
                 }
             },
             error: function (xhr) {
+                if (actionBtn) actionBtn.textContent = defaultText;
                 const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Lỗi kết nối.';
-                showNotifyModal(msg, 'error', function () { updateAddFollowButtonState(); });
+                showNotifyModal(msg, 'error', function () {
+                    updateAddFollowButtonState();
+                    updateSuggestAddButtonState();
+                });
             }
+        });
+    }
+
+    function submitAddFollowBatch() {
+        const checked = document.querySelectorAll('#stockTableBody .follow-checkbox:checked:not(:disabled)');
+        const codes = Array.from(checked).map(el => el.getAttribute('data-code'));
+        if (codes.length === 0) return;
+
+        const btn = document.getElementById('btnAddFollow');
+        btn.disabled = true;
+        submitFollowCodes(codes.map(normalizeCode), function() {
+            addFollowedCodes(codes);
+            renderTable(getFilteredStocks());
+            updateAddFollowButtonState();
+        }, {
+            button: btn,
+            loadingText: 'Đang thêm theo dõi...',
+            defaultText: '➕ Thêm theo dõi'
         });
     }
     window.submitAddFollowBatch = submitAddFollowBatch;

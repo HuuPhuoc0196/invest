@@ -31,6 +31,10 @@
 @endsection
 
 @section('user-body-content')
+    <div class="home-suggest-trigger-bar">
+        <button type="button" class="btn-filter btn-home-suggest-trigger" id="btnHomeSuggestTrigger">💡 Gợi ý theo dõi</button>
+    </div>
+
     @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu', 'level' => 1])
 
     <!-- Filter Panel -->
@@ -123,6 +127,41 @@
         </table>
     </div>
 
+    <div id="home-suggest-modal" class="home-suggest-modal" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="home-suggest-modal__backdrop" id="homeSuggestBackdrop"></div>
+        <div class="home-suggest-modal__box">
+            <div class="home-suggest-modal__header">
+                <h2 class="home-suggest-modal__title">Danh sách gợi ý theo dõi</h2>
+                <button type="button" class="home-suggest-modal__close-x" id="homeSuggestCloseX" aria-label="Đóng">&times;</button>
+            </div>
+            <div class="home-suggest-modal__body">
+                <div class="table-container home-suggest-table-wrap">
+                    <table id="home-suggest-table" class="home-suggest-table--no-margin">
+                        <thead class="sticky-header">
+                            <tr>
+                                <th class="col-select th-select-all" id="homeSuggestThSelectAll" title="Chọn tất cả">Chọn</th>
+                                <th class="col-code-sticky">Mã CK</th>
+                                <th>Thuộc VN</th>
+                                <th>Giá mua tốt</th>
+                                <th>Giá hiện tại</th>
+                                <th>Giá bán tốt</th>
+                                <th>Trạng thái</th>
+                                <th>Điểm</th>
+                                <th>Khối lượng</th>
+                                <th>% Định giá</th>
+                            </tr>
+                        </thead>
+                        <tbody id="homeSuggestTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="home-suggest-modal__footer">
+                <button type="button" class="btn-filter btn-add-follow-home" id="btnHomeSuggestAdd" disabled>➕ Thêm theo dõi</button>
+                <button type="button" class="btn-filter-reset" id="btnHomeSuggestClose">Đóng</button>
+            </div>
+        </div>
+    </div>
+
     {{-- Notify modal --}}
     <div id="home-notify-modal" class="home-notify-modal" aria-hidden="true" role="dialog" aria-modal="true">
         <div class="home-notify-modal__backdrop" id="homeNotifyBackdrop"></div>
@@ -140,6 +179,7 @@
         window.__pageData = {
             baseUrl: "{{ url('') }}",
             stocks: @json($stocks),
+            adminSuggestedStocks: @json($adminSuggestedStocks ?? []),
             userFollowedCodes: @json($userFollowedCodes ?? []),
             isLoggedIn: {{ auth()->check() ? 'true' : 'false' }}
         };

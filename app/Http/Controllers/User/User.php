@@ -14,6 +14,7 @@ use App\Models\UserCashFollow;
 use App\Models\UserFollow;
 use App\Models\UserPortfolio;
 use App\Models\UserPortfolioSell;
+use App\Models\AdminSuggest;
 use Illuminate\Database\QueryException;
 use App\Http\Requests\UpdateInfoProfileRequest;
 use App\Http\Requests\ChangePasswordRequest;
@@ -41,6 +42,11 @@ class User extends Controller
         }
 
         $stocks = Stock::getAllStocks();
+        $adminSuggestedStocks = AdminSuggest::query()
+            ->join('stocks', 'admin_suggest.stock_id', '=', 'stocks.id')
+            ->select('stocks.*')
+            ->distinct()
+            ->get();
         if (auth()->check()) {
             $userId            = auth()->id();
             $userPortfolios    = UserPortfolio::getProfileUser($userId);
@@ -50,7 +56,7 @@ class User extends Controller
             $userPortfolios    = [];
             $userFollowedCodes = [];
         }
-        return view('User.UserView', compact('stocks', 'userPortfolios', 'userFollowedCodes'));
+        return view('User.UserView', compact('stocks', 'userPortfolios', 'userFollowedCodes', 'adminSuggestedStocks'));
     }
 
     public function investmentPerformance()
