@@ -115,7 +115,7 @@ GET http://localhost/invest/public/__debug/test-log-critical
 - Context:
   ```json
   {
-    "server": "http://163.61.182.174",
+    "server": "http://180.93.42.13",
     "service": "Stock Price Sync",
     "downtime": "15 minutes",
     "impact": "Không thể cập nhật giá cổ phiếu realtime",

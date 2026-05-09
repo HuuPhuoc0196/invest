@@ -35,7 +35,7 @@ return [
     | URL service sync (get risk, price, logs...). Cấu hình qua SYNC_SERVICE_URL trong .env
     */
     'sync' => [
-        'base_url' => env('SYNC_SERVICE_URL', 'http://163.61.182.174'),
+        'base_url' => env('SYNC_SERVICE_URL', 'http://180.93.42.13'),
         /** Path trên VPS (GET) — browser không gọi trực tiếp; Laravel proxy qua runSyncUpdateStock */
         'run_update_stock_path' => env('SYNC_RUN_UPDATE_STOCK_PATH', '/run-sync-update-stocks'),
     ],

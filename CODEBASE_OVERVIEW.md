@@ -45,7 +45,7 @@
 ### 3. Sync / API (dùng cho cron hoặc gọi ngoài)
 
 - **`/api/admin/collect`:** Cập nhật giá hiện tại tất cả mã (`getNewPrice` → gọi API lấy giá)
-- **`/api/admin/collectRisk`:** Cập nhật `risk_level` tất cả mã (`getNewRisk` → gọi `http://163.61.182.174/getRiskFromHTML`)
+- **`/api/admin/collectRisk`:** Cập nhật `risk_level` tất cả mã (`getNewRisk` → gọi `http://180.93.42.13/getRiskFromHTML`)
 - **`/api/admin/getSuggestInvestment`:** Gửi email gợi ý đầu tư theo giá mua đề xuất
 - **Email:** Risk thay đổi, VN-Index, cổ phiếu volume 1tr/10tr, lỗi hệ thống, follow hằng ngày… (đích mặc định: `EmailService` → `lehuuphuoc0196@gmail.com`)
 - **Khác:** `deleteLogs`, `sendEmailRisk`, `sendEmailStocks`, `sendEmailStocksFollow`, `followStocksEveryDay`, `sendEmailVnindex`, `sendEmailError`
