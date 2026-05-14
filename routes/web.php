@@ -202,6 +202,18 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/logsVPS', [Sync::class, 'getLogsVPS'])->name('admin.logsVPS');
     Route::get('/admin/logsVPS/data', [Sync::class, 'getLogsVPSData'])->name('admin.logsVPS.data');
      Route::match(['get', 'post'], '/admin/uploadFile', [Sync::class, 'uploadFile'])->name('uploadFile');
+
+    // Cache management
+    Route::post('/admin/cache/clear-all', [Admin::class, 'clearAllCache'])->name('admin.cache.clearAll');
+
+    // Crontab management (proxy tới VPS)
+    Route::get('/admin/crontab', [Sync::class, 'getCrontab'])->name('admin.crontab');
+    Route::get('/admin/crontab/list', [Sync::class, 'getCrontabList'])->name('admin.crontab.list');
+    Route::post('/admin/crontab/add', [Sync::class, 'addCrontab'])->name('admin.crontab.add');
+    Route::put('/admin/crontab/update/{lineIdx}', [Sync::class, 'updateCrontab'])->name('admin.crontab.update');
+    Route::delete('/admin/crontab/delete/{lineIdx}', [Sync::class, 'deleteCrontab'])->name('admin.crontab.delete');
+    Route::post('/admin/crontab/toggle/{lineIdx}', [Sync::class, 'toggleCrontab'])->name('admin.crontab.toggle');
+    Route::post('/admin/crontab/run/{lineIdx}', [Sync::class, 'runCrontab'])->name('admin.crontab.run');
 });
 
 // User routes (các trang cần đăng nhập, role user)

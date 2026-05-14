@@ -38,6 +38,8 @@ return [
         'base_url' => env('SYNC_SERVICE_URL', 'http://180.93.42.13'),
         /** Path trên VPS (GET) — browser không gọi trực tiếp; Laravel proxy qua runSyncUpdateStock */
         'run_update_stock_path' => env('SYNC_RUN_UPDATE_STOCK_PATH', '/run-sync-update-stocks'),
+        /** API key (X-API-Key header) cho các endpoint /run-*, /crontab/add|update|delete|toggle|run */
+        'api_key' => env('SYNC_API_KEY', ''),
     ],
 
     /*

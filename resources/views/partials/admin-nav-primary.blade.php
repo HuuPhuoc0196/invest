@@ -6,6 +6,7 @@
                 <a href="{{ route('admin.stocks') }}" @class(['button-link', 'user-nav-link--active' => request()->is('admin/stocks', 'admin/stocks/*') || request()->routeIs('admin.update', 'admin.delete')])>📊 Quản lý cổ phiếu</a>
                 <a href="{{ route('admin.users') }}" @class(['button-link', 'user-nav-link--active' => request()->is('admin/users', 'admin/users/*') || request()->routeIs('admin.users', 'admin.users.update', 'admin.users.delete')])>👥 Quản lý user</a>
                 <a href="{{ url('/admin/infoProfile') }}" @class(['button-link', 'user-nav-link--active' => request()->is('admin/infoProfile*') || request()->is('admin/updateInfoProfile*') || request()->routeIs('admin.changePassword')])>👤 Thông tin cá nhân</a>
+                <a href="{{ route('admin.crontab') }}" @class(['button-link', 'user-nav-link--active' => request()->routeIs('admin.crontab', 'admin.crontab.*')])>⏰ Crontab</a>
                 <a href="{{ route('admin.logs') }}" @class(['button-link', 'user-nav-link--active' => request()->routeIs('admin.logs', 'admin.logsVPS', 'admin.logsVPS.data')])>📋 Logs</a>
             </div>
         </div>

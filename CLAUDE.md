@@ -429,6 +429,13 @@ stocks (1) ──────── (many) user_follows
 | GET/POST | `/admin/uploadFile` | `Sync@uploadFile` | Upload file |
 | GET/POST | `/admin/updateRiskForCode` | `Sync@updateRiskForCode` | Update risk 1 mã |
 | POST | `/admin/sync/run-update-stock/{code}` | `Sync@runSyncUpdateStock` | Sync update 1 stock |
+| GET | `/admin/crontab` | `Sync@getCrontab` | Trang quản lý crontab VPS |
+| GET | `/admin/crontab/list` | `Sync@getCrontabList` | Lấy danh sách cron jobs từ VPS |
+| POST | `/admin/crontab/add` | `Sync@addCrontab` | Thêm cron job mới |
+| PUT | `/admin/crontab/update/{lineIdx}` | `Sync@updateCrontab` | Sửa schedule/endpoint |
+| DELETE | `/admin/crontab/delete/{lineIdx}` | `Sync@deleteCrontab` | Xóa cron job |
+| POST | `/admin/crontab/toggle/{lineIdx}` | `Sync@toggleCrontab` | Bật/tắt cron job |
+| POST | `/admin/crontab/run/{lineIdx}` | `Sync@runCrontab` | Chạy ngay cron job |
 
 ### User Routes (middleware: `auth` + `user`)
 | Method | URL | Controller Action | Mô tả |
@@ -529,6 +536,7 @@ stocks (1) ──────── (many) user_follows
 - **User Management:** Xem, sửa, xóa user accounts.
 - **Log Viewer:** Dùng `opcodesio/log-viewer` để xem `storage/logs/laravel_YYYYMMDD.log`.
 - **Logs VPS:** Xem logs từ VPS bên ngoài qua `SYNC_SERVICE_URL`.
+- **Crontab Management:** Xem, thêm, sửa, xóa, bật/tắt, chạy ngay các cron job trên VPS — proxy qua `Sync.php` tới VPS API (xem mục 8.9).
 
 ---
 
@@ -599,6 +607,43 @@ Tất cả sync jobs được gọi qua API (cron server hoặc manual):
 | `/admin/sync/run-update-stock/{code}` (web) | Sync update 1 stock từ service ngoài |
 
 **External service:** `SYNC_SERVICE_URL` trong `.env` – URL của service bên ngoài cung cấp giá và risk level.
+
+---
+
+### 8.9 Crontab Management
+**Files:** [app/Http/Controllers/Sync/Sync.php](app/Http/Controllers/Sync/Sync.php), [resources/views/Admin/AdminCrontab.blade.php](resources/views/Admin/AdminCrontab.blade.php), [resources/js/pages/admin-crontab.js](resources/js/pages/admin-crontab.js)
+
+**Mục đích:** Admin quản lý cron jobs trên VPS (`SYNC_SERVICE_URL`) trực tiếp từ trình duyệt, không cần SSH.
+
+**Kiến trúc proxy:**
+```
+Admin browser → Laravel /admin/crontab/* → Sync.php (proxy) → VPS FastAPI /crontab/* (X-API-Key)
+```
+
+**VPS API (base: `SYNC_SERVICE_URL`):**
+
+| Endpoint VPS | Auth | Mô tả |
+|---|---|---|
+| `GET /crontab/list` | Không cần | Lấy tất cả entries |
+| `POST /crontab/add` | X-API-Key | Thêm entry mới |
+| `PUT /crontab/update/{line_idx}` | X-API-Key | Sửa schedule/endpoint |
+| `DELETE /crontab/delete/{line_idx}` | X-API-Key | Xóa entry |
+| `POST /crontab/toggle/{line_idx}` | X-API-Key | Bật/tắt |
+| `POST /crontab/run/{line_idx}` | X-API-Key | Chạy ngay |
+
+**Quy tắc quan trọng:**
+- VPS có 2 loại entries: `is_stocks_api=true` (API — có thể sửa/xóa/chạy) và `is_stocks_api=false` (System — chỉ bật/tắt)
+- Sau mỗi delete, `line_idx` của các entry thay đổi → frontend luôn re-fetch list sau mỗi mutation
+- `SYNC_API_KEY` trong `.env` là API key gửi header `X-API-Key` khi gọi VPS (add/update/delete/toggle/run)
+
+**Config:**
+```php
+// config/services.php
+'sync' => [
+    'base_url' => env('SYNC_SERVICE_URL'),
+    'api_key'  => env('SYNC_API_KEY', ''),   // dùng cho crontab + run-sync endpoints
+]
+```
 
 ---
 
@@ -747,6 +792,7 @@ npm run build  # Build tối ưu → public/build/ (production)
 | `MAIL_NOTIFICATION_TO` | `admin@example.com` | Email nhận thông báo hệ thống |
 | `CRON_API_SECRET` | – | **Bắt buộc** – Secret cho cron/VPS gọi `/api/admin/*` |
 | `SYNC_SERVICE_URL` | `http://localhost` | URL service bên ngoài cung cấp giá/risk |
+| `SYNC_API_KEY` | – | API key gửi header `X-API-Key` khi gọi VPS (crontab add/update/delete/toggle/run, run-sync) |
 
 ### Config files quan trọng
 

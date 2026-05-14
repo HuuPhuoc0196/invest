@@ -225,4 +225,161 @@ class Sync extends Controller
         }
         return view('Admin.AdminUploadFile');
     }
+
+    // -------------------------------------------------------------------------
+    // Crontab management (proxy tới VPS)
+    // -------------------------------------------------------------------------
+
+    private function vpsBaseUrl(): string
+    {
+        return rtrim((string) config('services.sync.base_url', ''), '/');
+    }
+
+    private function vpsHttp(): \Illuminate\Http\Client\PendingRequest
+    {
+        return Http::timeout(30)->withHeaders(['X-API-Key' => (string) config('services.sync.api_key', '')]);
+    }
+
+    public function getCrontab()
+    {
+        return view('Admin.AdminCrontab');
+    }
+
+    public function getCrontabList()
+    {
+        $baseUrl = $this->vpsBaseUrl();
+        if ($baseUrl === '') {
+            return response()->json(['error' => 'Chưa cấu hình SYNC_SERVICE_URL.'], 503);
+        }
+        try {
+            $response = Http::timeout(30)->get($baseUrl . '/crontab/list');
+        } catch (ConnectionException $e) {
+            Log::error('getCrontabList connection: ' . $e->getMessage());
+            return response()->json(['error' => 'Không kết nối được tới VPS.'], 502);
+        } catch (\Throwable $e) {
+            Log::error('getCrontabList: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi khi lấy danh sách crontab.'], 502);
+        }
+        if (!$response->successful()) {
+            return response()->json(['error' => 'VPS trả HTTP ' . $response->status()], $response->status());
+        }
+        return response()->json($response->json());
+    }
+
+    public function addCrontab(Request $request)
+    {
+        $baseUrl = $this->vpsBaseUrl();
+        if ($baseUrl === '') {
+            return response()->json(['error' => 'Chưa cấu hình SYNC_SERVICE_URL.'], 503);
+        }
+        $data = $request->only(['schedule', 'endpoint']);
+        try {
+            $response = $this->vpsHttp()->post($baseUrl . '/crontab/add', $data);
+        } catch (ConnectionException $e) {
+            Log::error('addCrontab connection: ' . $e->getMessage());
+            return response()->json(['error' => 'Không kết nối được tới VPS.'], 502);
+        } catch (\Throwable $e) {
+            Log::error('addCrontab: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi khi thêm crontab.'], 502);
+        }
+        $payload = $response->json();
+        if (!$response->successful()) {
+            $msg = is_array($payload) && !empty($payload['message']) ? (string) $payload['message'] : 'VPS trả HTTP ' . $response->status();
+            return response()->json(['error' => $msg], $response->status() >= 500 ? 502 : $response->status());
+        }
+        return response()->json($payload);
+    }
+
+    public function updateCrontab(Request $request, int $lineIdx)
+    {
+        $baseUrl = $this->vpsBaseUrl();
+        if ($baseUrl === '') {
+            return response()->json(['error' => 'Chưa cấu hình SYNC_SERVICE_URL.'], 503);
+        }
+        $data = $request->only(['schedule', 'endpoint']);
+        try {
+            $response = $this->vpsHttp()->put($baseUrl . '/crontab/update/' . $lineIdx, $data);
+        } catch (ConnectionException $e) {
+            Log::error('updateCrontab connection: ' . $e->getMessage());
+            return response()->json(['error' => 'Không kết nối được tới VPS.'], 502);
+        } catch (\Throwable $e) {
+            Log::error('updateCrontab: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi khi cập nhật crontab.'], 502);
+        }
+        $payload = $response->json();
+        if (!$response->successful()) {
+            $msg = is_array($payload) && !empty($payload['message']) ? (string) $payload['message'] : 'VPS trả HTTP ' . $response->status();
+            return response()->json(['error' => $msg], $response->status() >= 500 ? 502 : $response->status());
+        }
+        return response()->json($payload);
+    }
+
+    public function deleteCrontab(int $lineIdx)
+    {
+        $baseUrl = $this->vpsBaseUrl();
+        if ($baseUrl === '') {
+            return response()->json(['error' => 'Chưa cấu hình SYNC_SERVICE_URL.'], 503);
+        }
+        try {
+            $response = $this->vpsHttp()->delete($baseUrl . '/crontab/delete/' . $lineIdx);
+        } catch (ConnectionException $e) {
+            Log::error('deleteCrontab connection: ' . $e->getMessage());
+            return response()->json(['error' => 'Không kết nối được tới VPS.'], 502);
+        } catch (\Throwable $e) {
+            Log::error('deleteCrontab: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi khi xóa crontab.'], 502);
+        }
+        $payload = $response->json();
+        if (!$response->successful()) {
+            $msg = is_array($payload) && !empty($payload['message']) ? (string) $payload['message'] : 'VPS trả HTTP ' . $response->status();
+            return response()->json(['error' => $msg], $response->status() >= 500 ? 502 : $response->status());
+        }
+        return response()->json($payload);
+    }
+
+    public function toggleCrontab(int $lineIdx)
+    {
+        $baseUrl = $this->vpsBaseUrl();
+        if ($baseUrl === '') {
+            return response()->json(['error' => 'Chưa cấu hình SYNC_SERVICE_URL.'], 503);
+        }
+        try {
+            $response = $this->vpsHttp()->post($baseUrl . '/crontab/toggle/' . $lineIdx);
+        } catch (ConnectionException $e) {
+            Log::error('toggleCrontab connection: ' . $e->getMessage());
+            return response()->json(['error' => 'Không kết nối được tới VPS.'], 502);
+        } catch (\Throwable $e) {
+            Log::error('toggleCrontab: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi khi toggle crontab.'], 502);
+        }
+        $payload = $response->json();
+        if (!$response->successful()) {
+            $msg = is_array($payload) && !empty($payload['message']) ? (string) $payload['message'] : 'VPS trả HTTP ' . $response->status();
+            return response()->json(['error' => $msg], $response->status() >= 500 ? 502 : $response->status());
+        }
+        return response()->json($payload);
+    }
+
+    public function runCrontab(int $lineIdx)
+    {
+        $baseUrl = $this->vpsBaseUrl();
+        if ($baseUrl === '') {
+            return response()->json(['error' => 'Chưa cấu hình SYNC_SERVICE_URL.'], 503);
+        }
+        try {
+            $response = $this->vpsHttp()->timeout(120)->post($baseUrl . '/crontab/run/' . $lineIdx);
+        } catch (ConnectionException $e) {
+            Log::error('runCrontab connection: ' . $e->getMessage());
+            return response()->json(['error' => 'Không kết nối được tới VPS.'], 502);
+        } catch (\Throwable $e) {
+            Log::error('runCrontab: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi khi chạy crontab.'], 502);
+        }
+        $payload = $response->json();
+        if (!$response->successful()) {
+            $msg = is_array($payload) && !empty($payload['message']) ? (string) $payload['message'] : 'VPS trả HTTP ' . $response->status();
+            return response()->json(['error' => $msg], $response->status() >= 500 ? 502 : $response->status());
+        }
+        return response()->json($payload);
+    }
 }

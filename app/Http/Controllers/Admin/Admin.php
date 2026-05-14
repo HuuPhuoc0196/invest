@@ -510,4 +510,16 @@ class Admin extends Controller
             'deleted' => $deleted
         ]);
     }
+
+    public function clearAllCache()
+    {
+        try {
+            CacheService::clearAll();
+            \Illuminate\Support\Facades\Log::info('Cache cleared by admin', ['admin_id' => auth()->id()]);
+            return response()->json(['status' => 'success', 'message' => 'Đã xóa toàn bộ cache hệ thống.']);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Admin cache clear error', ['error' => $e->getMessage()]);
+            return response()->json(['status' => 'error', 'message' => 'Lỗi khi xóa cache: ' . $e->getMessage()], 500);
+        }
+    }
 }

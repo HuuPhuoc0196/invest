@@ -1,0 +1,696 @@
+/* ── Page wrapper ── */
+.admin-crontab-page {
+    width: 100%;
+}
+
+/* ── Flash (mirrors admin-stock-flash in adminStockManagement.css) ── */
+.admin-crontab-flash {
+    margin: 2px 0 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+.admin-crontab-flash--success {
+    background: rgba(34, 197, 94, 0.14);
+    border-color: rgba(34, 197, 94, 0.35);
+    color: #166534;
+}
+.admin-crontab-flash--error {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #991b1b;
+}
+body.theme-invest-app .admin-crontab-flash--success {
+    color: #4ade80;
+}
+body.theme-invest-app .admin-crontab-flash--error {
+    color: #f87171;
+}
+
+/* ── Toolbar (mirrors admin-stocks-toolbar) ── */
+.admin-crontab-toolbar {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+    align-items: center;
+}
+.admin-crontab-toolbar__left,
+.admin-crontab-toolbar__right {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.admin-crontab-toolbar__right {
+    flex-wrap: nowrap;
+    align-items: center;
+}
+.admin-crontab-status {
+    font-size: 0.78rem;
+    color: var(--inv-muted, #64748b);
+    white-space: nowrap;
+}
+
+/* ── Toolbar buttons (mirrors btn-toolbar variants) ── */
+.btn-crontab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: filter 0.15s, opacity 0.15s;
+    line-height: 1.4;
+}
+.btn-crontab:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+.btn-crontab--add {
+    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+    color: #0b1e3d;
+    border-color: #0ea5e9;
+}
+.btn-crontab--add:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+.btn-crontab--refresh {
+    background: transparent;
+    color: var(--inv-text, #e2e8f0);
+    border: 1px solid var(--inv-border, rgba(99,179,237,0.14));
+}
+body.theme-invest-app .btn-crontab--refresh {
+    border-color: rgba(99,179,237,0.28);
+}
+.btn-crontab--refresh:hover:not(:disabled) {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.45);
+    color: var(--inv-accent, #38bdf8);
+}
+.btn-crontab--danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #fff;
+    border-color: #dc2626;
+}
+.btn-crontab--danger:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+.btn-crontab:focus,
+.btn-crontab:active {
+    outline: none;
+    box-shadow: none;
+}
+
+/* ── Sticky header clone (PC) ── */
+.ct-sticky-clone {
+    position: fixed;
+    z-index: 1050;
+    overflow: hidden;
+    pointer-events: none;
+}
+.ct-sticky-clone table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.ct-sticky-clone th {
+    pointer-events: auto;
+}
+
+body.theme-invest-app #crontab-table-clone thead th {
+    background: linear-gradient(180deg, #0b1e3d 0%, #112748 100%) !important;
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 2px solid rgba(56, 189, 248, 0.35);
+    border-right: 1px solid rgba(56, 189, 248, 0.12);
+    font-family: "Be Vietnam Pro", sans-serif;
+    white-space: nowrap;
+    padding: 10px 14px;
+    text-align: center;
+}
+
+/* ── Confirm modal ── */
+.ct-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: ct-modal-fadein 0.15s ease;
+}
+.ct-modal-overlay[hidden] {
+    display: none;
+}
+@keyframes ct-modal-fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.ct-modal {
+    position: relative;
+    background: var(--inv-surface, #1e293b);
+    border: 1px solid var(--inv-border, rgba(99,179,237,0.2));
+    border-radius: 16px;
+    padding: 32px 28px 24px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+    animation: ct-modal-slidein 0.18s ease;
+    text-align: center;
+}
+@keyframes ct-modal-slidein {
+    from { transform: translateY(-12px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+}
+.ct-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: var(--inv-muted, #64748b);
+    font-size: 1.3rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+}
+.ct-modal__close:hover {
+    color: var(--inv-text, #e2e8f0);
+    background: rgba(255,255,255,0.07);
+}
+.ct-modal__icon {
+    font-size: 2.4rem;
+    margin-bottom: 12px;
+    line-height: 1;
+}
+.ct-modal__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--inv-text, #e2e8f0);
+    margin: 0 0 12px;
+}
+.ct-modal__body {
+    font-size: 0.875rem;
+    color: var(--inv-muted, #94a3b8);
+    line-height: 1.65;
+    margin-bottom: 24px;
+}
+.ct-modal__body strong {
+    color: var(--inv-text, #e2e8f0);
+    font-weight: 700;
+}
+.ct-modal__actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.ct-modal__actions .btn-crontab {
+    min-width: 110px;
+}
+@media (max-width: 400px) {
+    .ct-modal__actions {
+        flex-direction: column;
+    }
+    .ct-modal__actions .btn-crontab {
+        width: 100%;
+    }
+}
+
+/* ── Add / Edit form card ── */
+.admin-crontab-form {
+    margin-bottom: 20px;
+}
+.admin-crontab-form__title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--inv-text, #e2e8f0);
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--inv-border, rgba(99,179,237,0.14));
+}
+.admin-crontab-form__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+    margin-bottom: 12px;
+}
+.admin-crontab-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.admin-crontab-field--endpoint {
+    flex: 1;
+    min-width: 200px;
+}
+.admin-crontab-field__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--inv-muted, #64748b);
+}
+.admin-crontab-input {
+    width: 68px;
+    padding: 7px 10px;
+    background: var(--inv-bg, #0f172a);
+    color: var(--inv-text, #e2e8f0);
+    border: 1px solid var(--inv-border, rgba(99,179,237,0.14));
+    border-radius: 7px;
+    font-size: 0.82rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    line-height: 1.4;
+}
+.admin-crontab-field--endpoint .admin-crontab-input {
+    width: 100%;
+}
+.admin-crontab-input:focus {
+    border-color: var(--inv-accent, #38bdf8);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+.admin-crontab-form__desc {
+    font-size: 0.8rem;
+    color: var(--inv-muted, #64748b);
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+.admin-crontab-form__desc-label {
+    font-weight: 700;
+    margin-right: 4px;
+}
+.admin-crontab-form__desc-text {
+    color: var(--inv-text, #e2e8f0);
+    font-style: italic;
+}
+.admin-crontab-form__actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ── Error box inside table-container ── */
+.admin-crontab-error {
+    padding: 10px 16px;
+    background: rgba(239, 68, 68, 0.1);
+    border-bottom: 1px solid rgba(239, 68, 68, 0.28);
+    color: #f87171;
+    font-size: 0.84rem;
+}
+
+/* ── Table: #crontab-table (mirrors #stock-table theme styling) ── */
+body.theme-invest-app #crontab-table {
+    width: 100%;
+    margin-top: 0;
+    background: transparent;
+    box-shadow: none;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+body.theme-invest-app #crontab-table thead.sticky-header th {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: linear-gradient(180deg, #0b1e3d 0%, #112748 100%) !important;
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 2px solid rgba(56, 189, 248, 0.35);
+    border-right: 1px solid rgba(56, 189, 248, 0.12);
+    font-family: "Be Vietnam Pro", sans-serif;
+    white-space: nowrap;
+    padding: 10px 14px;
+    text-align: center;
+}
+
+body.theme-invest-app #crontab-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--inv-border);
+    border-right: 1px solid var(--inv-border);
+    color: var(--inv-text);
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+body.theme-invest-app #crontab-table tbody tr {
+    background-color: var(--inv-bg);
+    transition: background 0.1s;
+}
+
+body.theme-invest-app #crontab-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+body.theme-invest-app #crontab-table tbody tr:hover {
+    background: rgba(56, 189, 248, 0.04);
+}
+
+/* Column widths */
+.ct-th--idx     { width: 44px; text-align: center !important; }
+.ct-th--name    { min-width: 140px; }
+.ct-th--schedule{ min-width: 170px; }
+.ct-th--type    { width: 76px; }
+.ct-th--status  { width: 90px; }
+.ct-th--actions { min-width: 220px; }
+
+body.theme-invest-app #crontab-table td.ct-td--idx {
+    text-align: center;
+    color: var(--inv-muted, #64748b);
+    font-size: 12px;
+}
+body.theme-invest-app #crontab-table td.ct-td--name {
+    font-weight: 600;
+}
+body.theme-invest-app #crontab-table td.ct-td--schedule {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+}
+body.theme-invest-app #crontab-table td.ct-td--actions {
+    padding: 6px 10px;
+}
+
+/* Schedule cell sub-text */
+.ct-schedule-desc {
+    font-size: 0.72rem;
+    color: var(--inv-muted, #64748b);
+    margin-top: 2px;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+/* Type badges */
+.ct-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.ct-badge--api {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.28);
+}
+.ct-badge--system {
+    background: rgba(100, 116, 139, 0.14);
+    color: #94a3b8;
+    border: 1px solid rgba(100, 116, 139, 0.25);
+}
+
+/* Status indicator */
+.ct-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+.ct-status::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.ct-status--on  { color: #34d399; }
+.ct-status--on::before  { background: #34d399; box-shadow: 0 0 5px #34d399; }
+.ct-status--off { color: #64748b; }
+.ct-status--off::before { background: #64748b; }
+
+/* Action buttons inside table cells */
+.ct-td--actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+}
+.ct-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: filter 0.13s, opacity 0.13s;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+.ct-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.ct-btn:focus, .ct-btn:active { outline: none; box-shadow: none; }
+.ct-btn--edit {
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.25);
+}
+.ct-btn--edit:hover:not(:disabled) { filter: brightness(1.2); background: rgba(56, 189, 248, 0.18); }
+.ct-btn--run {
+    background: rgba(52, 211, 153, 0.1);
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.25);
+}
+.ct-btn--run:hover:not(:disabled) { filter: brightness(1.15); background: rgba(52, 211, 153, 0.18); }
+.ct-btn--toggle-on {
+    background: rgba(251, 191, 36, 0.1);
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.25);
+}
+.ct-btn--toggle-on:hover:not(:disabled) { filter: brightness(1.15); background: rgba(251, 191, 36, 0.18); }
+.ct-btn--toggle-off {
+    background: rgba(100, 116, 139, 0.12);
+    color: #94a3b8;
+    border-color: rgba(100, 116, 139, 0.22);
+}
+.ct-btn--toggle-off:hover:not(:disabled) { background: rgba(100, 116, 139, 0.2); }
+.ct-btn--delete {
+    background: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.25);
+}
+.ct-btn--delete:hover:not(:disabled) { filter: brightness(1.15); background: rgba(248, 113, 113, 0.18); }
+
+/* Empty / loading state */
+.ct-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--inv-muted, #64748b);
+    font-size: 0.875rem;
+    background: var(--inv-bg, #0f172a);
+}
+
+/* ── Responsive: 768px — toolbar + form ── */
+@media (max-width: 768px) {
+    .admin-crontab-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .admin-crontab-toolbar__left,
+    .admin-crontab-toolbar__right {
+        width: 100%;
+    }
+    .btn-crontab {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 100px;
+        justify-content: center;
+    }
+    .admin-crontab-toolbar__right {
+        justify-content: flex-end;
+    }
+    .admin-crontab-form__grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    .admin-crontab-field--endpoint {
+        grid-column: 1 / -1;
+        min-width: unset;
+    }
+    .admin-crontab-field--endpoint .admin-crontab-input {
+        width: 100%;
+    }
+    .admin-crontab-input {
+        width: 100%;
+    }
+    .admin-crontab-form__actions {
+        flex-wrap: wrap;
+    }
+    .admin-crontab-form__actions .btn-crontab {
+        flex: 1 1 120px;
+    }
+}
+
+/* ── Responsive: 640px — table → card layout ── */
+@media (max-width: 640px) {
+
+    /* Reset table-container so cards sit flush */
+    body.theme-invest-app .admin-crontab-page .table-container {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+        padding: 0;
+    }
+
+    /* Error box inside container */
+    .admin-crontab-error {
+        border-radius: 8px;
+        border: 1px solid rgba(239,68,68,0.28);
+        margin-bottom: 10px;
+    }
+
+    /* Table itself becomes a block list */
+    body.theme-invest-app #crontab-table,
+    body.theme-invest-app #crontab-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    /* Hide the column headers */
+    body.theme-invest-app #crontab-table thead {
+        display: none;
+    }
+
+    /* ── Each row = a card ── */
+    body.theme-invest-app #crontab-table tbody tr {
+        display: block;
+        background: var(--inv-surface, #1e293b);
+        border: 1px solid var(--inv-border, rgba(99,179,237,0.14));
+        border-radius: 12px;
+        padding: 14px 16px 12px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    body.theme-invest-app #crontab-table tbody tr:hover {
+        background: var(--inv-surface, #1e293b);
+    }
+
+    body.theme-invest-app #crontab-table tbody tr:last-child {
+        margin-bottom: 0;
+    }
+
+    /* ── All td: flex row with label ── */
+    body.theme-invest-app #crontab-table td {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 5px 0;
+        border: none !important;
+        font-family: "Be Vietnam Pro", sans-serif;
+        font-size: 13px;
+        color: var(--inv-text, #e2e8f0);
+    }
+
+    /* Label from data-label attribute */
+    body.theme-invest-app #crontab-table td[data-label]::before {
+        content: attr(data-label);
+        display: inline-block;
+        font-size: 0.67rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--inv-muted, #64748b);
+        min-width: 80px;
+        flex-shrink: 0;
+        padding-top: 2px;
+        line-height: 1.5;
+    }
+
+    /* Hide # column — redundant on cards */
+    body.theme-invest-app #crontab-table td.ct-td--idx {
+        display: none;
+    }
+
+    /* Name: card title, no label, larger */
+    body.theme-invest-app #crontab-table td.ct-td--name {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--inv-text, #e2e8f0);
+        padding-bottom: 10px;
+        margin-bottom: 2px;
+        border-bottom: 1px solid var(--inv-border, rgba(99,179,237,0.1)) !important;
+        word-break: break-all;
+    }
+
+    body.theme-invest-app #crontab-table td.ct-td--name::before {
+        display: none;
+    }
+
+    /* Schedule: monospace */
+    body.theme-invest-app #crontab-table td.ct-td--schedule {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.8rem;
+        line-height: 1.6;
+    }
+
+    body.theme-invest-app #crontab-table td.ct-td--schedule .ct-schedule-desc {
+        font-family: "Be Vietnam Pro", sans-serif;
+    }
+
+    /* Type & status: compact rows */
+    body.theme-invest-app #crontab-table td:not(.ct-td--name):not(.ct-td--schedule):not(.ct-td--actions):not(.ct-td--idx) {
+        padding: 3px 0;
+    }
+
+    /* Actions: full-width, separated from content */
+    body.theme-invest-app #crontab-table td.ct-td--actions {
+        flex-wrap: wrap;
+        gap: 7px;
+        padding-top: 12px;
+        margin-top: 6px;
+        border-top: 1px solid var(--inv-border, rgba(99,179,237,0.1)) !important;
+    }
+
+    body.theme-invest-app #crontab-table td.ct-td--actions::before {
+        display: none;
+    }
+
+    /* Bigger tap targets for action buttons */
+    body.theme-invest-app #crontab-table .ct-btn {
+        flex: 1 1 calc(50% - 4px);
+        justify-content: center;
+        padding: 9px 10px;
+        font-size: 0.82rem;
+        min-width: 0;
+    }
+
+    /* Empty / loading row */
+    body.theme-invest-app #crontab-table td.ct-empty {
+        display: block;
+        text-align: center;
+        padding: 32px 16px;
+        border: none !important;
+    }
+
+    body.theme-invest-app #crontab-table td.ct-empty::before {
+        display: none;
+    }
+}
