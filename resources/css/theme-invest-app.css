@@ -323,7 +323,7 @@ body.theme-invest-app main.login-layout-main {
     }
 
     /* Menu khách — Trang chủ giống Đăng ký (surface) | trạng thái active riêng */
-    body.theme-invest-app .actions-left .user-nav-link--guest:not(.user-nav-link--guest-login):not(.user-nav-link--guest-register):not(.user-nav-link--guest-home):not(.user-nav-link--active) {
+    body.theme-invest-app .actions-left .user-nav-link--guest:not(.user-nav-link--guest-login):not(.user-nav-link--guest-register):not(.user-nav-link--guest-home):not(.user-nav-link--guest-about):not(.user-nav-link--guest-contact):not(.user-nav-link--active) {
         color: var(--inv-muted) !important;
         border-color: var(--inv-border) !important;
         background: transparent !important;
@@ -331,7 +331,9 @@ body.theme-invest-app main.login-layout-main {
 
     body.theme-invest-app .actions-left .user-nav-link--guest-login:not(.user-nav-link--active),
     body.theme-invest-app .actions-left .user-nav-link--guest-register:not(.user-nav-link--active),
-    body.theme-invest-app .actions-left .user-nav-link--guest-home:not(.user-nav-link--active) {
+    body.theme-invest-app .actions-left .user-nav-link--guest-home:not(.user-nav-link--active),
+    body.theme-invest-app .actions-left .user-nav-link--guest-about:not(.user-nav-link--active),
+    body.theme-invest-app .actions-left .user-nav-link--guest-contact:not(.user-nav-link--active) {
         color: var(--inv-text) !important;
         border-color: var(--inv-border) !important;
         background: var(--inv-surface) !important;
@@ -339,12 +341,24 @@ body.theme-invest-app main.login-layout-main {
 
     body.theme-invest-app .actions-left .user-nav-link--guest-login:not(.user-nav-link--active):hover,
     body.theme-invest-app .actions-left .user-nav-link--guest-register:not(.user-nav-link--active):hover,
-    body.theme-invest-app .actions-left .user-nav-link--guest-home:not(.user-nav-link--active):hover {
+    body.theme-invest-app .actions-left .user-nav-link--guest-home:not(.user-nav-link--active):hover,
+    body.theme-invest-app .actions-left .user-nav-link--guest-about:not(.user-nav-link--active):hover,
+    body.theme-invest-app .actions-left .user-nav-link--guest-contact:not(.user-nav-link--active):hover {
         color: var(--inv-accent) !important;
         border-color: rgba(56, 189, 248, 0.45) !important;
         background: rgba(56, 189, 248, 0.1) !important;
     }
 
+    /* Giới thiệu + Liên hệ — grid col 2 trong __inner, gốc phải cùng hàng menu */
+    body.theme-invest-app .actions-left .user-nav-guest-info {
+        grid-column: 2;
+        grid-row: 1;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+        align-self: center;
+    }
 
     /* Search */
     body.theme-invest-app #actionsRightContent {

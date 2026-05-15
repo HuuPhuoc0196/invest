@@ -73,11 +73,11 @@ class CacheController extends Controller
             'table' => [
                 'required',
                 'string',
-                'in:stocks,user_portfolios,user_portfolios_sell,user_follows,cash_follow,users,status_sync',
+                'in:stocks,user_portfolios,user_portfolios_sell,user_follows,cash_follow,users,status_sync,admin_follow,admin_suggest',
             ],
         ], [
             'table.required' => 'Tên table không được để trống.',
-            'table.in' => 'Table không hợp lệ. Chỉ hỗ trợ: stocks, user_portfolios, user_portfolios_sell, user_follows, cash_follow, users, status_sync.',
+            'table.in' => 'Table không hợp lệ. Chỉ hỗ trợ: stocks, user_portfolios, user_portfolios_sell, user_follows, cash_follow, users, status_sync, admin_follow, admin_suggest.',
         ]);
 
         if ($validator->fails()) {

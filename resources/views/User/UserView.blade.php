@@ -32,7 +32,8 @@
 
 @section('user-body-content')
     <div class="home-suggest-trigger-bar">
-        <button type="button" class="btn-filter btn-home-suggest-trigger" id="btnHomeSuggestTrigger">💡 Gợi ý theo dõi</button>
+        <button type="button" class="btn-filter" id="btnHomeSuggestTrigger">💡 Gợi ý theo dõi</button>
+        <button type="button" class="btn-filter-reset" id="btnHomeBuySuggestTrigger">💰 Gợi ý mua hôm nay</button>
     </div>
 
     @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu', 'level' => 1])
@@ -158,6 +159,40 @@
             <div class="home-suggest-modal__footer">
                 <button type="button" class="btn-filter btn-add-follow-home" id="btnHomeSuggestAdd" disabled>➕ Thêm theo dõi</button>
                 <button type="button" class="btn-filter-reset" id="btnHomeSuggestClose">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Buy Suggest modal (auto-open khi login, chỉ khi có stock % Định giá < 0) --}}
+    <div id="home-buy-suggest-modal" class="home-buy-suggest-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="homeBuySuggestTitle">
+        <div class="home-buy-suggest-modal__backdrop" id="homeBuySuggestBackdrop"></div>
+        <div class="home-buy-suggest-modal__box">
+            <div class="home-buy-suggest-modal__header">
+                <h2 class="home-buy-suggest-modal__title" id="homeBuySuggestTitle">💡 Gợi ý mua hôm nay</h2>
+                <button type="button" class="home-buy-suggest-modal__close-x" id="homeBuySuggestCloseX" aria-label="Đóng">&times;</button>
+            </div>
+            <div class="home-buy-suggest-modal__body">
+                <div class="table-container home-buy-suggest-table-wrap">
+                    <table id="home-buy-suggest-table">
+                        <thead class="sticky-header">
+                            <tr>
+                                <th class="col-code-sticky">Mã CK</th>
+                                <th>Thuộc VN</th>
+                                <th>Giá mua tốt</th>
+                                <th>Giá hiện tại</th>
+                                <th>Giá bán tốt</th>
+                                <th>Trạng thái</th>
+                                <th>Điểm</th>
+                                <th>Khối lượng</th>
+                                <th>% Định giá</th>
+                            </tr>
+                        </thead>
+                        <tbody id="homeBuySuggestTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="home-buy-suggest-modal__footer">
+                <button type="button" class="btn-filter-reset home-buy-suggest-modal__close-btn" id="homeBuySuggestClose">Đóng</button>
             </div>
         </div>
     </div>

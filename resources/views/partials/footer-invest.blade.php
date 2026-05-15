@@ -72,7 +72,8 @@
         <div class="ft-col">
             <p class="ft-col-title">Hỗ trợ</p>
             <ul class="ft-links">
-                <li><a href="mailto:{{ $contactEmail }}">💬 Liên hệ hỗ trợ</a></li>
+                <li><a href="{{ route('about') }}">📖 Giới thiệu</a></li>
+                <li><a href="{{ route('contact') }}">📬 Liên hệ</a></li>
                 @if ($area === 'guest')
                     <li><a href="{{ route('home') }}">📊 Bảng giá công khai</a></li>
                 @else

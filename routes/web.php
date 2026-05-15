@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use App\Http\Controllers\Sync\Sync;
 use App\Services\CacheService;
+use App\Http\Controllers\Pages\PagesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -149,6 +150,10 @@ Route::get('/__debug/logo', function () {
         'hint' => 'Logo được phục vụ bởi route site.logo (Laravel). File nguồn: public/icon/investment_logo.svg. Không đặt public/logo.svg (file tĩnh) để tránh xung đột và lỗi PHP short_open_tag với <?xml.',
     ], 200, [], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 })->name('debug.logo');
+
+// Public pages — không cần đăng nhập
+Route::get('/gioi-thieu', [PagesController::class, 'about'])->name('about');
+Route::match(['get', 'post'], '/lien-he', [PagesController::class, 'contact'])->name('contact');
 
 // Trang chủ: cho phép cả guest và user (không bắt buộc login)
 Route::get('/trang-chu', [User::class, 'show'])->name('home');

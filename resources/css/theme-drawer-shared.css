@@ -160,7 +160,7 @@
         box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.2);
     }
 
-    .mobile-menu-drawer.actions-left .user-nav-link--guest:not(.user-nav-link--guest-login):not(.user-nav-link--guest-register):not(.user-nav-link--guest-home):not(.user-nav-link--active) {
+    .mobile-menu-drawer.actions-left .user-nav-link--guest:not(.user-nav-link--guest-login):not(.user-nav-link--guest-register):not(.user-nav-link--guest-home):not(.user-nav-link--guest-about):not(.user-nav-link--guest-contact):not(.user-nav-link--active) {
         color: var(--drawer-muted) !important;
         border-color: var(--drawer-border) !important;
         background: transparent !important;
@@ -168,7 +168,9 @@
 
     .mobile-menu-drawer.actions-left .user-nav-link--guest-login:not(.user-nav-link--active),
     .mobile-menu-drawer.actions-left .user-nav-link--guest-register:not(.user-nav-link--active),
-    .mobile-menu-drawer.actions-left .user-nav-link--guest-home:not(.user-nav-link--active) {
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-home:not(.user-nav-link--active),
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-about:not(.user-nav-link--active),
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-contact:not(.user-nav-link--active) {
         color: var(--drawer-text) !important;
         background: var(--drawer-surface2) !important;
         border-color: var(--drawer-border) !important;
@@ -176,10 +178,23 @@
 
     .mobile-menu-drawer.actions-left .user-nav-link--guest-login:not(.user-nav-link--active):hover,
     .mobile-menu-drawer.actions-left .user-nav-link--guest-register:not(.user-nav-link--active):hover,
-    .mobile-menu-drawer.actions-left .user-nav-link--guest-home:not(.user-nav-link--active):hover {
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-home:not(.user-nav-link--active):hover,
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-about:not(.user-nav-link--active):hover,
+    .mobile-menu-drawer.actions-left .user-nav-link--guest-contact:not(.user-nav-link--active):hover {
         color: var(--drawer-accent) !important;
         border-color: rgba(56, 189, 248, 0.4) !important;
         background: rgba(56, 189, 248, 0.1) !important;
+    }
+
+    /* Giới thiệu + Liên hệ — pin đáy drawer như logout button */
+    .mobile-menu-drawer.actions-left .user-nav-guest-info {
+        flex-shrink: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        width: 100%;
+        padding: 8px;
+        padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
     }
 
     .mobile-menu-toggle {

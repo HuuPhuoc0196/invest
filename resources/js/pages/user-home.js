@@ -79,6 +79,8 @@
         updateSortIcons();
         renderTable(stocks);
         bindHomeSuggestModalEvents();
+        bindBuySuggestModalEvents();
+        maybeAutoOpenBuySuggest();
 
         // Click vào ô Mã cổ phiếu = toggle checkbox
         document.getElementById('stockTableBody').addEventListener('click', function(e) {
@@ -797,6 +799,237 @@
         }
     }
     window.toggleFilter = toggleFilter;
+
+    // ── Buy Suggest Modal (auto-open) ────────────────────────────────────────────
+
+    function getBuySuggestStocks() {
+        return (adminSuggestedStocks || [])
+            .filter(s => {
+                const buy = parseFloat(s.recommended_buy_price) || 0;
+                const cur = parseFloat(s.current_price) || 0;
+                return buy !== 0 && ((cur / buy) * 100 - 100) < 0;
+            })
+            .sort((a, b) => {
+                const buyA = parseFloat(a.recommended_buy_price) || 1;
+                const buyB = parseFloat(b.recommended_buy_price) || 1;
+                const valA = ((parseFloat(a.current_price) || 0) / buyA) * 100 - 100;
+                const valB = ((parseFloat(b.current_price) || 0) / buyB) * 100 - 100;
+                return valA - valB;
+            });
+    }
+
+    function renderBuySuggestTable(list) {
+        const tbody = document.getElementById('homeBuySuggestTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (!list.length) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:18px;color:#94a3b8;">Không có mã nào phù hợp.</td></tr>';
+            return;
+        }
+
+        list.forEach(stock => {
+            const buyPrice     = parseFloat(stock.recommended_buy_price) || 0;
+            const currentPrice = parseFloat(stock.current_price) || 0;
+            const sellPrice    = stock.recommended_sell_price ? Number(stock.recommended_sell_price).toLocaleString('vi-VN') : 'N/A';
+            const volume       = stock.volume ? Number(stock.volume).toLocaleString('vi-VN') : 'N/A';
+            const valuation    = buyPrice !== 0 ? ((currentPrice / buyPrice) * 100 - 100).toFixed(2) : 0;
+            const sign         = valuation > 0 ? '+' : '';
+
+            const row = document.createElement('tr');
+            row.className = getRowClass(buyPrice, currentPrice);
+            row.innerHTML = `
+                <td class="col-code-sticky">${stock.code}</td>
+                <td>${[30, 100].includes(Number(stock.stocks_vn)) ? Number(stock.stocks_vn) : 'ALL'}</td>
+                <td>${Number(stock.recommended_buy_price).toLocaleString('vi-VN')}</td>
+                <td>${Number(stock.current_price).toLocaleString('vi-VN')}</td>
+                <td>${sellPrice}</td>
+                <td style="color:${getRisk(stock.risk_level).color}">${getRisk(stock.risk_level).label}</td>
+                <td>${getRatingBadge(stock.rating_stocks)}</td>
+                <td>${volume}</td>
+                <td style="color:red;font-weight:bold;">${sign}${valuation}%</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function setupBuySuggestStickyHeader() {
+        const modal      = document.getElementById('home-buy-suggest-modal');
+        const table      = document.getElementById('home-buy-suggest-table');
+        const container  = document.querySelector('.home-buy-suggest-table-wrap');
+        const scrollHost = document.querySelector('.home-buy-suggest-modal__body');
+        if (!modal || !table || !container || !scrollHost) return null;
+
+        const thead = table.querySelector('thead');
+        if (!thead) return null;
+
+        let cloneWrap = null;
+        let cloneTable = null;
+
+        function createClone() {
+            if (cloneWrap) cloneWrap.remove();
+            cloneWrap = document.createElement('div');
+            cloneWrap.className = 'home-buy-suggest-sticky-clone';
+            cloneTable = document.createElement('table');
+            cloneTable.style.cssText = 'border-collapse:separate;border-spacing:0;margin:0;background:transparent;';
+            cloneTable.appendChild(thead.cloneNode(true));
+            cloneWrap.appendChild(cloneTable);
+            document.body.appendChild(cloneWrap);
+            syncWidths();
+            syncScroll();
+            cloneWrap.style.display = 'none';
+        }
+
+        function syncWidths() {
+            if (!cloneTable) return;
+            const origCells  = thead.querySelectorAll('th');
+            const cloneCells = cloneTable.querySelectorAll('th');
+            let totalWidth = 0;
+            origCells.forEach((cell, i) => {
+                const w = cell.getBoundingClientRect().width;
+                totalWidth += w;
+                if (cloneCells[i]) {
+                    cloneCells[i].style.boxSizing  = 'border-box';
+                    cloneCells[i].style.width      = w + 'px';
+                    cloneCells[i].style.minWidth   = w + 'px';
+                    cloneCells[i].style.maxWidth   = w + 'px';
+                }
+            });
+            cloneTable.style.width = totalWidth + 'px';
+        }
+
+        function syncScroll() {
+            if (!cloneWrap || !cloneTable) return;
+            const containerRect = container.getBoundingClientRect();
+            const hostRect      = scrollHost.getBoundingClientRect();
+            cloneWrap.style.left  = containerRect.left + 'px';
+            cloneWrap.style.width = containerRect.width + 'px';
+            cloneWrap.style.top   = hostRect.top + 'px';
+            cloneTable.style.marginLeft = -container.scrollLeft + 'px';
+            const stickyTh = cloneTable.querySelector('th.col-code-sticky');
+            if (stickyTh) {
+                stickyTh.style.transform = 'translateX(' + container.scrollLeft + 'px)';
+            }
+        }
+
+        function onScroll() {
+            if (!cloneWrap || modal.getAttribute('aria-hidden') !== 'false') return;
+            const tableRect   = table.getBoundingClientRect();
+            const hostRect    = scrollHost.getBoundingClientRect();
+            const theadHeight = thead.offsetHeight;
+            if (tableRect.top < hostRect.top && tableRect.bottom > (hostRect.top + theadHeight)) {
+                syncWidths();
+                cloneWrap.style.display = 'block';
+                syncScroll();
+            } else {
+                cloneWrap.style.display = 'none';
+            }
+        }
+
+        createClone();
+        onScroll();
+        scrollHost.addEventListener('scroll', onScroll,    { passive: true });
+        container.addEventListener('scroll',  syncScroll,  { passive: true });
+        window.addEventListener('resize',     onScroll);
+
+        return function cleanup() {
+            scrollHost.removeEventListener('scroll', onScroll);
+            container.removeEventListener('scroll',  syncScroll);
+            window.removeEventListener('resize',     onScroll);
+            if (cloneWrap) cloneWrap.remove();
+        };
+    }
+
+    let buySuggestStickyCleanup = null;
+
+    function openBuySuggestModal() {
+        const modal = document.getElementById('home-buy-suggest-modal');
+        if (!modal) return;
+        modal.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(function() {
+            const container  = document.querySelector('.home-buy-suggest-table-wrap');
+            const scrollHost = document.querySelector('.home-buy-suggest-modal__body');
+            if (container)  container.scrollLeft = 0;
+            if (scrollHost) scrollHost.scrollTop = 0;
+            if (typeof buySuggestStickyCleanup === 'function') buySuggestStickyCleanup();
+            buySuggestStickyCleanup = setupBuySuggestStickyHeader();
+        });
+    }
+
+    function closeBuySuggestModal() {
+        const modal = document.getElementById('home-buy-suggest-modal');
+        if (!modal) return;
+        // Reset scroll BEFORE hiding — while display:flex so browser processes it
+        const container  = document.querySelector('.home-buy-suggest-table-wrap');
+        const scrollHost = document.querySelector('.home-buy-suggest-modal__body');
+        if (container)  container.scrollLeft = 0;
+        if (scrollHost) scrollHost.scrollTop = 0;
+        modal.setAttribute('aria-hidden', 'true');
+        if (typeof buySuggestStickyCleanup === 'function') {
+            buySuggestStickyCleanup();
+            buySuggestStickyCleanup = null;
+        }
+    }
+
+    function bindBuySuggestModalEvents() {
+        const trigger   = document.getElementById('btnHomeBuySuggestTrigger');
+        const closeX    = document.getElementById('homeBuySuggestCloseX');
+        const closeBtn  = document.getElementById('homeBuySuggestClose');
+        const backdrop  = document.getElementById('homeBuySuggestBackdrop');
+        const tableWrap = document.querySelector('.home-buy-suggest-table-wrap');
+
+        if (trigger) {
+            trigger.addEventListener('click', function() {
+                if (!isLoggedIn) {
+                    showNotifyModal('Vui lòng đăng nhập để sử dụng tính năng này.', 'error');
+                    return;
+                }
+                const list = getBuySuggestStocks();
+                renderBuySuggestTable(list);
+                openBuySuggestModal();
+            });
+        }
+
+        if (closeX)   closeX.addEventListener('click', closeBuySuggestModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeBuySuggestModal);
+        if (backdrop) backdrop.addEventListener('click', closeBuySuggestModal);
+
+        // Drag-to-scroll ngang
+        if (tableWrap) {
+            let isDown = false, startX = 0, scrollLeft = 0;
+            tableWrap.addEventListener('mousedown', function(e) {
+                if (e.target.closest('a,button,input')) return;
+                isDown = true;
+                tableWrap.style.cursor = 'grabbing';
+                startX = e.pageX - tableWrap.offsetLeft;
+                scrollLeft = tableWrap.scrollLeft;
+                e.preventDefault();
+            });
+            tableWrap.addEventListener('mouseleave', () => { isDown = false; tableWrap.style.cursor = 'grab'; });
+            tableWrap.addEventListener('mouseup',    () => { isDown = false; tableWrap.style.cursor = 'grab'; });
+            tableWrap.addEventListener('mousemove', function(e) {
+                if (!isDown) return;
+                e.preventDefault();
+                tableWrap.scrollLeft = scrollLeft - (e.pageX - tableWrap.offsetLeft - startX) * 2;
+            });
+        }
+    }
+
+    function maybeAutoOpenBuySuggest() {
+        if (!isLoggedIn) return;
+
+        // Chỉ show 1 lần mỗi ngày
+        const today = new Date().toISOString().slice(0, 10);
+        const storageKey = 'buy_suggest_shown_' + today;
+        if (sessionStorage.getItem(storageKey)) return;
+
+        const list = getBuySuggestStocks();
+        if (!list.length) return;
+
+        renderBuySuggestTable(list);
+        openBuySuggestModal();
+        sessionStorage.setItem(storageKey, '1');
+    }
 
     // Format KL trung bình + validate Điểm
     function formatVolume(val) {
