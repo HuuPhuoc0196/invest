@@ -101,11 +101,109 @@
 .risk-timeline-badge { min-width: 110px; }
 .risk-timeline-note { font-size: 0.85rem; color: #94a3b8; flex: 1; }
 
-/* Dividend table */
-.sd-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-.sd-table th { text-align: left; padding: 8px 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid rgba(99,179,237,0.1); }
-.sd-table td { padding: 10px 12px; border-bottom: 1px solid rgba(99,179,237,0.06); color: #e2e8f0; }
-.sd-table tr:last-child td { border-bottom: none; }
+/* ─── DIVIDEND TABLE WRAPPER ─── */
+.sd-table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid rgba(99, 179, 237, 0.12);
+    -webkit-overflow-scrolling: touch;
+    background: rgba(15, 23, 42, 0.5);
+}
+
+/* ─── DIVIDEND TABLE ─── */
+.sd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin-top: 0 !important;
+}
+
+.sd-table thead tr {
+    background: #1a2744;
+}
+
+.sd-table thead th {
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 1px solid rgba(99, 179, 237, 0.12);
+    white-space: nowrap;
+    background-color: #1a2744 !important;
+    text-align: center;
+}
+
+.sd-table thead th:nth-child(3) { text-align: right; }
+.sd-table thead th:last-child   { text-align: left; }
+
+.sd-table tbody tr {
+    border-bottom: 1px solid rgba(99, 179, 237, 0.06);
+    transition: background 0.12s;
+}
+.sd-table tbody tr:last-child { border-bottom: none; }
+.sd-table tbody tr:hover { background: rgba(56, 189, 248, 0.04); }
+
+.sd-table tbody td {
+    padding: 11px 14px;
+    color: #e2e8f0;
+    text-align: center;
+    border-bottom: none !important;
+    vertical-align: middle;
+}
+
+.sd-table tbody td:nth-child(3) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+.sd-table tbody td:last-child {
+    text-align: left;
+    color: #94a3b8;
+    font-size: 12.5px;
+}
+
+/* ─── ADJ TYPE BADGES ─── */
+.sd-adj-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sd-adj-badge--cash {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.sd-adj-badge--stock {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.sd-adj-badge--bonus {
+    background: rgba(129, 140, 248, 0.12);
+    color: #818cf8;
+    border: 1px solid rgba(129, 140, 248, 0.25);
+}
+
+.sd-adj-badge--other {
+    background: rgba(100, 116, 139, 0.12);
+    color: #64748b;
+    border: 1px solid rgba(100, 116, 139, 0.25);
+}
 
 /* User holding card */
 .user-holding-card {

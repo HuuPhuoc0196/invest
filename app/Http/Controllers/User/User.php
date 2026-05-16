@@ -74,7 +74,8 @@ class User extends Controller
         $userId         = auth()->id();
         $userPortfolios = UserPortfolio::getProfileUser($userId);
         $userInvestCash = $this->portfolioService->calcUserInvestCash($userId);
-        return view('User.UserProfile', compact('userPortfolios', 'userInvestCash'));
+        $userCash       = UserCashFollow::getCashFollow($userId);
+        return view('User.UserProfile', compact('userPortfolios', 'userInvestCash', 'userCash'));
     }
 
     public function exportPortfolioPdf()

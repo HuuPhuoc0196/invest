@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\ContactMail;
 use App\Models\Stock;
 use App\Models\UserFollow;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,12 @@ class PagesController extends Controller
     public function about()
     {
         return view('Pages.AboutView');
+    }
+
+    public function donate()
+    {
+        $email = Auth::check() ? Auth::user()->email : null;
+        return view('Pages.DonateView', compact('email'));
     }
 
     public function contact(Request $request)
@@ -54,6 +61,82 @@ class PagesController extends Controller
         return view('Pages.ContactView');
     }
 
+    public function privacy()
+    {
+        return view('Pages.PrivacyView');
+    }
+
+    public function terms()
+    {
+        return view('Pages.TermsView');
+    }
+
+    public function vn30()
+    {
+        $stocks = Stock::select('code', 'current_price', 'percent_stock', 'risk_level')
+            ->where('stocks_vn', 30)
+            ->orderBy('code')
+            ->get();
+
+        $itemListSchema = [
+            '@context'        => 'https://schema.org',
+            '@type'           => 'ItemList',
+            'name'            => 'Danh sách cổ phiếu VN30',
+            'itemListElement' => $stocks->values()->map(fn ($s, $i) => [
+                '@type'    => 'ListItem',
+                'position' => $i + 1,
+                'name'     => $s->code,
+                'url'      => url('/co-phieu/' . $s->code),
+            ])->all(),
+        ];
+
+        return view('Pages.StockCategoryView', [
+            'title'          => 'Danh sách cổ phiếu VN30',
+            'subtitle'       => 'Top 30 mã cổ phiếu vốn hóa lớn nhất sàn HOSE.',
+            'stocks'         => $stocks,
+            'categoryKey'    => 'vn30',
+            'itemListSchema' => $itemListSchema,
+        ]);
+    }
+
+    public function vn100()
+    {
+        $stocks = Stock::select('code', 'current_price', 'percent_stock', 'risk_level')
+            ->whereIn('stocks_vn', [30, 100])
+            ->orderBy('code')
+            ->get();
+
+        $itemListSchema = [
+            '@context'        => 'https://schema.org',
+            '@type'           => 'ItemList',
+            'name'            => 'Danh sách cổ phiếu VN100',
+            'itemListElement' => $stocks->values()->map(fn ($s, $i) => [
+                '@type'    => 'ListItem',
+                'position' => $i + 1,
+                'name'     => $s->code,
+                'url'      => url('/co-phieu/' . $s->code),
+            ])->all(),
+        ];
+
+        return view('Pages.StockCategoryView', [
+            'title'          => 'Danh sách cổ phiếu VN100',
+            'subtitle'       => 'Top 100 mã cổ phiếu vốn hóa lớn nhất sàn HOSE.',
+            'stocks'         => $stocks,
+            'categoryKey'    => 'vn100',
+            'itemListSchema' => $itemListSchema,
+        ]);
+    }
+
+    public function guide()
+    {
+        return view('Pages.GuideView');
+    }
+
+    public function faq()
+    {
+        return view('Pages.FaqView');
+    }
+
     public function stockDetail(string $code)
     {
         $code  = strtoupper(trim($code));
@@ -63,27 +146,35 @@ class PagesController extends Controller
             abort(404, "Mã cổ phiếu {$code} không tồn tại.");
         }
 
-        // Risk history — query trực tiếp DB dùng chung với VPS
+        // Risk history — cached 1 ngày, key: stock_risk_history_{CODE}
         try {
-            $riskHistory = DB::table('stock_risk_history')
-                ->where('code', $code)
-                ->orderBy('event_date', 'desc')
-                ->limit(30)
-                ->get();
+            $riskHistory = CacheService::remember(
+                "stock_risk_history_{$code}",
+                CacheService::TTL_ONE_DAY,
+                fn () => DB::table('stock_risk_history')
+                    ->where('code', $code)
+                    ->orderBy('event_date', 'desc')
+                    ->limit(30)
+                    ->get()
+            );
         } catch (\Throwable $e) {
             Log::warning("stock_risk_history query failed for {$code}: " . $e->getMessage());
             $riskHistory = collect();
         }
 
-        // Dividend history
+        // Dividend history — cached 1 ngày, key: stock_dividend_{CODE}
         try {
-            $dividendHistory = DB::table('dividend_adjustments')
-                ->join('stocks', 'stocks.id', '=', 'dividend_adjustments.stock_id')
-                ->where('stocks.code', $code)
-                ->orderBy('dividend_adjustments.gdkhq_date', 'desc')
-                ->limit(20)
-                ->select('dividend_adjustments.*')
-                ->get();
+            $dividendHistory = CacheService::remember(
+                "stock_dividend_{$code}",
+                CacheService::TTL_ONE_DAY,
+                fn () => DB::table('dividend_adjustments')
+                    ->join('stocks', 'stocks.id', '=', 'dividend_adjustments.stock_id')
+                    ->where('stocks.code', $code)
+                    ->orderBy('dividend_adjustments.gdkhq_date', 'desc')
+                    ->limit(20)
+                    ->select('dividend_adjustments.*')
+                    ->get()
+            );
         } catch (\Throwable $e) {
             Log::warning("dividend_adjustments query failed for {$code}: " . $e->getMessage());
             $dividendHistory = collect();

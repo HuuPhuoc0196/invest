@@ -5,6 +5,7 @@
     $isRegister = request()->routeIs('register');
     $isAbout = request()->routeIs('about');
     $isContact = request()->routeIs('contact');
+    $isDonate = request()->routeIs('donate');
 @endphp
 <div class="user-nav-primary">
     <div class="user-nav-primary__inner">
@@ -19,6 +20,7 @@
         <div class="user-nav-guest-info">
             <a href="{{ route('about') }}" class="button-link user-nav-link user-nav-link--guest user-nav-link--guest-about @if($isAbout) user-nav-link--active @endif">📖 Giới thiệu</a>
             <a href="{{ route('contact') }}" class="button-link user-nav-link user-nav-link--guest user-nav-link--guest-contact @if($isContact) user-nav-link--active @endif">📬 Liên hệ</a>
+            <a href="{{ route('donate') }}" class="button-link user-nav-link user-nav-link--guest user-nav-link--guest-donate @if($isDonate) user-nav-link--active @endif">💖 Ủng hộ</a>
         </div>
     </div>
 </div>

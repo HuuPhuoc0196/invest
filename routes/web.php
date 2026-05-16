@@ -46,10 +46,26 @@ Route::get('/sitemap.xml', function () {
             ['loc' => route('home'),          'lastmod' => $today, 'changefreq' => 'daily',   'priority' => '1.0'],
             ['loc' => route('about'),         'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.8'],
             ['loc' => route('contact'),       'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.7'],
-            ['loc' => route('login'),         'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.7'],
+            ['loc' => route('donate'),        'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => route('guide'),         'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.7'],
+            ['loc' => route('faq'),           'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.7'],
+            ['loc' => route('stocks.vn30'),   'lastmod' => $today, 'changefreq' => 'daily',   'priority' => '0.7'],
+            ['loc' => route('stocks.vn100'),  'lastmod' => $today, 'changefreq' => 'daily',   'priority' => '0.7'],
+            ['loc' => route('login'),         'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.6'],
             ['loc' => route('register'),      'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.6'],
-            ['loc' => route('forgotPassword'),'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.4'],
+            ['loc' => route('privacy'),       'lastmod' => $today, 'changefreq' => 'yearly',  'priority' => '0.3'],
+            ['loc' => route('terms'),         'lastmod' => $today, 'changefreq' => 'yearly',  'priority' => '0.3'],
+            ['loc' => route('forgotPassword'),'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.3'],
         ];
+
+        \App\Models\Stock::select('code', 'updated_at')->orderBy('code')->each(function ($stock) use (&$urls) {
+            $urls[] = [
+                'loc'        => url('/co-phieu/' . strtoupper($stock->code)),
+                'lastmod'    => optional($stock->updated_at)->toDateString() ?? now()->toDateString(),
+                'changefreq' => 'daily',
+                'priority'   => '0.6',
+            ];
+        });
         $lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'];
         foreach ($urls as $u) {
             $loc = htmlspecialchars($u['loc'], ENT_XML1 | ENT_QUOTES, 'UTF-8');
@@ -160,6 +176,15 @@ Route::get('/__debug/logo', function () {
 Route::get('/gioi-thieu', [PagesController::class, 'about'])->name('about');
 Route::get('/lien-he', [PagesController::class, 'contact'])->name('contact');
 Route::post('/lien-he', [PagesController::class, 'contact'])->middleware('throttle:contact-form');
+Route::get('/ung-ho', [PagesController::class, 'donate'])->name('donate');
+Route::get('/chinh-sach-bao-mat', [PagesController::class, 'privacy'])->name('privacy');
+Route::get('/dieu-khoan', [PagesController::class, 'terms'])->name('terms');
+Route::get('/huong-dan', [PagesController::class, 'guide'])->name('guide');
+Route::get('/hoi-dap', [PagesController::class, 'faq'])->name('faq');
+
+// Stock category pages — phải đứng TRƯỚC /co-phieu/{code} để tránh wildcard capture
+Route::get('/co-phieu/vn30', [PagesController::class, 'vn30'])->name('stocks.vn30');
+Route::get('/co-phieu/vn100', [PagesController::class, 'vn100'])->name('stocks.vn100');
 
 // Stock detail page (public)
 Route::get('/co-phieu/{code}', [PagesController::class, 'stockDetail'])->name('stock.detail');
@@ -209,6 +234,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/users', [Admin::class, 'userManagement'])->name('admin.users');
     Route::match(['get', 'put'], '/admin/users/update/{id}', [Admin::class, 'updateUser'])->name('admin.users.update');
     Route::post('/admin/users/delete/{id}', [Admin::class, 'deleteUser'])->name('admin.users.delete');
+    Route::get('/admin/users/{id}', [Admin::class, 'userDetail'])->name('admin.users.detail')->whereNumber('id');
 
     // Thông tin cá nhân admin
     Route::get('/admin/infoProfile', [Admin::class, 'infoProfile'])->name('admin.infoProfile');

@@ -28,63 +28,81 @@
             </div>
         </div>
 
+        {{-- ===== Điều hướng ===== --}}
         <div class="ft-col">
-            <p class="ft-col-title">Điều hướng</p>
-            <ul class="ft-links">
-                @if ($area === 'admin')
-                    <li><a href="{{ route('admin.home') }}">🏠 Trang chủ</a></li>
-                    <li><a href="{{ route('admin.stocks') }}">📊 Quản lý cổ phiếu</a></li>
-                    <li><a href="{{ route('insert') }}">➕ Thêm mã</a></li>
-                    <li><a href="{{ route('updateRiskForCode') }}">🔄 Cập nhật rủi ro</a></li>
-                    <li><a href="{{ route('uploadFile') }}">📁 Upload file</a></li>
-                @elseif ($area === 'guest')
-                    <li><a href="{{ route('home') }}">🏠 Trang chủ</a></li>
-                    <li><a href="{{ route('login') }}">🔑 Đăng nhập</a></li>
-                    <li><a href="{{ route('register') }}">📝 Đăng ký</a></li>
-                @else
-                    <li><a href="{{ route('home') }}">🏠 Trang chủ</a></li>
-                    <li><a href="{{ url('/user/profile') }}">💼 Tài sản</a></li>
-                    <li><a href="{{ url('/user/follow') }}">🔔 Theo dõi</a></li>
-                    <li><a href="{{ url('/user/investment-performance') }}">📈 Hiệu quả đầu tư</a></li>
-                    <li><a href="{{ route('buy') }}">➕ Mua cổ phiếu</a></li>
-                @endif
-            </ul>
+            @if ($area === 'admin')
+                <p class="ft-col-title">Quản lý</p>
+                <ul class="ft-links">
+                    <li><a href="{{ route('admin.home') }}"><span aria-hidden="true">🏠</span> Trang chủ</a></li>
+                    <li><a href="{{ route('admin.stocks') }}"><span aria-hidden="true">📊</span> Quản lý cổ phiếu</a></li>
+                    <li><a href="{{ route('admin.users') }}"><span aria-hidden="true">👥</span> Quản lý người dùng</a></li>
+                </ul>
+            @elseif ($area === 'guest')
+                <p class="ft-col-title">Điều hướng</p>
+                <ul class="ft-links">
+                    <li><a href="{{ route('home') }}"><span aria-hidden="true">🏠</span> Trang chủ</a></li>
+                    <li><a href="{{ route('stocks.vn30') }}"><span aria-hidden="true">📈</span> Cổ phiếu VN30</a></li>
+                    <li><a href="{{ route('stocks.vn100') }}"><span aria-hidden="true">📊</span> Cổ phiếu VN100</a></li>
+                </ul>
+            @else
+                <p class="ft-col-title">Điều hướng</p>
+                <ul class="ft-links">
+                    <li><a href="{{ route('home') }}"><span aria-hidden="true">🏠</span> Trang chủ</a></li>
+                    <li><a href="{{ url('/user/profile') }}"><span aria-hidden="true">💼</span> Tài sản</a></li>
+                    <li><a href="{{ url('/user/follow') }}"><span aria-hidden="true">🔔</span> Theo dõi</a></li>
+                    <li><a href="{{ url('/user/investment-performance') }}"><span aria-hidden="true">📈</span> Hiệu quả đầu tư</a></li>
+                </ul>
+            @endif
         </div>
 
+        {{-- ===== Tài khoản / Hệ thống ===== --}}
         <div class="ft-col">
-            <p class="ft-col-title">@if ($area === 'admin') Hệ thống @else Tài khoản @endif</p>
-            <ul class="ft-links">
-                @if ($area === 'admin')
-                    <li><a href="{{ route('admin.logs') }}">📋 Logs</a></li>
-                    <li><a href="{{ route('home') }}">📊 Xem trang người dùng</a></li>
-                @elseif ($area === 'guest')
-                    <li><a href="{{ route('forgotPassword') }}">🔒 Quên mật khẩu</a></li>
-                @else
-                    <li><a href="{{ url('/user/infoProfile') }}">👤 Thông tin cá nhân</a></li>
-                    <li><a href="{{ route('user.cashIn') }}">💰 Nạp tiền</a></li>
-                    <li><a href="{{ route('user.cashOut') }}">💵 Rút tiền</a></li>
-                    <li><a href="{{ route('user.emailSettings') }}">📧 Cài đặt thông báo</a></li>
-                    <li><a href="{{ route('changePassword') }}">🔑 Đổi mật khẩu</a></li>
-                @endif
-            </ul>
+            @if ($area === 'admin')
+                <p class="ft-col-title">Hệ thống</p>
+                <ul class="ft-links">
+                    <li><a href="{{ route('insert') }}"><span aria-hidden="true">➕</span> Thêm mã</a></li>
+                    <li><a href="{{ route('updateRiskForCode') }}"><span aria-hidden="true">🔄</span> Cập nhật rủi ro</a></li>
+                    <li><a href="{{ route('admin.logs') }}"><span aria-hidden="true">📋</span> Logs</a></li>
+                    <li><a href="{{ route('uploadFile') }}"><span aria-hidden="true">📁</span> Upload file</a></li>
+                </ul>
+            @elseif ($area === 'guest')
+                <p class="ft-col-title">Tài khoản</p>
+                <ul class="ft-links">
+                    <li><a href="{{ route('login') }}"><span aria-hidden="true">🔑</span> Đăng nhập</a></li>
+                    <li><a href="{{ route('register') }}"><span aria-hidden="true">📝</span> Đăng ký</a></li>
+                    <li><a href="{{ route('forgotPassword') }}"><span aria-hidden="true">🔒</span> Quên mật khẩu</a></li>
+                </ul>
+            @else
+                <p class="ft-col-title">Tài khoản</p>
+                <ul class="ft-links">
+                    <li><a href="{{ url('/user/infoProfile') }}"><span aria-hidden="true">👤</span> Thông tin cá nhân</a></li>
+                    <li><a href="{{ route('user.cashIn') }}"><span aria-hidden="true">💰</span> Nạp tiền</a></li>
+                    <li><a href="{{ route('user.cashOut') }}"><span aria-hidden="true">💵</span> Rút tiền</a></li>
+                    <li><a href="{{ route('changePassword') }}"><span aria-hidden="true">🔑</span> Đổi mật khẩu</a></li>
+                </ul>
+            @endif
         </div>
 
+        {{-- ===== Hỗ trợ (giống nhau cả 3 area) ===== --}}
         <div class="ft-col">
             <p class="ft-col-title">Hỗ trợ</p>
             <ul class="ft-links">
-                <li><a href="{{ route('about') }}">📖 Giới thiệu</a></li>
-                <li><a href="{{ route('contact') }}">📬 Liên hệ</a></li>
-                @if ($area === 'guest')
-                    <li><a href="{{ route('home') }}">📊 Bảng giá công khai</a></li>
-                @else
-                    <li><a href="{{ route('home') }}">📊 Danh sách mã</a></li>
-                @endif
-                <li><a href="mailto:{{ $contactEmail }}?subject=Góp%20ý%20ứng%20dụng">✏️ Góp ý</a></li>
+                <li><a href="{{ route('about') }}"><span aria-hidden="true">📖</span> Giới thiệu</a></li>
+                <li><a href="{{ route('guide') }}"><span aria-hidden="true">🗺️</span> Hướng dẫn</a></li>
+                <li><a href="{{ route('faq') }}"><span aria-hidden="true">❓</span> Hỏi đáp</a></li>
+                <li><a href="{{ route('contact') }}"><span aria-hidden="true">📬</span> Liên hệ</a></li>
             </ul>
         </div>
     </div>
 
     <div class="ft-bottom">
         <p class="ft-copy">&copy; {{ date('Y') }} <span>Invest Manager</span>. All rights reserved.</p>
+        <div class="ft-legal-links">
+            <a href="{{ route('donate') }}">💖 Ủng hộ</a>
+            <span aria-hidden="true">·</span>
+            <a href="{{ route('privacy') }}">Chính sách bảo mật</a>
+            <span aria-hidden="true">·</span>
+            <a href="{{ route('terms') }}">Điều khoản</a>
+        </div>
     </div>
 </footer>

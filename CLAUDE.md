@@ -1,4 +1,4 @@
-# CLAUDE.md — Tài liệu kỹ thuật: Invest App
+﻿# CLAUDE.md — Tài liệu kỹ thuật: Invest App
 
 > Tài liệu này được viết để AI (Claude Code) đọc và hiểu toàn bộ project ngay từ đầu session.
 > Cập nhật khi có thay đổi lớn về kiến trúc, database hoặc tính năng mới.
@@ -17,7 +17,7 @@
 8. [Modules & Features](#8-modules--features)
    - 8.1 Authentication | 8.2 Admin | 8.3 Portfolio | 8.4 Follow | 8.5 Cash | 8.6 Sync
    - 8.7 Cache System | 8.8 Logging | 8.9 Crontab
-   - 8.10 User Home Modals | 8.11 Public Pages
+   - 8.10 User Home Modals | 8.11 Public Pages (About, Contact, Donate, Privacy, Terms, Guide, FAQ, VN30, VN100)
    - 8.12 Middleware | 8.13 Mail Classes
    - 8.16 VPS Python Scripts (server-side)
 9. [Services](#9-services) — methods chi tiết từng service
@@ -167,7 +167,7 @@ invest/
 │   │   │   ├── Admin/Admin.php            # Admin panel: CRUD stocks, users, logs, sync, suggest, follow
 │   │   │   ├── User/User.php              # User: home, buy, sell, follow, cash, profile, email settings
 │   │   │   ├── Login/Login.php            # Auth: login, register, forgot/reset password, email verify
-│   │   │   ├── Pages/PagesController.php  # Public pages: about (GET), contact (GET+POST → ContactMail)
+│   │   │   ├── Pages/PagesController.php  # Public pages: about, contact (POST→ContactMail), donate, privacy, terms, guide, faq, vn30, vn100, stockDetail, stockRiskHistory, stockDividendHistory
 │   │   │   ├── Sync/Sync.php              # Sync/VPS proxy: risk, email jobs, crontab management
 │   │   │   └── Api/CacheController.php   # REST API: cache info, clear-all/table/user/stock/keys
 │   │   ├── Middleware/
@@ -226,7 +226,7 @@ invest/
 ├── docs/
 │   └── blade-seo.md                       # Blade template & SEO guidelines
 ├── resources/
-│   ├── css/                               # 30 CSS files tổng cộng
+│   ├── css/                               # 36 CSS files tổng cộng
 │   │   ├── app.css                        # Global styles (table reset, button, layout base)
 │   │   ├── theme-invest-app.css           # Theme chính: màu, nav PC, grid, dark finance UI
 │   │   ├── theme-drawer-shared.css        # Mobile drawer: Layout + LayoutAdmin dùng chung
@@ -239,9 +239,9 @@ invest/
 │   │   ├── loginRegister.css              # Register form
 │   │   ├── userFollow.css                 # Danh sách follow (table)
 │   │   ├── footer.css                     # Footer chung
-│   │   └── pages/                         # CSS riêng từng trang (18 files)
+│   │   └── pages/                         # CSS riêng từng trang (22 files)
 │   │       ├── user-home.css              # Trang chủ user: bảng cổ phiếu, filter, modals (suggest + buy suggest)
-│   │       ├── user-profile.css           # Profile: danh mục tổng hợp
+│   │       ├── user-profile.css           # Profile: danh mục tổng hợp, balance strip (.profile-balance-strip)
 │   │       ├── user-follow-form.css       # Form thêm/sửa follow
 │   │       ├── user-email-settings.css    # Cài đặt email thông báo
 │   │       ├── investment-performance.css # Trang hiệu suất đầu tư
@@ -252,13 +252,18 @@ invest/
 │   │       ├── user-change-password.css   # Đổi mật khẩu
 │   │       ├── public-profile.css         # Profile công khai
 │   │       ├── admin-stock-update.css     # Form sửa stock
-│   │       ├── admin-user-update.css      # Form sửa user
+│   │       ├── admin-user-update.css      # Form sửa user (select + live badge preview)
 │   │       ├── admin-logs.css             # Log viewer
 │   │       ├── admin-logs-vps.css         # VPS logs
 │   │       ├── admin-crontab.css          # Crontab manager
 │   │       ├── about.css                  # Trang giới thiệu (hero, mockups, animations)
-│   │       └── contact.css               # Trang liên hệ (split layout, form, FAQ)
-│   ├── js/                                # 36 JS files tổng cộng
+│   │       ├── contact.css               # Trang liên hệ (split layout, form, FAQ)
+│   │       ├── donate.css                # Trang ủng hộ (hero, cards, modal QR VietQR)
+│   │       ├── legal.css                  # Trang Privacy + Terms: prose layout, legal-hero, legal-highlight box
+│   │       ├── stock-category.css         # Trang VN30/VN100: bảng mã cổ phiếu, risk badge màu
+│   │       ├── guide.css                  # Trang Hướng dẫn: timeline 6 bước, step card layout
+│   │       └── faq-page.css              # Trang FAQ: details/summary accordion với CSS chevron rotation
+│   ├── js/                                # 37 JS files tổng cộng
 │   │   ├── app.js                         # Base bundle: Axios, CSRF token, global helpers
 │   │   ├── Admin.js                       # Admin bundle: stock CRUD, import/export
 │   │   ├── AdminStockManagement.js        # Quản lý stocks: filter, sort, batch
@@ -295,10 +300,11 @@ invest/
 │   │       ├── admin-update-risk.js       # Sync risk cho 1 mã
 │   │       ├── admin-logs-vps.js          # Xem logs từ VPS
 │   │       ├── admin-crontab.js           # Crontab CRUD UI
-│   │       └── contact.js                 # Form liên hệ AJAX + FAQ accordion
+│   │       ├── contact.js                 # Form liên hệ AJAX + FAQ accordion
+│       │       └── donate.js                  # Donate: mở/đóng modal QR, copy clipboard, VietQR URL builder
 │   └── views/                             # 50+ Blade templates
 │       ├── Layout/
-│       │   ├── Layout.blade.php           # Layout user/public: mobile drawer, SEO meta, topbar
+│       │   ├── Layout.blade.php           # Layout user/public: mobile drawer, SEO meta, topbar; Organization JSON-LD trên mọi trang
 │       │   ├── LayoutAdmin.blade.php      # Layout admin: sidebar, mobile drawer
 │       │   └── LayoutLogin.blade.php      # Layout auth: minimal, centered card
 │       ├── Admin/                         # 16 admin views
@@ -312,15 +318,16 @@ invest/
 │       │   ├── AdminStockFollow.blade.php # Danh sách admin follow
 │       │   ├── AdminStockSuggest.blade.php# Danh sách admin suggest
 │       │   ├── AdminUserManagement.blade.php # Quản lý users
-│       │   ├── AdminUserUpdate.blade.php  # Form sửa user (role, active, email)
+│       │   ├── AdminUserUpdate.blade.php  # Form sửa user (role, active, email) — có live badge preview cho 3 select
+│       │   ├── AdminUserDetail.blade.php  # Xem tài sản user (portfolio FIFO) — reuse user-profile.js
 │       │   ├── AdminUploadFile.blade.php  # Upload file lên VPS
 │       │   ├── AdminUpdateRiskForCode.blade.php # Sync risk 1 mã
 │       │   ├── AdminInfoProfile.blade.php # Thông tin admin
 │       │   ├── AdminUpdateInfoProfile.blade.php # Cập nhật tên admin
 │       │   └── AdminChangePassword.blade.php # Đổi mật khẩu admin
 │       ├── User/                          # 14 user views
-│       │   ├── UserView.blade.php         # Trang chủ: bảng giá, suggest modals, notif modal
-│       │   ├── UserProfile.blade.php      # Portfolio tổng hợp FIFO
+│       │   ├── UserView.blade.php         # Trang chủ: bảng giá, suggest modals, notif modal (title: "Bảng giá cổ phiếu — Theo dõi danh mục đầu tư cá nhân")
+│       │   ├── UserProfile.blade.php      # Portfolio tổng hợp FIFO + balance strip (Số dư khả dụng từ cash_follow)
 │       │   ├── UserInvestmentPerformance.blade.php # Hiệu suất P&L, ROI
 │       │   ├── UserFollow.blade.php       # Danh sách follow
 │       │   ├── UserBuy.blade.php          # Form mua cổ phiếu
@@ -338,9 +345,15 @@ invest/
 │       │   ├── Register.blade.php
 │       │   ├── ForgotPassword.blade.php
 │       │   └── ResetPassword.blade.php
-│       ├── Pages/                         # 2 public views
+│       ├── Pages/                         # 8 public views
 │       │   ├── AboutView.blade.php        # Giới thiệu: hero, features, how-it-works, CTA
-│       │   └── ContactView.blade.php      # Liên hệ: split layout, form, FAQ accordion
+│       │   ├── ContactView.blade.php      # Liên hệ: split layout, form, FAQ accordion; FAQPage JSON-LD (4 câu hỏi)
+│       │   ├── DonateView.blade.php       # Ủng hộ: 4 feature cards, CTA, modal QR TPBank VietQR
+│       │   ├── PrivacyView.blade.php      # Chính sách bảo mật: 6 mục, legal-hero, legal-highlight; robots index
+│       │   ├── TermsView.blade.php        # Điều khoản sử dụng: 7 mục, disclaimer nổi bật (nền tảng mô phỏng); robots index
+│       │   ├── StockCategoryView.blade.php# Shared template cho VN30/VN100: bảng mã, giá, %, risk badge; ItemList JSON-LD
+│       │   ├── GuideView.blade.php        # Hướng dẫn 6 bước với HowTo JSON-LD; @auth/@else cho links hành động
+│       │   └── FaqView.blade.php          # Hỏi đáp: 18 câu/5 nhóm dùng details/summary; FAQPage JSON-LD
 │       ├── PDF/                           # 1 PDF template
 │       │   └── PortfolioPdf.blade.php     # PDF xuất danh mục: header, KPI cards, bảng holdings (rating badge màu), P&L bar, footer. Không có logo (dompdf 2.0 không hỗ trợ SVG, XAMPP không có Imagick/GD). Không có FIFO timeline (đã bỏ).
 │       ├── Emails/                        # 5 email templates
@@ -352,12 +365,12 @@ invest/
 │       └── partials/                      # Reusable components
 │           ├── user-nav-primary.blade.php # Nav user đã đăng nhập
 │           ├── admin-nav-primary.blade.php# Nav admin
-│           ├── guest-nav-actions.blade.php# Nav guest: Trang chủ, Đăng nhập, Đăng ký + Giới thiệu, Liên hệ
+│           ├── guest-nav-actions.blade.php# Nav guest: Trang chủ, Đăng nhập, Đăng ký + Giới thiệu, Liên hệ, Ủng hộ
 │           ├── footer-invest.blade.php    # Footer chung (3 area: guest/user/admin)
 │           ├── notify-modal.blade.php     # Modal thông báo dùng chung
 │           ├── page-title-invest.blade.php# Component tiêu đề trang
-│           ├── seo-public.blade.php       # SEO metadata cho trang public
-│           └── favicon.blade.php          # Favicon link tags
+│           ├── seo-public.blade.php       # SEO metadata: canonical, description, og: (w/h 1200×630), twitter:card=summary_large_image
+│           └── favicon.blade.php          # Favicon: SVG + shortcut icon + apple-touch + theme-color #0f172a
 ├── routes/
 │   ├── web.php                            # Web routes
 │   └── api.php                            # API routes (cron.secret protected)
@@ -366,7 +379,7 @@ invest/
 │   └── logs/                             # laravel_YYYYMMDD.log (daily rotating, 30 ngày)
 ├── .env                                   # Environment config (không commit)
 ├── .env.example                           # Template
-├── vite.config.js                         # 30 CSS + 36 JS entry points
+├── vite.config.js                         # 36 CSS + 37 JS entry points
 ├── composer.json                          # PHP dependencies
 └── package.json                           # Node dependencies
 ```
@@ -406,7 +419,7 @@ invest/
 | `stocks_vn` | int (default 1000) | 30=VN30, 100=VN100, 1000=không thuộc VN30/VN100 |
 | `rating_stocks` | int (default 0) | Điểm đánh giá 1–10 (syncRatingPrice tính theo risk × volume × price) |
 | `volume` | decimal (default 0) | Khối lượng phiên giao dịch gần nhất |
-| `volume_avg` | decimal (default 0) | Khối lượng giao dịch trung bình 1008 phiên |
+| `volume_avg` | decimal (default 0) | Khối lượng giao dịch trung bình 1008 phiên — **admin-only**, ẩn trên trang public `/co-phieu/{code}` |
 | `created_at`, `updated_at` | datetime | Timestamps |
 
 ### Bảng `user_portfolios` (FIFO lots – cổ phiếu đang giữ)
@@ -504,6 +517,22 @@ invest/
 
 > Không có migration — bảng được tạo thủ công. Model tự động xóa cache khi create/delete.
 
+### Bảng `stock_risk_history`
+| Cột | Kiểu | Mô tả |
+|-----|------|-------|
+| `id` | bigint (PK) | Auto increment |
+| `stock_id` | bigint | FK → stocks |
+| `code` | varchar | Mã cổ phiếu |
+| `event_date` | date | Ngày sự kiện |
+| `channel_id` | int | Loại sự kiện (xem mapping bên dưới) |
+| `note` | text | Mô tả sự kiện — dùng trực tiếp làm badge label trong StockDetailView |
+| `detected_at` | datetime | Thời điểm VPS phát hiện và ghi nhận |
+
+> **Không có cột `risk_level`.** Badge color trong StockDetailView được suy ra từ keyword của `note` + `channel_id`:
+> - `channel_id 18` + note chứa "hủy niêm yết" → risk 4 (Đình chỉ); còn lại (Giao dịch trở lại) → risk 1
+> - `channel_id 19` → risk 2 (Cảnh báo); `channel_id 22/50/51/52/53` → risk 3 (Hạn chế); `channel_id 56` → risk 4 (Đình chỉ)
+> - Note chứa "ra khỏi" hoặc "giao dịch trở lại" → override về risk 1 bất kể channel_id
+
 ### Bảng `stock_status_logs`
 Audit log cho các thao tác sync stock. Hiện chỉ có `id` + timestamps (mở rộng sau).
 
@@ -530,6 +559,8 @@ stocks (1) ──────── (many) user_follows
 | Bảng | Cache Key | Xóa khi |
 |------|-----------|---------|
 | stocks | `stocks_all`, `stock_code_{CODE}`, `stock_risk_{CODE}` | Insert/Update/Delete stock, Import CSV, Sync |
+| stock_risk_history | `stock_risk_history_{CODE}` | Sau khi VPS ghi record mới vào `stock_risk_history` |
+| dividend_adjustments | `stock_dividend_{CODE}` | Sau khi VPS ghi record mới vào `dividend_adjustments` |
 | user_portfolios | `user_portfolio_profile_{USER_ID}`, `user_portfolio_stock_info_{USER_ID}`, `user_portfolio_buy_{USER_ID}`, `user_portfolio_session_{USER_ID}` | Buy, Sell |
 | user_portfolio_sells | `user_portfolio_sell_{USER_ID}` | Sell |
 | user_follows | `user_follow_{USER_ID}`, `user_follow_notice_{USER_ID}` | Insert/Update/Delete follow |
@@ -590,11 +621,19 @@ stocks (1) ──────── (many) user_follows
 | Method | URL | Mô tả |
 |--------|-----|-------|
 | GET | `/robots.txt` | SEO robots file |
-| GET | `/sitemap.xml` | XML sitemap (cached 1 ngày) |
+| GET | `/sitemap.xml` | XML sitemap (cached 1 ngày) — home, about, contact, donate, guide (0.7), faq (0.7), vn30 (0.7, daily), vn100 (0.7, daily), privacy (0.3, yearly), terms (0.3, yearly) + tất cả `/co-phieu/{code}` (dynamic, daily) |
 | GET | `/logo.svg` | Logo SVG (served qua Laravel, không phải file tĩnh) |
 | GET | `/trang-chu` | Trang chủ (không cần đăng nhập) – `name: home` |
 | GET | `/gioi-thieu` | Trang giới thiệu nền tảng – `name: about` |
 | GET/POST | `/lien-he` | Trang liên hệ + form gửi email – `name: contact` |
+| GET | `/ung-ho` | Trang ủng hộ + modal QR chuyển khoản – `name: donate` |
+| GET | `/huong-dan` | Hướng dẫn sử dụng 6 bước + HowTo JSON-LD – `name: guide` |
+| GET | `/hoi-dap` | Hỏi đáp 18 câu/5 nhóm (details/summary) + FAQPage JSON-LD – `name: faq` |
+| GET | `/chinh-sach-bao-mat` | Chính sách bảo mật (6 mục) – `name: privacy` |
+| GET | `/dieu-khoan` | Điều khoản sử dụng (7 mục) – `name: terms` |
+| GET | `/co-phieu/vn30` | Danh sách 30 mã VN30 + ItemList JSON-LD – `name: stocks.vn30` (phải khai báo TRƯỚC wildcard) |
+| GET | `/co-phieu/vn100` | Danh sách ~95 mã VN100 (stocks_vn IN 30,100) + ItemList JSON-LD – `name: stocks.vn100` (phải khai báo TRƯỚC wildcard) |
+| GET | `/co-phieu/{code}` | Chi tiết mã cổ phiếu: giá, risk, lịch sử, dividend – `name: stock.detail` (wildcard — khai báo SAU vn30/vn100) |
 | GET | `/` | Redirect: Admin → `/admin`, User → `/trang-chu` |
 
 ### Guest Routes (middleware: `guest`)
@@ -631,6 +670,7 @@ stocks (1) ──────── (many) user_follows
 | GET | `/admin/users` | `Admin@userManagement` | Quản lý users |
 | GET/PUT | `/admin/users/update/{id}` | `Admin@updateUser` | Sửa user |
 | POST | `/admin/users/delete/{id}` | `Admin@deleteUser` | Xóa user |
+| GET | `/admin/users/{id}` | `Admin@userDetail` | Xem tài sản user (portfolio) – `name: admin.users.detail`, `->whereNumber('id')` |
 | GET | `/admin/infoProfile` | `Admin@infoProfile` | Profile admin |
 | GET/PUT | `/admin/updateInfoProfile` | `Admin@updateInfoProfile` | Cập nhật profile |
 | GET/PUT | `/admin/changePassword` | `Admin@changePassword` | Đổi mật khẩu |
@@ -694,7 +734,7 @@ stocks (1) ──────── (many) user_follows
 |--------|-----|------|-------|
 | GET | `/api/cache/info` | – | Thông tin cache (driver, số file, dung lượng) |
 | POST | `/api/cache/clear-all` | – | Xóa toàn bộ cache |
-| POST | `/api/cache/clear-table` | `{"table": "stocks"}` | Xóa cache theo bảng (hỗ trợ: stocks, user_portfolios, user_portfolios_sell, user_follows, cash_follow, users, status_sync, admin_follow, admin_suggest) |
+| POST | `/api/cache/clear-table` | `{"table": "stocks"}` | Xóa cache theo bảng (hỗ trợ: stocks, user_portfolios, user_portfolios_sell, user_follows, cash_follow, users, status_sync, admin_follow, admin_suggest, stock_risk_history, dividend_adjustments) |
 | POST | `/api/cache/clear-user` | `{"user_id": 1}` | Xóa cache user |
 | POST | `/api/cache/clear-stock` | `{"code": "VNM"}` | Xóa cache stock code |
 | POST | `/api/cache/clear-keys` | `{"keys": [...]}` | Xóa cache theo danh sách keys |
@@ -744,7 +784,8 @@ stocks (1) ──────── (many) user_follows
 - **Stock Management:** Export CSV (tải về toàn bộ stocks), Import CSV (thêm/cập nhật hàng loạt).
 - **Admin Follow:** Danh sách mã admin theo dõi (khác với user follow).
 - **Admin Suggest:** Gợi ý đầu tư từ admin cho users.
-- **User Management:** Xem, sửa, xóa user accounts.
+- **User Management:** Xem, sửa, xóa user accounts. Click vào row → `/admin/users/{id}` xem portfolio của user đó (reuse `user-profile.js` + `user-profile.css`, inject `userPortfolios` + `userInvestCash` qua `window.__pageData`).
+- **User Update Form:** 3 select (Vai trò, Trạng thái, Xác thực email) có live badge preview bên dưới — cập nhật màu ngay khi thay đổi selection, khớp màu với badge trong bảng danh sách users.
 - **Log Viewer:** Dùng `opcodesio/log-viewer` để xem `storage/logs/laravel_YYYYMMDD.log`.
 - **Logs VPS:** Xem logs từ VPS bên ngoài qua `SYNC_SERVICE_URL`.
 - **Crontab Management:** Xem, thêm, sửa, xóa, bật/tắt, chạy ngay các cron job trên VPS — proxy qua `Sync.php` tới VPS API (xem mục 8.9).
@@ -768,6 +809,11 @@ stocks (1) ──────── (many) user_follows
 4. Tạo bản ghi `user_portfolio_sells`
 5. Cộng `cash_follow.cash` += `sell_price × quantity`
 6. Clear cache liên quan
+
+**Trang Profile (`profile()`):**
+- Controller truyền 3 biến vào view: `$userPortfolios` (FIFO lots), `$userInvestCash` (tổng tài sản + vốn nạp), `$userCash` (`UserCashFollow::getCashFollow($userId)` — cached `user_cash_{USER_ID}`)
+- View render **balance strip** (Blade, không cần JS): hiển thị `$userCash->cash` nổi bật phía trên bảng danh mục, class `.profile-balance-strip`
+- `userInvestCash.cash` = tổng tài sản (ví + giá thị trường các lô đang giữ); `userCash->cash` = số dư ví khả dụng — hai giá trị khác nhau, không nhầm lẫn
 
 **Investment Performance:** Tính P&L, ROI so sánh giá mua TB với giá hiện tại.
 
@@ -952,8 +998,8 @@ Admin browser → Laravel /admin/crontab/* → Sync.php (proxy) → VPS FastAPI 
 
 ---
 
-### 8.11 Public Pages (Giới thiệu & Liên hệ)
-**Files:** [app/Http/Controllers/Pages/PagesController.php](app/Http/Controllers/Pages/PagesController.php), [app/Mail/ContactMail.php](app/Mail/ContactMail.php), [resources/views/Pages/AboutView.blade.php](resources/views/Pages/AboutView.blade.php), [resources/views/Pages/ContactView.blade.php](resources/views/Pages/ContactView.blade.php), [resources/css/pages/about.css](resources/css/pages/about.css), [resources/css/pages/contact.css](resources/css/pages/contact.css), [resources/js/pages/contact.js](resources/js/pages/contact.js)
+### 8.11 Public Pages (Giới thiệu, Liên hệ & Donate)
+**Files:** [app/Http/Controllers/Pages/PagesController.php](app/Http/Controllers/Pages/PagesController.php), [app/Mail/ContactMail.php](app/Mail/ContactMail.php), [resources/views/Pages/AboutView.blade.php](resources/views/Pages/AboutView.blade.php), [resources/views/Pages/ContactView.blade.php](resources/views/Pages/ContactView.blade.php), [resources/views/Pages/DonateView.blade.php](resources/views/Pages/DonateView.blade.php), [resources/css/pages/about.css](resources/css/pages/about.css), [resources/css/pages/contact.css](resources/css/pages/contact.css), [resources/css/pages/donate.css](resources/css/pages/donate.css), [resources/js/pages/contact.js](resources/js/pages/contact.js), [resources/js/pages/donate.js](resources/js/pages/donate.js)
 
 **Trang Giới thiệu `/gioi-thieu` (route `about`):**
 - 4 section: Hero (animated orbs + gradient chips) → Feature Cards (4 tính năng, grid 2×2 PC / 1 col mobile) → Cách hoạt động (3 bước timeline) → CTA cuối trang
@@ -965,16 +1011,81 @@ Admin browser → Laravel /admin/crontab/* → Sync.php (proxy) → VPS FastAPI 
 - Form AJAX: POST → validate server → `ContactMail` → JSON response → inline success/error (không redirect)
 - `ContactMail` dùng lại view `Emails/Notify.blade.php`; Reply-To = email người gửi → admin reply thẳng
 - `contact.js`: validate client-side (required, email format), Axios POST với CSRF, FAQ accordion (click → toggle height), disabled button khi đang gửi
+- SEO: `@section('seo')` có `FAQPage` JSON-LD (4 câu hỏi) → Google có thể hiển thị rich snippet FAQ trực tiếp trên kết quả tìm kiếm
+
+**Trang Ủng hộ `/ung-ho` (route `donate`):**
+- Controller: `PagesController@donate` — trả `$email` (Auth::user()->email hoặc null)
+- Nội dung: Hero (💖 pulse animation + gradient) → 4 cards (Đội ngũ, Phân tích, Đầu tư không áp lực, Dịch vụ miễn phí) → CTA với button "Donate ngay"
+- Button mở modal QR: Ngân hàng TPBank, STK 02319798401, Chủ tài khoản LE HUU PHUOC, nội dung `{email} donate` (đã login) hoặc `Nguoi dung donate` (guest)
+- QR image: VietQR public API — `https://img.vietqr.io/image/TPB-{STK}-compact2.png?addInfo={encoded}&accountName=Invest+Team` (chuẩn EMVCo/NAPAS, CSP `img-src https:` đã cho phép)
+- Copy buttons cho STK và nội dung (visual tick xanh 1.5s)
+- Accessible cho cả guest và user đã đăng nhập (không có auth middleware)
+- Assets: `donate.css` + `donate.js` — inject `window.__donateData = { accountNumber, bank, donateContent }` từ Blade
+
+**Trang Chính sách bảo mật `/chinh-sach-bao-mat` (route `privacy`):**
+- Controller: `PagesController@privacy` — `return view('Pages.PrivacyView')`
+- 6 mục: Thông tin thu thập → Mục đích sử dụng → Bảo mật dữ liệu → Xóa tài khoản (cascade delete cảnh báo) → Cookies → Liên hệ
+- `legal-highlight` box nổi bật cho thông tin xóa cascade
+- SEO: robots index, follow — Google được index trang này (trust signal YMYL)
+- Assets: `legal.css` (prose layout, legal-hero, legal-highlight box)
+
+**Trang Điều khoản sử dụng `/dieu-khoan` (route `terms`):**
+- Controller: `PagesController@terms` — `return view('Pages.TermsView')`
+- 7 mục: Điều kiện sử dụng → Quyền và trách nhiệm → Tài khoản → Nội dung → Nền tảng mô phỏng → Giới hạn trách nhiệm → Thay đổi điều khoản
+- `legal-highlight` box nổi bật disclaimer "đây là nền tảng mô phỏng, không phải giao dịch thật"
+- SEO: robots index, follow
+- Assets: `legal.css` (dùng chung với Privacy)
+
+**Trang Hướng dẫn `/huong-dan` (route `guide`):**
+- Controller: `PagesController@guide` — `return view('Pages.GuideView')`
+- 6 bước: Đăng ký → Nạp tiền → Follow mã → Mua cổ phiếu → Theo dõi danh mục → Bán và rút tiền
+- `@auth/@else` conditional: links hành động trong mỗi bước chỉ hiển thị khi đã đăng nhập (nếu guest → hiển thị link đăng ký)
+- HowTo JSON-LD schema → Google hiển thị hướng dẫn dạng step-by-step trên kết quả tìm kiếm
+- Assets: `guide.css` (step card timeline layout)
+
+**Trang Hỏi đáp `/hoi-dap` (route `faq`):**
+- Controller: `PagesController@faq` — `return view('Pages.FaqView')`
+- 18 câu hỏi chia 5 nhóm: Tổng quan (4) → Tài khoản (3) → Giao dịch (4) → Danh mục (4) → Kỹ thuật (3)
+- Dùng HTML `<details>/<summary>` — không cần JS, content trong DOM → Google index đầy đủ
+- FAQPage JSON-LD với tất cả 18 câu → rich snippet FAQ trên Google
+- Assets: `faq-page.css` (CSS chevron rotation, accordion styling)
+
+**Trang VN30 `/co-phieu/vn30` (route `stocks.vn30`):**
+- Controller: `PagesController@vn30` — query `Stock::where('stocks_vn', 30)->orderBy('code')` → 30 mã
+- Dùng shared template `StockCategoryView.blade.php` với `$title`, `$subtitle`, `$stocks`, `$categoryKey`, `$itemListSchema`
+- Bảng: mã (link → `/co-phieu/{code}`), giá hiện tại, % thay đổi (màu xanh/đỏ), risk badge màu
+- ItemList JSON-LD schema → Google hiển thị danh sách mã trên kết quả tìm kiếm
+- **Quan trọng:** Route phải khai báo TRƯỚC wildcard `/co-phieu/{code}` trong `routes/web.php`
+- Assets: `stock-category.css`
+
+**Trang VN100 `/co-phieu/vn100` (route `stocks.vn100`):**
+- Controller: `PagesController@vn100` — query `Stock::whereIn('stocks_vn', [30, 100])->orderBy('code')` → ~95 mã
+- VN100 = stocks_vn=30 (30 mã VN30) + stocks_vn=100 (65 mã riêng VN100) = 95 mã tổng
+- Dùng chung template `StockCategoryView.blade.php`
+- ItemList JSON-LD schema
+- **Quan trọng:** Route phải khai báo TRƯỚC wildcard `/co-phieu/{code}`
+- Assets: `stock-category.css` (dùng chung với VN30)
+
+**Trang Chi tiết cổ phiếu `/co-phieu/{code}` (route `stock.detail`):**
+- Controller: `PagesController@stockDetail` — lấy `$stock`, `$riskHistory`, `$dividendHistory`, `$userHolding`, `$userFollow`
+- **Info grid:** Giá mua/bán khuyến nghị, Khối lượng phiên, Chỉ số (VN30/VN100/Ngoài), Điểm đánh giá
+  - `volume_avg` **ẩn** với user/guest (admin-only) — không hiển thị trong info grid
+- **Lịch sử rủi ro:** Đọc từ bảng `stock_risk_history` (không có cột `risk_level`). Badge color suy ra từ `channel_id` + keyword `note`; badge label hiển thị `note` trực tiếp
+- **Lịch sử cổ tức:** Từ bảng `dividend_adjustments` join `stocks`
+- **Danh mục user:** Chỉ hiện khi đã đăng nhập + đang giữ mã → FIFO summary (tổng qty, giá mua TB, giá trị thị trường, P&L, ROI)
+- **Action buttons:** @auth user → Mua/Bán/Theo dõi; @guest → Đăng ký/Đăng nhập
+- Assets: `stock-detail.css`
 
 **Nav guest (`guest-nav-actions.blade.php`):**
 - 3 link chính (Trang chủ, Đăng nhập, Đăng ký) nằm trong `user-nav-primary__mid`
-- Giới thiệu + Liên hệ nằm trong `user-nav-guest-info` **ngoài** `__mid`:
+- Giới thiệu + Liên hệ + **Ủng hộ** nằm trong `user-nav-guest-info` **ngoài** `__mid`:
   - PC: `grid-column: 2; grid-row: 1` → hiển thị góc phải cùng hàng với 3 link chính
   - Mobile: `flex-shrink: 0` → ghim đáy drawer (cùng cơ chế với nút Đăng xuất của user)
+- Footer (`footer-invest.blade.php`): cột "Hỗ trợ" có đủ Giới thiệu, Hướng dẫn, Hỏi đáp, Liên hệ, Ủng hộ, Danh sách mã; `.ft-bottom` có `.ft-legal-links` với Privacy + Terms
 
 **CSS `:not()` chain — quan trọng khi thêm link guest mới:**
 - `theme-invest-app.css` và `theme-drawer-shared.css` đều có fallback rule muted cho `.user-nav-link--guest:not(...)`. Khi thêm modifier class mới, phải thêm vào chain `:not()` trong **cả 2 file** và thêm vào rule surface tile.
-- Hiện tại chain gồm: `:not(.user-nav-link--guest-login):not(.user-nav-link--guest-register):not(.user-nav-link--guest-home):not(.user-nav-link--guest-about):not(.user-nav-link--guest-contact):not(.user-nav-link--active)`
+- Hiện tại chain gồm: `:not(.user-nav-link--guest-login):not(.user-nav-link--guest-register):not(.user-nav-link--guest-home):not(.user-nav-link--guest-about):not(.user-nav-link--guest-contact):not(.user-nav-link--guest-donate):not(.user-nav-link--active)`
 
 ---
 
@@ -1159,7 +1270,7 @@ Auth gọi webapp: header `X-Cron-Secret: {WEBAPP_CACHE_SECRET}` (env var trên 
 |--------|-------|
 | `buyStock($data, $userId)` | Kiểm tra số dư, tạo FIFO lot, trừ cash |
 | `sellStock($data, $userId)` | FIFO: trừ từ lot cũ nhất, tạo sell record, cộng cash |
-| `calcUserInvestCash($userId)` | Tính tổng tiền đã đầu tư (sum buy_price × qty) |
+| `calcUserInvestCash($userId)` | Trả `{cash: tổng tài sản (ví + market value), cash_in: net vốn nạp}` — dùng trong invest-table JS; khác với `UserCashFollow->cash` (chỉ là số dư ví) |
 | `saveSessionClosedFlags($userId, $items)` | Batch update `session_closed_flag` |
 
 ### FollowService
@@ -1265,7 +1376,7 @@ Drawer menu dùng chung giữa `Layout.blade.php` (user/public) và `LayoutAdmin
 | `userFollow.css` | Follow table |
 | `footer.css` | Footer 3-area layout |
 | `pages/user-home.css` | Bảng giá, filter chips, suggest modal (blue), buy-suggest modal (amber), sticky clone |
-| `pages/user-profile.css` | Portfolio FIFO summary cards |
+| `pages/user-profile.css` | Portfolio FIFO summary cards; `.profile-balance-strip` — Số dư khả dụng card (emerald nếu > 0, muted nếu = 0) |
 | `pages/user-follow-form.css` | Form follow inline |
 | `pages/user-email-settings.css` | Email settings toggles |
 | `pages/investment-performance.css` | Performance chart table |
@@ -1276,12 +1387,17 @@ Drawer menu dùng chung giữa `Layout.blade.php` (user/public) và `LayoutAdmin
 | `pages/user-change-password.css` | Password change form |
 | `pages/public-profile.css` | Public profile |
 | `pages/admin-stock-update.css` | Form sửa stock |
-| `pages/admin-user-update.css` | Form sửa user |
+| `pages/admin-user-update.css` | Form sửa user — select styling + `.user-update-select-badge` live preview |
 | `pages/admin-logs.css` | Log viewer |
 | `pages/admin-logs-vps.css` | VPS logs realtime |
 | `pages/admin-crontab.css` | Crontab manager UI |
 | `pages/about.css` | Hero orbs, feature cards, CSS-only UI mockups, animations |
 | `pages/contact.css` | Split layout, FAQ accordion |
+| `pages/donate.css` | Hero pulse, 4 feature cards (grid 2×2), CTA, modal QR |
+| `pages/legal.css` | Prose layout cho Privacy + Terms: legal-hero, legal-highlight box |
+| `pages/stock-category.css` | Bảng VN30/VN100: mã cổ phiếu, giá, %, risk badge màu theo level |
+| `pages/guide.css` | Timeline 6 bước hướng dẫn: step card layout, step number circle |
+| `pages/faq-page.css` | FAQ accordion: details/summary styling, CSS chevron rotation |
 
 ### JavaScript files
 | File | Tính năng chính |
@@ -1322,6 +1438,7 @@ Drawer menu dùng chung giữa `Layout.blade.php` (user/public) và `LayoutAdmin
 | `pages/admin-logs-vps.js` | VPS logs: fetch + display |
 | `pages/admin-crontab.js` | Crontab CRUD: add/edit/delete/toggle/run, re-fetch after mutation |
 | `pages/contact.js` | Contact form: client validate, Axios POST AJAX, FAQ accordion |
+| `pages/donate.js` | Donate: `openDonateModal()`, `closeDonateModal()`, `copyDonateText()`, VietQR URL builder từ `window.__donateData` |
 
 ### Cách include assets (Vite)
 ```blade
@@ -1489,12 +1606,15 @@ Chi tiết đầy đủ tại [docs/blade-seo.md](docs/blade-seo.md). Tóm tắt
 - `actions-left` — nav: `@include('partials.user-nav-primary')` hoặc `@include('partials.guest-nav-actions')`
 - `seo` — SEO meta (xem dưới)
 
+**SEO — `Layout.Layout` (luôn có):**
+- `Organization` JSON-LD schema xuất hiện trên **mọi trang** (trong `<head>`, trước SEO conditionals) — tên app, URL, logo, contactPoint (email + phone + language)
+
 **SEO logic tự động trong `Layout.Layout`:**
 1. Nếu view có `@section('seo')` → dùng section đó (ghi đè hoàn toàn)
 2. Nếu route là `home` → layout tự gắn `seo-public` + JSON-LD `WebSite`
 3. Nếu user đã đăng nhập → tự động `<meta name="robots" content="noindex, follow">`
 
-**Dùng `partials.seo-public` cho trang public:**
+**`partials.seo-public` — cấu trúc tag đầy đủ:**
 ```blade
 @section('seo')
     @include('partials.seo-public', [
@@ -1503,14 +1623,40 @@ Chi tiết đầy đủ tại [docs/blade-seo.md](docs/blade-seo.md). Tóm tắt
         // 'canonical' => url('/...'),   // tuỳ chọn
         // 'ogImage'   => url('/img/og.jpg'),
     ])
+    {{-- Thêm JSON-LD riêng tại đây nếu cần (FAQPage, FinancialProduct, ...) --}}
 @endsection
 ```
+Tags tự động sinh: `canonical`, `description`, `og:type/locale/site_name/url/title/description/image/image:alt`, `og:image:width=1200`, `og:image:height=630`, `twitter:card=summary_large_image`, `twitter:title/description/image/image:alt`.
+
+**JSON-LD theo trang:**
+| Trang | Schema |
+|-------|--------|
+| Tất cả (Layout) | `Organization` |
+| `/trang-chu` | `WebSite` |
+| `/co-phieu/{code}` | `FinancialProduct` |
+| `/lien-he` | `FAQPage` (4 câu hỏi) |
+| `/hoi-dap` | `FAQPage` (18 câu hỏi) |
+| `/huong-dan` | `HowTo` (6 bước) |
+| `/co-phieu/vn30` | `ItemList` (30 mã) |
+| `/co-phieu/vn100` | `ItemList` (~95 mã) |
+
+**Sitemap (`/sitemap.xml`, cached 1 ngày):**
+- Static: `home` (1.0), `about` (0.8), `contact` (0.7), `login` (0.7), `register` (0.6), `forgotPassword` (0.4)
+- SEO pages: `guide` (0.7, monthly), `faq` (0.7, monthly), `stocks.vn30` (0.7, daily), `stocks.vn100` (0.7, daily), `donate` (0.6, monthly), `privacy` (0.3, yearly), `terms` (0.3, yearly)
+- Dynamic: tất cả `/co-phieu/{code}` từ bảng `stocks` (priority 0.6, changefreq daily, lastmod = `stocks.updated_at`)
+- Sau khi thêm stock mới hoặc muốn refresh: `php artisan cache:forget sitemap_xml`
+
+**Favicon (`partials.favicon`):**
+- SVG (modern): `<link rel="icon" type="image/svg+xml">`
+- Shortcut icon (legacy): `<link rel="shortcut icon">`
+- Apple Touch: `<link rel="apple-touch-icon">`
+- Theme color: `<meta name="theme-color" content="#0f172a">` + `msapplication-TileColor`
 
 **URL trong AJAX:** Truyền từ Blade qua `window.__pageData` hoặc `@json(route('...'))` — tránh hardcode URL trong JS để đúng khi `APP_URL` có subfolder.
 
 **Heading:** Mỗi trang có đúng 1 `<h1>`. Dùng `@include('partials.page-title-invest', ['title' => '...', 'level' => 1])`.
 
-**Thêm trang public mới:** Nếu muốn Google index → thêm URL vào route `site.sitemap` trong `routes/web.php`.
+**Thêm trang public mới:** Nếu muốn Google index → thêm URL vào route `site.sitemap` trong `routes/web.php`. Nếu trang có FAQ, thêm `FAQPage` JSON-LD vào `@section('seo')`.
 
 ---
 

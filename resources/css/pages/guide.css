@@ -1,0 +1,236 @@
+/* ===== GUIDE PAGE ===== */
+
+.guide-page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 0 72px;
+}
+
+/* ─── HERO ─── */
+.guide-hero {
+    text-align: center;
+    padding: 48px 0 44px;
+}
+
+.guide-hero__icon {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 18px;
+    display: block;
+}
+
+.guide-hero__title {
+    font-size: clamp(1.75rem, 4vw, 2.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 14px;
+}
+
+.guide-hero__sub {
+    color: var(--inv-muted);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+/* ─── STEPS GRID ─── */
+.guide-steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 52px;
+}
+
+@media (min-width: 769px) {
+    .guide-steps {
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+}
+
+/* ─── STEP CARD ─── */
+.guide-step {
+    background: var(--inv-surface);
+    border: 1px solid var(--inv-border);
+    border-radius: 16px;
+    padding: 28px 28px 24px;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.guide-step:hover {
+    border-color: rgba(56, 189, 248, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+}
+
+/* ─── STEP NUMBER BADGE ─── */
+.guide-step__num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+}
+
+/* ─── STEP TITLE ─── */
+.guide-step__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--inv-text);
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+/* ─── STEP BODY ─── */
+.guide-step__body {
+    color: var(--inv-muted);
+    line-height: 1.72;
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+.guide-step__body strong {
+    color: var(--inv-text);
+    font-weight: 650;
+}
+
+/* ─── STEP ACTION LINK ─── */
+.guide-step__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--inv-accent);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    background: rgba(56, 189, 248, 0.05);
+}
+
+.guide-step__action:hover {
+    background: rgba(56, 189, 248, 0.12);
+    border-color: rgba(56, 189, 248, 0.6);
+    transform: translateX(2px);
+}
+
+/* ─── CTA ─── */
+.guide-cta {
+    margin-top: 16px;
+}
+
+.guide-cta__inner {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.06) 0%, rgba(129, 140, 248, 0.06) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 16px;
+    padding: 40px 40px 36px;
+    text-align: center;
+}
+
+.guide-cta__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--inv-text);
+    margin-bottom: 10px;
+}
+
+.guide-cta__body {
+    color: var(--inv-muted);
+    font-size: 14.5px;
+    line-height: 1.7;
+    max-width: 500px;
+    margin: 0 auto 26px;
+}
+
+.guide-cta__actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.guide-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 26px;
+    border-radius: 10px;
+    font-size: 14.5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.guide-cta__btn--primary {
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+    color: #0f172a;
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
+}
+
+.guide-cta__btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(56, 189, 248, 0.45);
+}
+
+.guide-cta__btn--ghost {
+    background: transparent;
+    color: var(--inv-text);
+    border: 1px solid var(--inv-border);
+}
+
+.guide-cta__btn--ghost:hover {
+    border-color: rgba(56, 189, 248, 0.4);
+    color: var(--inv-accent);
+    background: rgba(56, 189, 248, 0.05);
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+    .guide-page {
+        padding: 24px 0 56px;
+    }
+
+    .guide-hero {
+        padding: 32px 0 32px;
+    }
+
+    .guide-hero__icon {
+        font-size: 2rem;
+    }
+
+    .guide-step {
+        padding: 22px 20px 18px;
+    }
+
+    .guide-cta__inner {
+        padding: 28px 20px 24px;
+    }
+
+    .guide-cta__actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .guide-cta__btn {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+    }
+}

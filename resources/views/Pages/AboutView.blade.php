@@ -77,7 +77,7 @@
                     <span class="about-hero__chip-icon">🆓</span>
                     <div>
                         <div class="about-hero__chip-value">Miễn phí</div>
-                        <div class="about-hero__chip-label">Không cần thẻ</div>
+                        <div class="about-hero__chip-label">100% tính năng</div>
                     </div>
                 </div>
             </div>
@@ -94,7 +94,7 @@
         <div class="about-stats-strip__inner">
             <div class="about-stat">
                 <span class="about-stat__icon">📊</span>
-                <span class="about-stat__number">100+</span>
+                <span class="about-stat__number">300+</span>
                 <span class="about-stat__label">Mã cổ phiếu</span>
             </div>
             <div class="about-stat-divider"></div>

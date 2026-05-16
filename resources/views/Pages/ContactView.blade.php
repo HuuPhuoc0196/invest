@@ -12,6 +12,46 @@
         'pageTitle'   => 'Liên hệ — ' . config('app.name'),
         'description' => 'Liên hệ với chúng tôi qua form, email hoặc số điện thoại. Chúng tôi sẵn sàng hỗ trợ bạn.',
     ])
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context'   => 'https://schema.org',
+        '@type'      => 'FAQPage',
+        'mainEntity' => [
+            [
+                '@type'          => 'Question',
+                'name'           => 'Ứng dụng có miễn phí không?',
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text'  => 'Có, hoàn toàn miễn phí. Bạn chỉ cần đăng ký tài khoản bằng email là có thể sử dụng tất cả tính năng.',
+                ],
+            ],
+            [
+                '@type'          => 'Question',
+                'name'           => 'Dữ liệu giá cổ phiếu từ đâu?',
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text'  => 'Giá cổ phiếu được đồng bộ tự động từ dịch vụ dữ liệu thị trường chứng khoán Việt Nam và cập nhật theo lịch giao dịch.',
+                ],
+            ],
+            [
+                '@type'          => 'Question',
+                'name'           => 'Tôi quên mật khẩu thì làm gì?',
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text'  => 'Dùng tính năng Quên mật khẩu trên trang đăng nhập. Hệ thống sẽ gửi link đặt lại mật khẩu về email của bạn.',
+                ],
+            ],
+            [
+                '@type'          => 'Question',
+                'name'           => 'Làm sao để nhận cảnh báo giá?',
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text'  => 'Sau khi đăng nhập, vào mục Theo dõi, thêm mã cổ phiếu và đặt giá mục tiêu mua/bán. Hệ thống sẽ gửi email tự động khi giá chạm ngưỡng.',
+                ],
+            ],
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
 @endsection
 
 @section('header-css')

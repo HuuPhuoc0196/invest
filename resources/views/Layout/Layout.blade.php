@@ -7,6 +7,28 @@
     @yield('csrf-token')
     <title>@yield('title', config('app.name', 'Invest'))</title>
 
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context'     => 'https://schema.org',
+        '@type'        => 'Organization',
+        'name'         => config('app.name'),
+        'url'          => url('/'),
+        'logo'         => [
+            '@type'  => 'ImageObject',
+            'url'    => route('site.logo'),
+            'width'  => 512,
+            'height' => 512,
+        ],
+        'contactPoint' => [
+            '@type'             => 'ContactPoint',
+            'email'             => 'lehuuphuoc0196@gmail.com',
+            'telephone'         => '+84382834597',
+            'contactType'       => 'customer support',
+            'availableLanguage' => 'Vietnamese',
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+
     @if (View::hasSection('seo'))
         @yield('seo')
     @elseif (request()->routeIs('home'))

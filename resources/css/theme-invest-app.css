@@ -323,7 +323,7 @@ body.theme-invest-app main.login-layout-main {
     }
 
     /* Menu khách — Trang chủ giống Đăng ký (surface) | trạng thái active riêng */
-    body.theme-invest-app .actions-left .user-nav-link--guest:not(.user-nav-link--guest-login):not(.user-nav-link--guest-register):not(.user-nav-link--guest-home):not(.user-nav-link--guest-about):not(.user-nav-link--guest-contact):not(.user-nav-link--active) {
+    body.theme-invest-app .actions-left .user-nav-link--guest:not(.user-nav-link--guest-login):not(.user-nav-link--guest-register):not(.user-nav-link--guest-home):not(.user-nav-link--guest-about):not(.user-nav-link--guest-contact):not(.user-nav-link--guest-donate):not(.user-nav-link--active) {
         color: var(--inv-muted) !important;
         border-color: var(--inv-border) !important;
         background: transparent !important;
@@ -333,7 +333,8 @@ body.theme-invest-app main.login-layout-main {
     body.theme-invest-app .actions-left .user-nav-link--guest-register:not(.user-nav-link--active),
     body.theme-invest-app .actions-left .user-nav-link--guest-home:not(.user-nav-link--active),
     body.theme-invest-app .actions-left .user-nav-link--guest-about:not(.user-nav-link--active),
-    body.theme-invest-app .actions-left .user-nav-link--guest-contact:not(.user-nav-link--active) {
+    body.theme-invest-app .actions-left .user-nav-link--guest-contact:not(.user-nav-link--active),
+    body.theme-invest-app .actions-left .user-nav-link--guest-donate:not(.user-nav-link--active) {
         color: var(--inv-text) !important;
         border-color: var(--inv-border) !important;
         background: var(--inv-surface) !important;
@@ -343,7 +344,8 @@ body.theme-invest-app main.login-layout-main {
     body.theme-invest-app .actions-left .user-nav-link--guest-register:not(.user-nav-link--active):hover,
     body.theme-invest-app .actions-left .user-nav-link--guest-home:not(.user-nav-link--active):hover,
     body.theme-invest-app .actions-left .user-nav-link--guest-about:not(.user-nav-link--active):hover,
-    body.theme-invest-app .actions-left .user-nav-link--guest-contact:not(.user-nav-link--active):hover {
+    body.theme-invest-app .actions-left .user-nav-link--guest-contact:not(.user-nav-link--active):hover,
+    body.theme-invest-app .actions-left .user-nav-link--guest-donate:not(.user-nav-link--active):hover {
         color: var(--inv-accent) !important;
         border-color: rgba(56, 189, 248, 0.45) !important;
         background: rgba(56, 189, 248, 0.1) !important;

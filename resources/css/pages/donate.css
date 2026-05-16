@@ -1,0 +1,322 @@
+.donate-page-main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+}
+
+/* ── HERO ── */
+.donate-hero {
+    position: relative;
+    text-align: center;
+    padding: 60px 16px 48px;
+    overflow: hidden;
+}
+
+.donate-hero__orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.donate-hero__orb--1 {
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.18) 0%, transparent 70%);
+    top: -60px;
+    left: -80px;
+}
+
+.donate-hero__orb--2 {
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.14) 0%, transparent 70%);
+    bottom: -40px;
+    right: -60px;
+}
+
+.donate-hero__icon {
+    position: relative;
+    z-index: 1;
+    font-size: 56px;
+    line-height: 1;
+    margin-bottom: 18px;
+    animation: donate-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes donate-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+.donate-hero__title {
+    position: relative;
+    z-index: 1;
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    background: linear-gradient(135deg, #f87171 0%, #fb923c 50%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.donate-hero__sub {
+    position: relative;
+    z-index: 1;
+    font-size: 1.05rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* ── CARDS ── */
+.donate-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 48px;
+}
+
+.donate-card {
+    background: linear-gradient(160deg, #0f213f 0%, #122747 100%);
+    border: 1px solid rgba(99, 179, 237, 0.14);
+    border-radius: 16px;
+    padding: 26px 22px;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.donate-card:hover {
+    border-color: rgba(248, 113, 113, 0.3);
+    transform: translateY(-2px);
+}
+
+.donate-card--highlight {
+    border-color: rgba(251, 191, 36, 0.3);
+    background: linear-gradient(160deg, #1a1a0f 0%, #1e1e0a 100%);
+}
+
+.donate-card--highlight:hover {
+    border-color: rgba(251, 191, 36, 0.55);
+}
+
+.donate-card__icon {
+    font-size: 30px;
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+.donate-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0 0 10px;
+}
+
+.donate-card__body {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    line-height: 1.65;
+    margin: 0;
+}
+
+.donate-card__free {
+    margin: 12px 0 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #fbbf24;
+    letter-spacing: 0.01em;
+}
+
+/* ── CTA ── */
+.donate-cta {
+    text-align: center;
+}
+
+.donate-cta__inner {
+    background: linear-gradient(160deg, #0f213f 0%, #122747 100%);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    border-radius: 20px;
+    padding: 42px 28px;
+}
+
+.donate-cta__title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #e2e8f0;
+    margin: 0 0 14px;
+}
+
+.donate-cta__body {
+    font-size: 0.92rem;
+    color: #94a3b8;
+    line-height: 1.7;
+    max-width: 560px;
+    margin: 0 auto 28px;
+}
+
+.donate-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 36px;
+    border-radius: 50px;
+    border: none;
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 50%, #f59e0b 100%);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.15s;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
+}
+
+.donate-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+.donate-btn:active {
+    transform: translateY(0);
+}
+
+/* ── MODAL ── */
+.donate-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 14, 26, 0.78);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.donate-modal-content {
+    position: relative;
+    width: min(94vw, 500px);
+    border-radius: 18px;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    background: linear-gradient(180deg, #0f213f 0%, #122747 100%);
+    padding: 28px 24px 22px;
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6);
+    color: #e2e8f0;
+}
+
+.donate-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    line-height: 1;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0;
+}
+
+.donate-modal-close:hover {
+    color: #f87171;
+}
+
+.donate-modal-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin: 0 28px 18px 0;
+    color: #fca5a5;
+}
+
+.donate-modal-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.donate-modal-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+}
+
+.donate-modal-label {
+    color: #64748b;
+    min-width: 100px;
+    flex-shrink: 0;
+}
+
+.donate-modal-value {
+    color: #e2e8f0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    word-break: break-all;
+}
+
+.donate-copy-btn {
+    background: none;
+    border: 1px solid rgba(99, 179, 237, 0.2);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #94a3b8;
+    line-height: 1.4;
+    transition: border-color 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+.donate-copy-btn:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+    color: #38bdf8;
+}
+
+.donate-qr-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 14px;
+    min-height: 180px;
+    align-items: center;
+}
+
+.donate-qr-img {
+    width: 260px;
+    max-width: 100%;
+    border-radius: 10px;
+    display: block;
+}
+
+.donate-modal-note {
+    text-align: center;
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+    .donate-hero__title {
+        font-size: 1.8rem;
+    }
+
+    .donate-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .donate-cta__inner {
+        padding: 28px 18px;
+    }
+
+    .donate-btn {
+        padding: 13px 28px;
+        font-size: 0.95rem;
+    }
+}

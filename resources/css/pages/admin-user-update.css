@@ -1,3 +1,77 @@
+.user-update-select-badge {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    border: 1px solid transparent;
+}
+
+.user-update-select-badge--role-admin {
+    color: #1d4ed8;
+    background: #dbeafe;
+    border-color: #93c5fd;
+}
+
+.user-update-select-badge--role-investor {
+    color: #7c2d12;
+    background: #ffedd5;
+    border-color: #fdba74;
+}
+
+.user-update-select-badge--status-active {
+    color: #166534;
+    background: #dcfce7;
+    border-color: #86efac;
+}
+
+.user-update-select-badge--status-inactive {
+    color: #991b1b;
+    background: #fee2e2;
+    border-color: #fca5a5;
+}
+
+body.theme-invest-app .user-update-select-badge--role-admin {
+    color: #93c5fd;
+    background: rgba(59, 130, 246, 0.16);
+    border-color: rgba(147, 197, 253, 0.45);
+}
+
+body.theme-invest-app .user-update-select-badge--role-investor {
+    color: #fcd34d;
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(252, 211, 77, 0.45);
+}
+
+body.theme-invest-app .user-update-select-badge--status-active {
+    color: #6ee7b7;
+    background: rgba(52, 211, 153, 0.14);
+    border-color: rgba(52, 211, 153, 0.45);
+}
+
+body.theme-invest-app .user-update-select-badge--status-inactive {
+    color: #fca5a5;
+    background: rgba(248, 113, 113, 0.14);
+    border-color: rgba(248, 113, 113, 0.45);
+}
+
+.admin-user-update-form select {
+    padding: 7px 10px;
+    border: 1px solid #bdc3c7;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.admin-user-update-form select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 3px rgba(52, 152, 219, 0.3);
+}
+
 .admin-user-update-form input[readonly] {
     background: #eef2f7;
     color: #4b5563;
@@ -30,6 +104,24 @@ body.theme-invest-app .admin-user-update-form input[readonly] {
     background: #0f213f;
     color: #94a3b8;
     border-color: rgba(148, 163, 184, 0.3);
+}
+
+body.theme-invest-app .admin-user-update-form select {
+    background: var(--inv-surface2);
+    border: 1px solid var(--inv-border);
+    color: var(--inv-text);
+    border-radius: 8px;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.theme-invest-app .admin-user-update-form select:focus {
+    outline: none;
+    border-color: rgba(56, 189, 248, 0.65);
+    box-shadow:
+        0 0 0 1px rgba(56, 189, 248, 0.45),
+        0 0 0 4px rgba(56, 189, 248, 0.12);
 }
 
 body.theme-invest-app .admin-user-update-flash {

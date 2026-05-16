@@ -41,6 +41,19 @@
         <a href="{{ route('user.portfolio.exportPdf') }}" class="asset-action-btn" style="background:rgba(129,140,248,0.15);color:#818cf8;border:1px solid rgba(129,140,248,0.3);" target="_blank">📄 Xuất PDF</a>
     </div>
 
+    @php
+        $balanceCash = $userCash?->cash ?? 0;
+    @endphp
+    <div class="profile-balance-strip">
+        <div class="profile-balance-left">
+            <span class="profile-balance-icon">💰</span>
+            <span class="profile-balance-label">Số dư khả dụng</span>
+        </div>
+        <span class="profile-balance-amount {{ $balanceCash > 0 ? 'is-positive' : 'is-zero' }}">
+            {{ number_format($balanceCash, 0, ',', '.') }}&nbsp;VNĐ
+        </span>
+    </div>
+
     @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu đang giữ', 'level' => 1])
 
     <div class="table-container">

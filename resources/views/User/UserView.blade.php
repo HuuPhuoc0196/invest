@@ -4,7 +4,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
-@section('title', 'Danh sách mã cổ phiếu')
+@section('title', 'Bảng giá cổ phiếu — Theo dõi danh mục đầu tư cá nhân')
 
 @section('header-css')
     @vite('resources/css/app.css')

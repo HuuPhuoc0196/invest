@@ -188,11 +188,13 @@ class CacheService
         $keys = [
             "stock_code_{$code}",
             "stock_risk_{$code}",
+            "stock_risk_history_{$code}",
+            "stock_dividend_{$code}",
         ];
 
         $count = self::forgetMany($keys);
         Log::info("Stock cache cleared", ['code' => $code, 'count' => $count]);
-        
+
         return $count;
     }
 
@@ -258,6 +260,16 @@ class CacheService
                 // Clear admin_suggest_stock_ids và admin_suggest_stocks (joined view)
                 $count += self::forget('admin_suggest_stock_ids') ? 1 : 0;
                 $count += self::forget('admin_suggest_stocks') ? 1 : 0;
+                break;
+
+            case 'stock_risk_history':
+                // Clear tất cả stock_risk_history_{CODE}
+                $count += self::forgetByPattern('stock_risk_history_*');
+                break;
+
+            case 'dividend_adjustments':
+                // Clear tất cả stock_dividend_{CODE}
+                $count += self::forgetByPattern('stock_dividend_*');
                 break;
 
             default:

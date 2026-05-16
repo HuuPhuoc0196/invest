@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\StockService;
+use App\Services\PortfolioService;
 use App\Models\StatusSync;
 use Illuminate\Http\Request;
 use App\Models\Stock;
+use App\Models\UserPortfolio;
 use Illuminate\Database\QueryException;
 use App\Http\Requests\InsertStockBasicRequest;
 use App\Http\Requests\StockInsertRequest;
@@ -24,8 +26,9 @@ use Illuminate\Support\Facades\DB;
 class Admin extends Controller
 {
     public function __construct(
-        private StockService $stockService,
-        private AuthService  $authService,
+        private StockService     $stockService,
+        private AuthService      $authService,
+        private PortfolioService $portfolioService,
     ) {}
 
     public function show()
@@ -317,6 +320,17 @@ class Admin extends Controller
         } catch (QueryException $e) {
             return redirect()->route('admin.users')->with('error', 'Không thể xoá user vì đang có dữ liệu liên quan.');
         }
+    }
+
+    public function userDetail(int $id)
+    {
+        $user = UserModel::find($id);
+        if (!$user) {
+            return redirect()->route('admin.users')->with('error', 'Không tìm thấy user.');
+        }
+        $userPortfolios = UserPortfolio::getProfileUser($id);
+        $userInvestCash = $this->portfolioService->calcUserInvestCash($id);
+        return view('Admin.AdminUserDetail', compact('user', 'userPortfolios', 'userInvestCash'));
     }
 
     /**

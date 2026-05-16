@@ -54,6 +54,7 @@
                         <option value="1" @selected((int) old('role', $user->role) === 1)>Quản trị viên</option>
                         <option value="0" @selected((int) old('role', $user->role) === 0)>Nhà đầu tư</option>
                     </select>
+                    <span id="role-badge" class="user-update-select-badge"></span>
                 </div>
 
                 <div class="form-group">
@@ -62,6 +63,7 @@
                         <option value="1" @selected((int) old('active', $user->active) === 1)>Đã active</option>
                         <option value="0" @selected((int) old('active', $user->active) === 0)>Chưa active</option>
                     </select>
+                    <span id="active-badge" class="user-update-select-badge"></span>
                 </div>
 
                 <div class="form-group">
@@ -70,6 +72,7 @@
                         <option value="1" @selected((int) old('email_verified', $user->email_verified_at ? 1 : 0) === 1)>Đã xác thực</option>
                         <option value="0" @selected((int) old('email_verified', $user->email_verified_at ? 1 : 0) === 0)>Chưa xác thực</option>
                     </select>
+                    <span id="email-verified-badge" class="user-update-select-badge"></span>
                 </div>
 
                 <button type="submit" id="btnFormSubmit">Cập nhật</button>
@@ -96,23 +99,61 @@
             if (!modal) return;
             modal.style.display = 'none';
         };
-        document.addEventListener('DOMContentLoaded', function () {
-            var modal = document.getElementById('userUpdateNoticeModal');
-            if (modal) {
-                modal.addEventListener('click', function (e) {
-                    if (e.target === modal) window.closeUserUpdateNoticeModal();
-                });
+
+        (function () {
+            var BADGE_CONFIGS = {
+                role: function (val) {
+                    return val === '1'
+                        ? { cls: 'user-update-select-badge--role-admin', label: 'Quản trị viên' }
+                        : { cls: 'user-update-select-badge--role-investor', label: 'Nhà đầu tư' };
+                },
+                active: function (val) {
+                    return val === '1'
+                        ? { cls: 'user-update-select-badge--status-active', label: 'Đã active' }
+                        : { cls: 'user-update-select-badge--status-inactive', label: 'Chưa active' };
+                },
+                email_verified_at: function (val) {
+                    return val === '1'
+                        ? { cls: 'user-update-select-badge--status-active', label: 'Đã xác thực' }
+                        : { cls: 'user-update-select-badge--status-inactive', label: 'Chưa xác thực' };
+                },
+            };
+
+            function wireSelectBadge(selectId, badgeId, configFn) {
+                var sel = document.getElementById(selectId);
+                var badge = document.getElementById(badgeId);
+                if (!sel || !badge) return;
+                function refresh() {
+                    var cfg = configFn(sel.value);
+                    badge.className = 'user-update-select-badge ' + cfg.cls;
+                    badge.textContent = cfg.label;
+                }
+                sel.addEventListener('change', refresh);
+                refresh();
             }
 
-            @if (session('success'))
+            document.addEventListener('DOMContentLoaded', function () {
+                wireSelectBadge('role', 'role-badge', BADGE_CONFIGS.role);
+                wireSelectBadge('active', 'active-badge', BADGE_CONFIGS.active);
+                wireSelectBadge('email_verified_at', 'email-verified-badge', BADGE_CONFIGS.email_verified_at);
+
+                var modal = document.getElementById('userUpdateNoticeModal');
                 if (modal) {
-                    modal.classList.remove('is-error');
-                    modal.classList.add('is-success');
-                    document.getElementById('userUpdateNoticeTitle').textContent = 'Cập nhật thành công';
-                    document.getElementById('userUpdateNoticeMessage').innerHTML = @json('✅ ' . session('success'));
-                    modal.style.display = 'flex';
+                    modal.addEventListener('click', function (e) {
+                        if (e.target === modal) window.closeUserUpdateNoticeModal();
+                    });
                 }
-            @endif
-        });
+
+                @if (session('success'))
+                    if (modal) {
+                        modal.classList.remove('is-error');
+                        modal.classList.add('is-success');
+                        document.getElementById('userUpdateNoticeTitle').textContent = 'Cập nhật thành công';
+                        document.getElementById('userUpdateNoticeMessage').innerHTML = @json('✅ ' . session('success'));
+                        modal.style.display = 'flex';
+                    }
+                @endif
+            });
+        })();
     </script>
 @endsection

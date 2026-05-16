@@ -104,10 +104,6 @@
                 <span class="sd-info-value">{{ number_format($stock->volume) }}</span>
             </div>
             <div class="sd-info-item">
-                <span class="sd-info-label">Khối lượng TB</span>
-                <span class="sd-info-value">{{ number_format($stock->volume_avg) }}</span>
-            </div>
-            <div class="sd-info-item">
                 <span class="sd-info-label">Chỉ số</span>
                 <span class="sd-info-value">
                     @if($stock->stocks_vn == 30) VN30
@@ -170,15 +166,29 @@
         @if($riskHistory->isNotEmpty())
             <div class="risk-timeline">
                 @foreach($riskHistory as $r)
-                @php $rlh = $r->risk_level ?? 1; @endphp
+                @php
+                    $noteText  = $r->note ?? '';
+                    $channelId = $r->channel_id ?? 0;
+                    $noteL     = mb_strtolower($noteText);
+                    if (str_contains($noteL, 'hủy niêm yết') || str_contains($noteL, 'huỷ niêm yết') || str_contains($noteL, 'đình chỉ')) {
+                        $rlh = 4;
+                    } elseif (str_contains($noteL, 'ra khỏi') || str_contains($noteL, 'giao dịch trở lại')) {
+                        $rlh = 1;
+                    } elseif ($channelId == 56) {
+                        $rlh = 4;
+                    } elseif (in_array($channelId, [22, 50, 51, 52, 53])) {
+                        $rlh = 3;
+                    } elseif ($channelId == 19) {
+                        $rlh = 2;
+                    } else {
+                        $rlh = 1;
+                    }
+                @endphp
                 <div class="risk-timeline-item">
                     <span class="risk-timeline-date">{{ \Carbon\Carbon::parse($r->event_date)->format('d/m/Y') }}</span>
                     <span class="risk-timeline-badge">
-                        <span class="risk-badge risk-{{ $rlh }}">{{ $riskIcons[$rlh] ?? '' }} {{ $riskLabels[$rlh] ?? 'Không xác định' }}</span>
+                        <span class="risk-badge risk-{{ $rlh }}">{{ $riskIcons[$rlh] ?? '' }} {{ $noteText ?: ($riskLabels[$rlh] ?? 'Không xác định') }}</span>
                     </span>
-                    @if(!empty($r->reason) || !empty($r->note))
-                    <span class="risk-timeline-note">{{ $r->reason ?? $r->note ?? '' }}</span>
-                    @endif
                 </div>
                 @endforeach
             </div>
@@ -191,28 +201,31 @@
     <div class="sd-section">
         <div class="sd-section-title">💰 Lịch sử điều chỉnh cổ tức</div>
         @if($dividendHistory->isNotEmpty())
-            <div style="overflow-x:auto;">
-                <table class="sd-table">
+            <div class="sd-table-wrap">
+                <table class="sd-table" aria-label="Lịch sử điều chỉnh cổ tức {{ $stock->code }}">
                     <thead>
                         <tr>
-                            <th>Ngày GDKHQ</th>
-                            <th>Loại</th>
-                            <th>Hệ số điều chỉnh</th>
-                            <th>Ghi chú</th>
+                            <th scope="col">Ngày GDKHQ</th>
+                            <th scope="col">Loại</th>
+                            <th scope="col">Hệ số điều chỉnh</th>
+                            <th scope="col">Ghi chú</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($dividendHistory as $d)
+                        @php
+                            [$adjLabel, $adjClass] = match($d->adj_type ?? '') {
+                                'cash_dividend'  => ['💵 Tiền mặt',  'sd-adj-badge--cash'],
+                                'stock_dividend' => ['📈 Cổ phiếu',  'sd-adj-badge--stock'],
+                                'bonus_shares'   => ['🎁 Thưởng CP', 'sd-adj-badge--bonus'],
+                                default          => [$d->adj_type ?: '—', 'sd-adj-badge--other'],
+                            };
+                        @endphp
                         <tr>
                             <td>{{ \Carbon\Carbon::parse($d->gdkhq_date)->format('d/m/Y') }}</td>
-                            <td>
-                                @if($d->adj_type === 'cash_dividend') 💵 Tiền mặt
-                                @elseif($d->adj_type === 'stock_dividend') 📊 Cổ phiếu
-                                @else {{ $d->adj_type ?? '—' }}
-                                @endif
-                            </td>
-                            <td>{{ $d->adj_factor ?? '—' }}</td>
-                            <td style="font-size:0.82rem;color:#94a3b8;">{{ $d->note_raw ?? '—' }}</td>
+                            <td><span class="sd-adj-badge {{ $adjClass }}">{{ $adjLabel }}</span></td>
+                            <td>{{ $d->adj_factor ? number_format((float)$d->adj_factor, 4) : '—' }}</td>
+                            <td>{{ $d->note_raw ?? '—' }}</td>
                         </tr>
                         @endforeach
                     </tbody>

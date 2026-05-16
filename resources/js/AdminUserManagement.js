@@ -29,6 +29,16 @@ window.renderUserTable = function(users) {
     users.forEach(user => {
         const row = document.createElement('tr');
         const isSelf = Number(currentAdminId) === Number(user.id);
+        row.style.cursor = 'pointer';
+        let pointerDownAt = { x: 0, y: 0 };
+        row.addEventListener('mousedown', function(e) {
+            pointerDownAt = { x: e.clientX, y: e.clientY };
+        });
+        row.addEventListener('click', function(e) {
+            if (e.target.closest('button')) return;
+            if (Math.abs(e.clientX - pointerDownAt.x) > 4 || Math.abs(e.clientY - pointerDownAt.y) > 4) return;
+            location.href = `${baseUrl}/admin/users/${user.id}`;
+        });
         row.innerHTML = `
             <td>${user.id}</td>
             <td>${user.email || ''}</td>

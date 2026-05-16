@@ -22,6 +22,7 @@
     flex-shrink: 0;
 }
 
+/* PC: 4 cột — brand chiếm 2fr, 3 cột link mỗi 1fr */
 .ft-top {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
@@ -33,26 +34,77 @@
     box-sizing: border-box;
 }
 
+/* Tablet 769–1024px: 2 hàng */
 @media (max-width: 1024px) {
     .ft-top {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1.5fr 1fr 1fr;
         gap: 1.75rem;
     }
+
+    .ft-brand {
+        grid-column: 1 / -1;
+    }
+
+    .ft-brand .ft-desc {
+        max-width: 100%;
+    }
+
+    .ft-contact-block {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
 }
 
-@media (max-width: 560px) {
+/* Mobile ≤768px: brand full-width + 3 cột link hàng ngang */
+@media (max-width: 768px) {
     .ft-top {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem 1rem;
         padding: 1.75rem 1rem 1.5rem;
     }
-}
 
-@media (max-width: 768px) {
-    .ft-col {
-        display: none;
+    .ft-brand {
+        grid-column: 1 / -1;
+    }
+
+    .ft-brand .ft-desc {
+        max-width: 100%;
+        margin-bottom: 12px;
+    }
+
+    .ft-contact-block {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .ft-col-title {
+        font-size: 9.5px;
+        margin-bottom: 10px;
+    }
+
+    .ft-links {
+        gap: 7px;
+    }
+
+    .ft-links a {
+        font-size: 12px;
     }
 }
 
+/* Small mobile ≤480px: stack tất cả 1 cột */
+@media (max-width: 480px) {
+    .ft-top {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .ft-brand {
+        grid-column: 1;
+    }
+}
+
+/* —— Brand —— */
 .ft-logo-row {
     display: flex;
     align-items: center;
@@ -100,7 +152,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
 }
 
 .ft-email,
@@ -111,7 +163,7 @@
     font-size: 12px;
     color: #38bdf8;
     text-decoration: none;
-    padding: 6px 12px;
+    padding: 5px 11px;
     border-radius: 7px;
     border: 1px solid rgba(56, 189, 248, 0.2);
     background: rgba(56, 189, 248, 0.05);
@@ -130,13 +182,14 @@
     line-height: 1;
 }
 
+/* —— Cột link —— */
 .ft-col-title {
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 700;
     color: #64748b;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
-    margin: 0 0 14px;
+    margin: 0 0 12px;
 }
 
 .ft-links {
@@ -145,39 +198,68 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: 8px;
 }
 
 .ft-links a {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: block;
     font-size: 12.5px;
     color: #475569;
     text-decoration: none;
     transition: color 0.15s ease;
+    line-height: 1.4;
 }
 
 .ft-links a:hover {
-    color: #e2e8f0;
+    color: #cbd5e1;
 }
 
+/* —— Bottom bar —— */
 .ft-bottom {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 10px;
-    padding: 14px 1.25rem;
+    gap: 8px;
+    padding: 13px 1.25rem;
     max-width: 1440px;
     margin: 0 auto;
     box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+    .ft-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px 1rem;
+        gap: 6px;
+    }
+}
+
+.ft-legal-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #334155;
+}
+
+.ft-legal-links a {
+    color: #475569;
+    text-decoration: none;
+    transition: color 0.15s;
+    white-space: nowrap;
+}
+
+.ft-legal-links a:hover {
+    color: #38bdf8;
 }
 
 .ft-copy {
     margin: 0;
     font-size: 12px;
     color: #475569;
+    white-space: nowrap;
 }
 
 .ft-copy span {
@@ -185,6 +267,7 @@
     font-weight: 600;
 }
 
+/* —— Legacy classes (không xóa, dùng chỗ khác) —— */
 .user-info {
     display: flex;
     align-items: center;
