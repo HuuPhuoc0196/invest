@@ -21,7 +21,7 @@
 
 @section('user-body-content')
     <div class="back-bar">
-        <a href="{{ url('/admin/infoProfile') }}" class="back-btn">← Quay lại</a>
+        <a href="{{ route('admin.infoProfile') }}" class="back-btn">← Quay lại</a>
     </div>
 
     @include('partials.page-title-invest', ['title' => 'Cập nhật thông tin cá nhân'])
@@ -55,7 +55,7 @@
         window.__pageData = {
             baseUrl: "{{ url('') }}",
             user: @json($user),
-            apiUrl: "{{ url('/admin/updateInfoProfile') }}"
+            apiUrl: "{{ route('admin.updateInfoProfile') }}"
         };
     </script>
     @vite('resources/js/pages/user-update-info-profile.js')

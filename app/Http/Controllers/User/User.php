@@ -25,6 +25,7 @@ use App\Http\Requests\AddFollowBatchRequest;
 use App\Http\Requests\UpdateFollowRequest;
 use App\Http\Requests\CashInRequest;
 use App\Http\Requests\CashOutRequest;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class User extends Controller
 {
@@ -74,6 +75,54 @@ class User extends Controller
         $userPortfolios = UserPortfolio::getProfileUser($userId);
         $userInvestCash = $this->portfolioService->calcUserInvestCash($userId);
         return view('User.UserProfile', compact('userPortfolios', 'userInvestCash'));
+    }
+
+    public function exportPortfolioPdf()
+    {
+        $userId      = auth()->id();
+        $user        = UserModel::getUserById($userId);
+        $cashBalance = UserCashFollow::where('user_id', $userId)->value('cash') ?? 0;
+
+        // Aggregated FIFO holdings (code, total_quantity, avg_buy_price, current_price, risk_level, earliest_buy_date)
+        $rawPortfolios = UserPortfolio::getProfileUser($userId);
+
+        // Enrich with rating_stocks + stocks_vn from stocks table
+        $codes = collect($rawPortfolios)->pluck('code')->toArray();
+        $stockMeta = \Illuminate\Support\Facades\DB::table('stocks')
+            ->whereIn('code', $codes)
+            ->select('code', 'rating_stocks', 'stocks_vn')
+            ->get()->keyBy('code');
+
+        $userPortfolios = collect($rawPortfolios)->map(function ($item) use ($stockMeta) {
+            $p = (object) $item;
+            $meta = $stockMeta->get($p->code);
+            $p->rating_stocks = $meta->rating_stocks ?? 0;
+            $p->stocks_vn     = $meta->stocks_vn ?? 1000;
+            return $p;
+        });
+
+        // Individual lots for buy timeline chart
+        $portfolioLots = UserPortfolio::getPortfolioWithStockInfo($userId);
+
+        // Sell history
+        $sellHistory = UserPortfolioSell::getPortfolioSellWithStockInfo($userId);
+
+        // Totals
+        $totalCost = 0; $totalValue = 0;
+        foreach ($userPortfolios as $p) {
+            $totalCost  += ($p->avg_buy_price ?? 0) * ($p->total_quantity ?? 0);
+            $totalValue += ($p->current_price  ?? 0) * ($p->total_quantity ?? 0);
+        }
+        $totalPnl = $totalValue - $totalCost;
+        $totalRoi = $totalCost > 0 ? round($totalPnl / $totalCost * 100, 2) : 0;
+
+        $pdf = Pdf::loadView('PDF.PortfolioPdf', compact(
+            'user', 'userPortfolios', 'portfolioLots', 'sellHistory',
+            'cashBalance', 'totalCost', 'totalValue', 'totalPnl', 'totalRoi'
+        ))->setPaper('a4', 'landscape');
+
+        $filename = 'danh-muc-' . now()->format('Ymd-His') . '.pdf';
+        return $pdf->download($filename);
     }
 
     public function infoProfile()
@@ -320,7 +369,7 @@ class User extends Controller
     public function saveSessionClosedFlags(Request $request)
     {
         $validated = $request->validate([
-            'items'                    => ['required', 'array', 'max:200'],
+            'items'                    => ['required', 'array'],
             'items.*.stock_id'         => ['required', 'integer', 'min:1'],
             'items.*.session_closed_flag' => ['required', 'boolean'],
         ]);
@@ -336,7 +385,7 @@ class User extends Controller
     public function saveEmailSettingsFollow(Request $request)
     {
         $validated = $request->validate([
-            'items'                => ['required', 'array', 'max:200'],
+            'items'                => ['required', 'array'],
             'items.*.id'           => ['required', 'integer', 'min:1'],
             'items.*.notice_buy'   => ['required', 'boolean'],
             'items.*.notice_sell'  => ['required', 'boolean'],

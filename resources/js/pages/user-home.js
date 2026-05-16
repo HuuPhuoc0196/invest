@@ -658,10 +658,16 @@
         const actionBtn = opts.button || null;
         const loadingText = opts.loadingText || 'Đang thêm theo dõi...';
         const defaultText = opts.defaultText || '➕ Thêm theo dõi';
+        const checkboxes = opts.checkboxes || [];  // NodeList/Array của checkboxes cần lock
 
         if (actionBtn) {
             actionBtn.disabled = true;
             actionBtn.textContent = loadingText;
+        }
+        checkboxes.forEach(function(cb) { cb.disabled = true; });
+
+        function restoreCheckboxes() {
+            checkboxes.forEach(function(cb) { cb.disabled = false; });
         }
 
         $.ajax({
@@ -676,9 +682,11 @@
             success: function (res) {
                 if (res.status === 'success') {
                     if (actionBtn) actionBtn.textContent = defaultText;
+                    // onSuccess sẽ gọi renderTable → checkboxes được vẽ lại, không cần restore
                     if (typeof onSuccess === 'function') onSuccess();
                     showNotifyModal(res.message, 'success');
                 } else {
+                    restoreCheckboxes();
                     if (actionBtn) actionBtn.textContent = defaultText;
                     showNotifyModal(res.message || 'Có lỗi xảy ra.', 'error', function () {
                         updateAddFollowButtonState();
@@ -687,6 +695,7 @@
                 }
             },
             error: function (xhr) {
+                restoreCheckboxes();
                 if (actionBtn) actionBtn.textContent = defaultText;
                 const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Lỗi kết nối.';
                 showNotifyModal(msg, 'error', function () {
@@ -698,8 +707,10 @@
     }
 
     function submitAddFollowBatch() {
-        const checked = document.querySelectorAll('#stockTableBody .follow-checkbox:checked:not(:disabled)');
-        const codes = Array.from(checked).map(el => el.getAttribute('data-code'));
+        const checkedBoxes = Array.from(
+            document.querySelectorAll('#stockTableBody .follow-checkbox:checked:not(:disabled)')
+        );
+        const codes = checkedBoxes.map(el => el.getAttribute('data-code'));
         if (codes.length === 0) return;
 
         const btn = document.getElementById('btnAddFollow');
@@ -711,7 +722,8 @@
         }, {
             button: btn,
             loadingText: 'Đang thêm theo dõi...',
-            defaultText: '➕ Thêm theo dõi'
+            defaultText: '➕ Thêm theo dõi',
+            checkboxes: checkedBoxes,
         });
     }
     window.submitAddFollowBatch = submitAddFollowBatch;

@@ -68,28 +68,28 @@ class AuthService
     {
         $email = trim($data['email']);
         $existingUser = User::getUserByEmail($email);
-        if (!$existingUser) {
-            return ['status' => 'error', 'message' => 'Email không tồn tại.'];
+
+        if ($existingUser) {
+            $token         = Str::random(64);
+            $expiryMinutes = 60;
+
+            DB::table('password_resets')->updateOrInsert(
+                ['email' => $email],
+                ['token' => Hash::make($token), 'created_at' => now()]
+            );
+
+            $resetUrl = url('/dat-lai-mat-khau?' . http_build_query([
+                'token' => $token,
+                'email' => $email,
+            ]));
+            $result   = EmailService::sendPasswordResetLink($email, $resetUrl, $expiryMinutes);
+            Log::info("Password reset link sent to {$email}: " . $result);
         }
 
-        $token         = Str::random(64);
-        $expiryMinutes = 60;
-
-        DB::table('password_resets')->updateOrInsert(
-            ['email' => $email],
-            ['token' => Hash::make($token), 'created_at' => now()]
-        );
-
-        $resetUrl = url('/dat-lai-mat-khau?' . http_build_query([
-            'token' => $token,
-            'email' => $email,
-        ]));
-        $result   = EmailService::sendPasswordResetLink($email, $resetUrl, $expiryMinutes);
-        Log::info("Password reset link sent to {$email}: " . $result);
-
+        // Luôn trả về cùng message để tránh email enumeration
         return [
             'status'  => 'success',
-            'message' => 'Vui lòng kiểm tra email để lấy link đặt lại mật khẩu.',
+            'message' => 'Nếu email tồn tại trong hệ thống, chúng tôi đã gửi hướng dẫn đặt lại mật khẩu.',
         ];
     }
 

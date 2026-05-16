@@ -522,4 +522,79 @@ class Admin extends Controller
             return response()->json(['status' => 'error', 'message' => 'Lỗi khi xóa cache: ' . $e->getMessage()], 500);
         }
     }
+
+    public function accessManagement(Request $request)
+    {
+        $period = $request->query('period', 'week');
+        $from   = match($period) {
+            'today' => now()->startOfDay(),
+            'month' => now()->startOfMonth(),
+            'year'  => now()->startOfYear(),
+            default => now()->startOfWeek(),
+        };
+
+        // Chỉ tính user thường (role=0) — loại admin ra khỏi stats
+        $userIds = DB::table('users')->where('role', 0)->pluck('id');
+
+        // ── Top Users: mỗi user = số phiên duy nhất (COUNT DISTINCT session_id)
+        $topUsers = DB::table('page_visits')
+            ->join('users', 'users.id', '=', 'page_visits.user_id')
+            ->where('page_visits.visited_at', '>=', $from)
+            ->whereIn('page_visits.user_id', $userIds)
+            ->select(
+                'users.id',
+                'users.name',
+                'users.email',
+                DB::raw('COUNT(DISTINCT page_visits.session_id) as session_count'),
+                DB::raw('COUNT(*) as pageview_count'),
+                DB::raw('MAX(page_visits.visited_at) as last_visit')
+            )
+            ->groupBy('users.id', 'users.name', 'users.email')
+            ->orderByDesc('session_count')
+            ->limit(20)
+            ->get();
+
+        // ── Top Pages: group theo page, lấy MAX(page_title)
+        $topPages = DB::table('page_visits')
+            ->where('visited_at', '>=', $from)
+            ->select(
+                'page',
+                DB::raw('MAX(page_title) as page_title'),
+                DB::raw('COUNT(*) as view_count'),
+                DB::raw('COUNT(DISTINCT session_id) as unique_sessions')
+            )
+            ->groupBy('page')
+            ->orderByDesc('view_count')
+            ->limit(20)
+            ->get();
+
+        // ── KPIs
+        // Unique sessions = proxy "unique visitors"
+        $uniqueAuthSessions  = DB::table('page_visits')
+            ->where('visited_at', '>=', $from)
+            ->whereIn('user_id', $userIds)
+            ->distinct('session_id')->count('session_id');
+
+        $uniqueAnonSessions  = DB::table('page_visits')
+            ->where('visited_at', '>=', $from)
+            ->whereNull('user_id')
+            ->distinct('session_id')->count('session_id');
+
+        $totalPageviews      = DB::table('page_visits')
+            ->where('visited_at', '>=', $from)
+            ->whereRaw('(user_id IS NULL OR user_id IN (' . implode(',', $userIds->all() ?: [0]) . '))')
+            ->count();
+
+        $uniqueUsers         = DB::table('page_visits')
+            ->where('visited_at', '>=', $from)
+            ->whereIn('user_id', $userIds)
+            ->distinct('user_id')->count('user_id');
+
+        return view('Admin.AdminAccessManagement', compact(
+            'topUsers', 'topPages',
+            'uniqueAuthSessions', 'uniqueAnonSessions',
+            'totalPageviews', 'uniqueUsers',
+            'period', 'from'
+        ));
+    }
 }

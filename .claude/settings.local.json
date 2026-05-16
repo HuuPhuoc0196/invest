@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs -I {} basename {})"
+      "Bash(*)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "PowerShell(*)"
     ]
   }
 }

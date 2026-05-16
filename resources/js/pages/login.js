@@ -68,6 +68,14 @@
                 } else {
                     errorMessage.innerText = response.message || '';
                     errorMessage.style.display = "block";
+                    // Hiện nút resend nếu lỗi email chưa xác thực
+                    if (response.message && response.message.includes('xác thực email')) {
+                        const resendBox = document.getElementById('resendVerifyBox');
+                        if (resendBox) {
+                            resendBox.style.display = 'block';
+                            resendBox.dataset.email = document.getElementById('email').value.trim();
+                        }
+                    }
                 }
             },
             error: function (xhr) {
@@ -85,4 +93,29 @@
             }
         });
     });
+    // Resend verification email
+    const btnResend = document.getElementById('btnResendVerify');
+    if (btnResend) {
+        btnResend.addEventListener('click', function () {
+            const box    = document.getElementById('resendVerifyBox');
+            const result = document.getElementById('resendResult');
+            const email  = box ? box.dataset.email : '';
+            if (!email) return;
+            btnResend.disabled = true;
+            btnResend.textContent = 'Đang gửi…';
+            axios.post('/email/resend-verification', { email })
+                .then(res => {
+                    result.textContent = res.data.message || 'Đã gửi!';
+                    result.style.color = '#10b981';
+                })
+                .catch(() => {
+                    result.textContent = 'Gửi thất bại. Thử lại sau.';
+                    result.style.color = '#ef4444';
+                })
+                .finally(() => {
+                    btnResend.disabled = false;
+                    btnResend.textContent = 'Gửi lại email xác thực';
+                });
+        });
+    }
 })();

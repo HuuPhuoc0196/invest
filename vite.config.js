@@ -37,6 +37,8 @@ export default defineConfig({
                 'resources/css/pages/admin-crontab.css',
                 'resources/css/pages/about.css',
                 'resources/css/pages/contact.css',
+                'resources/css/pages/stock-detail.css',
+                'resources/css/pages/admin-access-management.css',
                 'resources/js/Admin.js',
                 'resources/js/AdminStockManagement.js',
                 'resources/js/AdminUserManagement.js',

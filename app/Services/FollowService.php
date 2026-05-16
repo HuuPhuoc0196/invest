@@ -85,15 +85,21 @@ class FollowService
             ]);
         }
 
-        $message = count($added) > 0
-            ? 'Đã thêm ' . count($added) . ' mã vào danh mục theo dõi: ' . implode(', ', $added) . '.'
-            : 'Không có mã nào được thêm.';
+        $addedCount   = count($added);
+        $skippedCount = count($skipped);
+        $invalidCount = count($invalid);
 
-        if (count($skipped) > 0) {
-            $message .= ' Đã theo dõi trước đó: ' . implode(', ', $skipped) . '.';
+        if ($addedCount > 0) {
+            $message = 'Đã thêm ' . $addedCount . ' mã vào danh sách theo dõi.';
+        } else {
+            $message = 'Không có mã nào được thêm mới.';
         }
-        if (count($invalid) > 0) {
-            $message .= ' Mã không tồn tại: ' . implode(', ', $invalid) . '.';
+
+        if ($skippedCount > 0) {
+            $message .= ' ' . $skippedCount . ' mã đã theo dõi trước đó.';
+        }
+        if ($invalidCount > 0) {
+            $message .= ' ' . $invalidCount . ' mã không tồn tại.';
         }
 
         return [

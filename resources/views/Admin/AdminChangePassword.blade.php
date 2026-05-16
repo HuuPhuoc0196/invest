@@ -21,7 +21,7 @@
 
 @section('user-body-content')
     <div class="back-bar">
-        <a href="{{ url('/admin/infoProfile') }}" class="back-btn">← Quay lại</a>
+        <a href="{{ route('admin.infoProfile') }}" class="back-btn">← Quay lại</a>
     </div>
 
     @include('partials.page-title-invest', ['title' => 'Thay đổi mật khẩu'])
@@ -63,7 +63,7 @@
     <script>
         window.__pageData = {
             baseUrl: "{{ url('') }}",
-            apiUrl: "{{ url('/admin/changePassword') }}"
+            apiUrl: "{{ route('admin.changePassword') }}"
         };
     </script>
     @vite('resources/js/pages/user-change-password.js')

@@ -4,7 +4,7 @@
     $contactEmail = 'lehuuphuoc0196@gmail.com';
     $contactPhone = '0382834597';
     $contactPhoneTel = '+84382834597';
-    $brandHref = $area === 'admin' ? url('/admin') : route('home');
+    $brandHref = $area === 'admin' ? route('admin.home') : route('home');
 @endphp
 <footer class="footer ft-invest">
     <div class="ft-top">
@@ -32,11 +32,11 @@
             <p class="ft-col-title">Điều hướng</p>
             <ul class="ft-links">
                 @if ($area === 'admin')
-                    <li><a href="{{ url('/admin') }}">🏠 Trang chủ</a></li>
-                    <li><a href="{{ url('/admin/stocks') }}">📊 Quản lý cổ phiếu</a></li>
-                    <li><a href="{{ url('/admin/insert') }}">➕ Thêm mã</a></li>
-                    <li><a href="{{ url('/admin/updateRiskForCode') }}">🔄 Cập nhật rủi ro</a></li>
-                    <li><a href="{{ url('/admin/uploadFile') }}">📁 Upload file</a></li>
+                    <li><a href="{{ route('admin.home') }}">🏠 Trang chủ</a></li>
+                    <li><a href="{{ route('admin.stocks') }}">📊 Quản lý cổ phiếu</a></li>
+                    <li><a href="{{ route('insert') }}">➕ Thêm mã</a></li>
+                    <li><a href="{{ route('updateRiskForCode') }}">🔄 Cập nhật rủi ro</a></li>
+                    <li><a href="{{ route('uploadFile') }}">📁 Upload file</a></li>
                 @elseif ($area === 'guest')
                     <li><a href="{{ route('home') }}">🏠 Trang chủ</a></li>
                     <li><a href="{{ route('login') }}">🔑 Đăng nhập</a></li>

@@ -34,10 +34,11 @@
 
 @section('user-body-content')
     <div class="asset-action-bar">
-        <a href="{{ url('/user/buy') }}" class="asset-action-btn asset-action-btn--buy">➕ Mua cổ phiếu</a>
-        <a href="{{ url('/user/sell') }}" class="asset-action-btn asset-action-btn--sell">❌ Bán cổ phiếu</a>
-        <a href="{{ url('/user/cashIn') }}" class="asset-action-btn asset-action-btn--cash-in">💰 Nạp tiền</a>
-        <a href="{{ url('/user/cashOut') }}" class="asset-action-btn asset-action-btn--cash-out">💵 Rút tiền</a>
+        <a href="{{ route('buy') }}" class="asset-action-btn asset-action-btn--buy">➕ Mua cổ phiếu</a>
+        <a href="{{ route('sell') }}" class="asset-action-btn asset-action-btn--sell">❌ Bán cổ phiếu</a>
+        <a href="{{ route('user.cashIn') }}" class="asset-action-btn asset-action-btn--cash-in">💰 Nạp tiền</a>
+        <a href="{{ route('user.cashOut') }}" class="asset-action-btn asset-action-btn--cash-out">💵 Rút tiền</a>
+        <a href="{{ route('user.portfolio.exportPdf') }}" class="asset-action-btn" style="background:rgba(129,140,248,0.15);color:#818cf8;border:1px solid rgba(129,140,248,0.3);" target="_blank">📄 Xuất PDF</a>
     </div>
 
     @include('partials.page-title-invest', ['title' => 'Danh sách mã cổ phiếu đang giữ', 'level' => 1])

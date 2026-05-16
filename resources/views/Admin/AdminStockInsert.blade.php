@@ -17,7 +17,7 @@
 
 @section('admin-body-content')
     <div class="buy-back-bar">
-        <a href="{{ url('/admin/stocks') }}" class="buy-back-btn">← Quay lại</a>
+        <a href="{{ route('admin.stocks') }}" class="buy-back-btn">← Quay lại</a>
     </div>
 
     @include('partials.page-title-invest', ['title' => 'Thêm cổ phiếu'])

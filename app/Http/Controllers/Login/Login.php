@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Login;
 
 use App\Http\Controllers\Controller;
+use App\Models\User as UserModel;
 use App\Services\AuthService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -85,6 +86,25 @@ class Login extends Controller
         }
 
         return redirect()->route('login')->with('message', 'Đã đặt lại mật khẩu. Vui lòng đăng nhập.');
+    }
+
+    public function resendVerification(Request $request)
+    {
+        $email = trim($request->input('email', ''));
+        if ($email) {
+            $user = UserModel::getUserByEmail($email);
+            if ($user && !$user->hasVerifiedEmail()) {
+                try {
+                    $user->sendEmailVerificationNotification();
+                } catch (\Throwable $e) {
+                    // silent fail
+                }
+            }
+        }
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Nếu email tồn tại và chưa xác thực, chúng tôi đã gửi lại email xác thực.',
+        ]);
     }
 
 }

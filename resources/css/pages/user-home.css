@@ -547,7 +547,7 @@
 }
 
 .home-buy-suggest-modal__body {
-    padding: 0 10px;
+    padding: 10px 10px 0;
     overflow: auto;
     flex: 1;
     background: linear-gradient(180deg, rgba(40, 28, 4, 0.22) 0%, rgba(10, 16, 33, 0.74) 100%);

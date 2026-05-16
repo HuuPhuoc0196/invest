@@ -48,7 +48,7 @@
                 <div class="admin-logs-card__meta">
                     <span class="admin-logs-badge admin-logs-badge--vps">● Service VPS</span>
                 </div>
-                <a href="{{ url('/admin/logsVPS') }}" rel="noopener noreferrer"
+                <a href="{{ route('admin.logsVPS') }}" rel="noopener noreferrer"
                    class="admin-logs-card__btn admin-logs-card__btn--secondary">
                     Mở Logs VPS →
                 </a>

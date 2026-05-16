@@ -40,6 +40,13 @@
         </div>
 
         <div class="error-message" id="errorMessage" style="display: none; color: red;"></div>
+        <div id="resendVerifyBox" style="display:none;margin-bottom:10px;padding:10px 12px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:8px;font-size:0.85rem;color:#f59e0b;">
+            Email chưa xác thực.
+            <button type="button" id="btnResendVerify" style="margin-left:8px;background:none;border:none;color:#38bdf8;cursor:pointer;font-size:0.85rem;text-decoration:underline;padding:0;">
+                Gửi lại email xác thực
+            </button>
+            <span id="resendResult" style="margin-left:6px;font-size:0.82rem;"></span>
+        </div>
 
         <button type="submit" class="login-btn" id="btnLoginSubmit">
             <span class="btn-spinner" id="btnLoginSpinner" aria-hidden="true"></span>
@@ -61,7 +68,7 @@
     <script>
         window.__pageData = {
             baseUrl: "{{ url('') }}",
-            urlAdmin: "{{ url('/admin') }}",
+            urlAdmin: "{{ route('admin.home') }}",
             urlHome: "{{ route('home') }}",
             urlLoginPost: @json(route('login')),
         };

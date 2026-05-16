@@ -66,8 +66,8 @@
         </section>
 
         <section class="profile-detail-card profile-detail-card--actions" aria-label="Thao tác nhanh">
-            <a href="{{ url('/user/updateInfoProfile') }}" class="button-link profile-detail-cta">✏️ Cập nhật thông tin</a>
-            <a href="{{ url('/user/changePassword') }}" class="button-link profile-detail-cta profile-detail-cta--secondary">🔐 Đổi mật khẩu</a>
+            <a href="{{ route('updateInfoProfile') }}" class="button-link profile-detail-cta">✏️ Cập nhật thông tin</a>
+            <a href="{{ route('changePassword') }}" class="button-link profile-detail-cta profile-detail-cta--secondary">🔐 Đổi mật khẩu</a>
         </section>
     </div>
 @endsection

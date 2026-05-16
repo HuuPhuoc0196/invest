@@ -44,6 +44,8 @@ Route::get('/sitemap.xml', function () {
         $today = now()->toDateString();
         $urls = [
             ['loc' => route('home'),          'lastmod' => $today, 'changefreq' => 'daily',   'priority' => '1.0'],
+            ['loc' => route('about'),         'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.8'],
+            ['loc' => route('contact'),       'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.7'],
             ['loc' => route('login'),         'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.7'],
             ['loc' => route('register'),      'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.6'],
             ['loc' => route('forgotPassword'),'lastmod' => $today, 'changefreq' => 'monthly', 'priority' => '0.4'],
@@ -76,6 +78,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [Login::class, 'register']);
     Route::post('/forgotPassword', [Login::class, 'forgotPassword']);
     Route::post('/reset-password', [Login::class, 'resetPassword']);
+    Route::post('/email/resend-verification', [Login::class, 'resendVerification'])
+        ->middleware('throttle:3,5')
+        ->name('email.resend');
 });
 
 Route::get('/login', fn () => redirect('/dang-nhap', 301));
@@ -153,7 +158,13 @@ Route::get('/__debug/logo', function () {
 
 // Public pages — không cần đăng nhập
 Route::get('/gioi-thieu', [PagesController::class, 'about'])->name('about');
-Route::match(['get', 'post'], '/lien-he', [PagesController::class, 'contact'])->name('contact');
+Route::get('/lien-he', [PagesController::class, 'contact'])->name('contact');
+Route::post('/lien-he', [PagesController::class, 'contact'])->middleware('throttle:contact-form');
+
+// Stock detail page (public)
+Route::get('/co-phieu/{code}', [PagesController::class, 'stockDetail'])->name('stock.detail');
+Route::get('/co-phieu/{code}/lich-su-risk', [PagesController::class, 'stockRiskHistory'])->name('stock.riskHistory');
+Route::get('/co-phieu/{code}/co-tuc', [PagesController::class, 'stockDividendHistory'])->name('stock.dividendHistory');
 
 // Trang chủ: cho phép cả guest và user (không bắt buộc login)
 Route::get('/trang-chu', [User::class, 'show'])->name('home');
@@ -211,6 +222,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Cache management
     Route::post('/admin/cache/clear-all', [Admin::class, 'clearAllCache'])->name('admin.cache.clearAll');
 
+    // Quản lý truy cập
+    Route::get('/admin/access-management', [Admin::class, 'accessManagement'])->name('admin.accessManagement');
+
     // Crontab management (proxy tới VPS)
     Route::get('/admin/crontab', [Sync::class, 'getCrontab'])->name('admin.crontab');
     Route::get('/admin/crontab/list', [Sync::class, 'getCrontabList'])->name('admin.crontab.list');
@@ -253,4 +267,7 @@ Route::middleware(['auth', 'user'])->group(function () {
 
     // Email settings follow
     Route::post('/user/email-settings-follow/save', [User::class, 'saveEmailSettingsFollow'])->name('user.saveEmailSettingsFollow');
+
+    // Export portfolio
+    Route::get('/user/portfolio/export/pdf', [User::class, 'exportPortfolioPdf'])->name('user.portfolio.exportPdf');
 });

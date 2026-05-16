@@ -19,6 +19,7 @@
    - 8.7 Cache System | 8.8 Logging | 8.9 Crontab
    - 8.10 User Home Modals | 8.11 Public Pages
    - 8.12 Middleware | 8.13 Mail Classes
+   - 8.16 VPS Python Scripts (server-side)
 9. [Services](#9-services) — methods chi tiết từng service
 10. [Frontend Structure](#10-frontend-structure) — theme, CSS, JS, Blade file list
 11. [Configuration & Environment](#11-configuration--environment) — env vars, config files
@@ -340,6 +341,8 @@ invest/
 │       ├── Pages/                         # 2 public views
 │       │   ├── AboutView.blade.php        # Giới thiệu: hero, features, how-it-works, CTA
 │       │   └── ContactView.blade.php      # Liên hệ: split layout, form, FAQ accordion
+│       ├── PDF/                           # 1 PDF template
+│       │   └── PortfolioPdf.blade.php     # PDF xuất danh mục: header, KPI cards, bảng holdings (rating badge màu), P&L bar, footer. Không có logo (dompdf 2.0 không hỗ trợ SVG, XAMPP không có Imagick/GD). Không có FIFO timeline (đã bỏ).
 │       ├── Emails/                        # 5 email templates
 │       │   ├── verify.blade.php           # Xác thực email
 │       │   ├── reset-password.blade.php   # Đặt lại mật khẩu
@@ -389,19 +392,22 @@ invest/
 | Cột | Kiểu | Mô tả |
 |-----|------|-------|
 | `id` | bigint (PK) | Auto increment |
-| `code` | string | Mã cổ phiếu (VD: VNM, FPT) |
-| `recommended_buy_price` | decimal(15,2) | Giá mua đề xuất |
-| `current_price` | decimal(15,2) | Giá hiện tại (cập nhật từ sync) |
-| `recommended_sell_price` | decimal(15,2), nullable | Giá bán đề xuất |
-| `risk_level` | tinyint | Mức độ rủi ro (từ API ngoài) |
-| `rating_stocks` | decimal(5,2), nullable | Điểm đánh giá |
-| `volume_avg` | bigint, nullable | Khối lượng giao dịch TB |
-| `price_avg` | decimal | Giá trung bình (tính toán) |
-| `percent_buy` | decimal | % lời nếu mua theo giá đề xuất |
-| `percent_sell` | decimal | % lời nếu bán theo giá đề xuất |
-| `stocks_vn` | string | Tên công ty (tiếng Việt) |
-| `volume` | bigint | Khối lượng giao dịch gần nhất |
-| `created_at`, `updated_at` | timestamp | Timestamps |
+| `code` | varchar | Mã cổ phiếu (VD: VNM, FPT) |
+| `current_price` | decimal | Giá hiện tại × 1000 (VCI trả về giá nghìn, sync × 1000) |
+| `price_avg` | decimal | Giá trung bình 1008 phiên giao dịch |
+| `percent_buy` | decimal (default 100) | % của price_avg để tính recommended_buy_price |
+| `percent_sell` | decimal (default 100) | % của price_avg để tính recommended_sell_price |
+| `recommended_buy_price` | decimal | `price_avg × percent_buy / 100` |
+| `recommended_sell_price` | decimal | `price_avg × percent_sell / 100` |
+| `percent_stock` | decimal | % thay đổi giá so với phiên trước |
+| `risk_level` | int | 1=An toàn, 2=Cảnh báo, 3=Hạn chế, 4=Đình chỉ |
+| `event_date` | date | Ngày sự kiện risk hiện tại (từ VietStock, default curdate()) |
+| `recommended_date` | date | Ngày tính lại recommended prices |
+| `stocks_vn` | int (default 1000) | 30=VN30, 100=VN100, 1000=không thuộc VN30/VN100 |
+| `rating_stocks` | int (default 0) | Điểm đánh giá 1–10 (syncRatingPrice tính theo risk × volume × price) |
+| `volume` | decimal (default 0) | Khối lượng phiên giao dịch gần nhất |
+| `volume_avg` | decimal (default 0) | Khối lượng giao dịch trung bình 1008 phiên |
+| `created_at`, `updated_at` | datetime | Timestamps |
 
 ### Bảng `user_portfolios` (FIFO lots – cổ phiếu đang giữ)
 | Cột | Kiểu | Mô tả |
@@ -473,10 +479,10 @@ invest/
 ### Bảng `status_sync`
 | Cột | Kiểu | Mô tả |
 |-----|------|-------|
-| `id` | bigint (PK) | Auto increment |
-| `status_sync_price` | string/timestamp | Lần cuối sync giá |
-| `status_sync_risk` | string/timestamp | Lần cuối sync risk |
-| `created_at`, `updated_at` | timestamp | Timestamps |
+| `id` | bigint (PK) | Auto increment — chỉ có 1 row |
+| `status_sync_price` | int | Legacy, không được dùng — VPS không update field này. Luôn = 0 |
+| `status_sync_risk` | int | 0=idle, 1=running — VPS set=1 khi syncRisk bắt đầu, set=0 khi xong |
+| `created_at`, `updated_at` | datetime | Timestamps |
 
 ### Bảng `admin_follow` (admin theo dõi mã CK)
 | Cột | Kiểu | Mô tả |
@@ -662,6 +668,7 @@ stocks (1) ──────── (many) user_follows
 | GET/POST | `/user/cashOut` | `User@cashOut` | Rút tiền ảo |
 | GET/PUT | `/user/updateInfoProfile` | `User@updateInfoProfile` | Cập nhật tên |
 | GET/PUT | `/user/changePassword` | `User@changePassword` | Đổi mật khẩu |
+| GET | `/user/portfolio/export-pdf` | `User@exportPortfolioPdf` | Xuất danh mục PDF – `name: user.portfolio.exportPdf` |
 | GET | `/user/email-settings` | `User@emailSettings` | Cài đặt email |
 | POST | `/user/email-settings/save-session-closed` | `User@saveSessionClosedFlags` | Lưu session closed |
 | POST | `/user/email-settings-follow/save` | `User@saveEmailSettingsFollow` | Lưu cài đặt follow email |
@@ -763,6 +770,13 @@ stocks (1) ──────── (many) user_follows
 6. Clear cache liên quan
 
 **Investment Performance:** Tính P&L, ROI so sánh giá mua TB với giá hiện tại.
+
+**Xuất PDF (`exportPortfolioPdf`):**
+- Route: `GET /user/portfolio/export-pdf` — dùng `barryvdh/laravel-dompdf`, trả về `streamDownload`
+- Dữ liệu: `getProfileUser($userId)` (FIFO tổng hợp theo mã) + enrich với `rating_stocks`, `stocks_vn`, `current_price` từ `stocks` table
+- Cấu trúc PDF hiện tại: header branding (text only, không logo) → user info strip → 4 KPI cards (tổng mã, tổng vốn, giá trị thị trường, P&L) → bảng danh mục holdings (cột Điểm dùng badge màu: ≥7 xanh, 5–6 vàng, <5 đỏ) → P&L bar chart (CSS `width:%`) → footer
+- **Giới hạn dompdf 2.0 trên XAMPP này:** Không render SVG qua `<img>` data-URI. Inline SVG `<text>` bị leak ra ngoài SVG bounds. XAMPP không có Imagick/GD nên không convert SVG→PNG runtime. Logo đã bỏ hoàn toàn.
+- FIFO Timeline đã bỏ (quá phức tạp để đọc).
 
 ---
 
@@ -1049,6 +1063,67 @@ Strict-Transport-Security: max-age=31536000 (chỉ production)
 | `EventServiceProvider` | Map `Registered` event → `SendEmailVerificationNotification` listener (kích hoạt khi đăng ký) |
 | `BroadcastServiceProvider` | Laravel default, chưa dùng |
 | `RouteServiceProvider` | `HOME = '/trang-chu'`; rate limiter API: 60 req/phút per user/IP |
+
+---
+
+### 8.16 VPS Python Scripts (server-side)
+**Thư mục VPS:** `/root/stocks/` | **Server:** `root@180.93.42.13`
+
+Các Python script chạy trên VPS để đồng bộ dữ liệu về webapp (giá, risk, dividend, admin_follow) và gửi email thông báo. Mỗi script được gọi bởi cron job quản lý qua [8.9 Crontab Management](#89-crontab-management).
+
+#### Các script chính
+
+| File | Mô tả |
+|------|-------|
+| `syncPrice.py` | Đồng bộ `current_price`, `percent_stock`, `volume` cho tất cả mã CK từ VCI API. Sau khi sync: gọi `cacheHelper.clear_stocks()` + `clear_user_follows()` + `flush()` |
+| `syncRisk.py` | Đồng bộ `risk_level`, `event_date` từ VietStock. Sau khi sync: `cacheHelper.clear_stocks()` + `clear_status_sync()` + `flush()` |
+| `syncRatingPrice.py` | Tính lại `rating_stocks`, `price_avg`, `recommended_buy_price`, `recommended_sell_price`. Sau khi sync: `cacheHelper.clear_stocks()` + `flush()` |
+| `syncDividend.py` | Phát hiện sự kiện cổ tức hôm nay (GDKHQ = today), điều chỉnh `current_price` + `buy_price`/`quantity` trong portfolios. Sau khi sync: `clear_stocks()` + `clear_user_portfolios()` + `clear_user_portfolios_sell()` + `flush()` |
+| `syncStocks10M.py` | Kiểm tra GTGD (giá trị giao dịch) 10 phút để tự động thêm mã vào `admin_follow` nếu đủ điều kiện (GTGD > threshold + risk An toàn). Sau khi insert: `cacheHelper.clear_admin_follow()` |
+| `noticeUserFollow.py` | Gửi email tín hiệu mua/bán cho users có follow. Chạy sáng T2–T6 trước phiên giao dịch |
+| `noticeStock.py` | Gửi email thông báo risk thay đổi |
+| `AdminFollowDB.py` | Helper module: `checkFollowExists(user_id, stock_id)`, `insertFollow(user_id, stock_id)`, `getFollowsByUser(user_id)` — CRUD bảng `admin_follow` |
+| `stocksDB.py` | Helper module: CRUD bảng `stocks` |
+| `commonDB.py` | DB connection pool, helpers `fetch_one()`, `execute()` |
+| `sendEmail.py` | Gửi email qua SMTP: `sendEmailWarning()`, `sendEmailError()`, `sendEmailInfo()` |
+| `getRiskFromAPI.py` | Lấy risk level cho 1 mã từ VietStock API |
+| `getDividendFromAPI.py` | Lấy dữ liệu cổ tức/thưởng từ API |
+| `logg.py` | Logging wrapper: `logg.info()`, `logg.warning()`, `logg.error()` |
+| `cacheHelper.py` | Gọi webapp `/api/cache/*` để invalidate cache sau khi VPS cập nhật DB |
+| `api.py` | FastAPI server phục vụ các endpoint cron + crontab management |
+| `crontabManager.py` | Quản lý danh sách cron jobs (đọc/ghi file crontab) |
+| `deleteLogs.py` | Xóa log files cũ hơn 30 ngày |
+
+#### cacheHelper.py — tất cả hàm
+
+| Hàm | API webapp gọi | Mô tả |
+|-----|---------------|-------|
+| `clear_stocks()` | `POST /api/cache/clear-table` `{"table":"stocks"}` | Xóa cache `stocks_all`, `stock_code_*`, `stock_risk_*` |
+| `clear_user_follows()` | `POST /api/cache/clear-table` `{"table":"user_follows"}` | Xóa cache `user_follow_*`, `user_follow_notice_*` |
+| `clear_user_portfolios()` | `POST /api/cache/clear-table` `{"table":"user_portfolios"}` | Xóa cache `user_portfolio_*` |
+| `clear_user_portfolios_sell()` | `POST /api/cache/clear-table` `{"table":"user_portfolios_sell"}` | Xóa cache `user_portfolio_sell_*` |
+| `clear_status_sync()` | `POST /api/cache/clear-keys` `{"keys":["status_sync"]}` | Xóa cache key `status_sync` |
+| `clear_stock(code)` | `POST /api/cache/clear-stock` `{"code":"..."}` | Xóa cache 1 mã cụ thể |
+| `clear_admin_follow()` | `POST /api/cache/clear-table` `{"table":"admin_follow"}` | Xóa cache `admin_follow_stock_ids`, `admin_follow_stocks` |
+| `flush(caller_file)` | (gọi sendEmail nội bộ) | Nếu có lỗi trong run, gửi email tổng hợp rồi clear `_errors` list |
+
+Auth gọi webapp: header `X-Cron-Secret: {WEBAPP_CACHE_SECRET}` (env var trên VPS).
+
+#### syncStocks10M.py — luồng xử lý admin_follow
+
+```
+1. Lấy danh sách tất cả mã CK từ DB
+2. Với mỗi mã: fetch GTGD 10 phút từ VCI API
+3. Nếu GTGD > threshold_add → gửi email cảnh báo (chưa insert)
+4. Nếu GTGD > threshold_follow + risk == An toàn + chưa có trong admin_follow:
+   → AdminFollowDB.insertFollow(user_id, stock_id)
+   → cacheHelper.clear_admin_follow()   ← invalidate webapp cache ngay lập tức
+   → sendEmail.sendEmailWarning(...)
+5. Cuối run: _notify_stale_admin_follows() → kiểm tra các mã follow cũ có GTGD xuống thấp
+6. sendEmail tổng hợp + _send_accumulated_errors()
+```
+
+**Config env trên VPS:** `WEBAPP_CACHE_URL` (URL webapp), `WEBAPP_CACHE_SECRET` (phải khớp `CRON_API_SECRET` trong `.env` Laravel).
 
 ---
 
@@ -1385,7 +1460,19 @@ echo "debug";
 - Mã cổ phiếu luôn uppercase: `strtoupper($code)` trước khi query
 - VD: `Stock::getByCode('vnm')` → sẽ tự uppercase thành `'VNM'`
 
-### 6. Blade Template & SEO
+### 6. `route()` vs `url()` trong Blade
+
+**Luôn dùng `route('name')` khi named route tồn tại** — `route()` throw ngay nếu tên sai, `url()` hardcode path và âm thầm break khi path thay đổi.
+
+**Dùng `url()` chỉ trong 3 trường hợp hợp lệ:**
+1. **Không có named route** — VD: `/user/profile`, `/user/follow`, `/user/infoProfile`, `/user/investment-performance` (chỉ có alias `Route::get(...)->name(...)` cho 1 số route, không phải tất cả)
+2. **JS dynamic base URL** — VD: `url('/admin/crontab')` trong Blade truyền sang JS, vì JS sẽ append `/{lineIdx}` — không có named route cho parameterized path này
+3. **Third-party package URL** — VD: `/admin/log-viewer` (opcodesio/log-viewer), không có named route trong app
+
+❌ Không dùng `url('/admin')` khi có thể dùng `route('admin.home')`  
+❌ Không hardcode path khi named route đã có
+
+### 7. Blade Template & SEO
 Chi tiết đầy đủ tại [docs/blade-seo.md](docs/blade-seo.md). Tóm tắt quan trọng:
 
 **Chọn layout & section content:**

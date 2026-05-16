@@ -696,6 +696,50 @@ body.theme-invest-app main.login-layout-main {
 
 }
 
+/* ── Admin + User nav: icon-only mode khi màn hình hẹp (769–1150px) ── */
+@media (min-width: 769px) and (max-width: 1150px) {
+    /* Ẩn text, chỉ hiện emoji */
+    body.theme-invest-app.layout-admin .admin-nav-primary__cluster .button-link .anp-label,
+    body.theme-invest-app.layout-user  .user-nav-primary__cluster  .button-link .anp-label {
+        display: none;
+    }
+
+    /* Thu hẹp padding để các icon vừa vặn trên 1 hàng */
+    body.theme-invest-app.layout-admin .admin-nav-primary__cluster .button-link,
+    body.theme-invest-app.layout-user  .user-nav-primary__cluster  .button-link {
+        position: relative;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    /* User nav: giữ nowrap để không xuống hàng khi icon-only */
+    body.theme-invest-app.layout-user .user-nav-primary__cluster {
+        flex-wrap: nowrap;
+    }
+
+    /* Tooltip hiện ra khi hover */
+    body.theme-invest-app.layout-admin .admin-nav-primary__cluster .button-link[data-tip]:hover::after,
+    body.theme-invest-app.layout-user  .user-nav-primary__cluster  .button-link[data-tip]:hover::after {
+        content: attr(data-tip);
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 5px 12px;
+        border-radius: 7px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        font-family: "Be Vietnam Pro", sans-serif;
+        white-space: nowrap;
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        z-index: 9999;
+        pointer-events: none;
+    }
+}
+
 /* Mobile topbar: dùng theme-drawer-shared (global). Chỉ tinh chỉnh nhẹ nếu cần. */
 
 /* —— Page title —— (trang chủ + toàn bộ trang app; .page-header-home = alias cũ) */

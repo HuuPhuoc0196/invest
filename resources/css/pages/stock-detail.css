@@ -1,0 +1,169 @@
+/* Stock Detail Page */
+.stock-detail-wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+.stock-detail-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background: var(--inv-surface, #1e293b);
+    border: 1px solid rgba(99,179,237,0.14);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.stock-detail-code {
+    font-size: 2.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+
+.stock-detail-price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.stock-detail-change {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+.stock-detail-change.up   { background: rgba(16,185,129,0.15); color: #10b981; }
+.stock-detail-change.down { background: rgba(239,68,68,0.15);  color: #ef4444; }
+.stock-detail-change.flat { background: rgba(100,116,139,0.15); color: #94a3b8; }
+
+/* Risk badge */
+.risk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+.risk-badge.risk-1 { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+.risk-badge.risk-2 { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+.risk-badge.risk-3 { background: rgba(239,68,68,0.15);  color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+.risk-badge.risk-4 { background: rgba(127,29,29,0.3);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.5); }
+
+/* Section card */
+.sd-section {
+    background: var(--inv-surface, #1e293b);
+    border: 1px solid rgba(99,179,237,0.14);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+}
+.sd-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #38bdf8;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Info grid */
+.sd-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+}
+.sd-info-item { display: flex; flex-direction: column; gap: 4px; }
+.sd-info-label { font-size: 0.75rem; color: #64748b; }
+.sd-info-value { font-size: 1.05rem; font-weight: 600; color: #e2e8f0; }
+
+/* Timeline */
+.risk-timeline { display: flex; flex-direction: column; gap: 10px; }
+.risk-timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(15,23,42,0.5);
+    border: 1px solid rgba(99,179,237,0.08);
+}
+.risk-timeline-date { font-size: 0.82rem; color: #64748b; min-width: 90px; }
+.risk-timeline-badge { min-width: 110px; }
+.risk-timeline-note { font-size: 0.85rem; color: #94a3b8; flex: 1; }
+
+/* Dividend table */
+.sd-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.sd-table th { text-align: left; padding: 8px 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid rgba(99,179,237,0.1); }
+.sd-table td { padding: 10px 12px; border-bottom: 1px solid rgba(99,179,237,0.06); color: #e2e8f0; }
+.sd-table tr:last-child td { border-bottom: none; }
+
+/* User holding card */
+.user-holding-card {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+.uhc-item { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+.uhc-label { font-size: 0.75rem; color: #64748b; }
+.uhc-value { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; }
+.uhc-value.positive { color: #10b981; }
+.uhc-value.negative { color: #ef4444; }
+
+/* CTA row */
+.sd-cta-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+}
+.sd-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+    color: #0f172a;
+    font-weight: 700;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.sd-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    background: rgba(56,189,248,0.1);
+    color: #38bdf8;
+    border: 1px solid rgba(56,189,248,0.3);
+    font-weight: 600;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.sd-btn-secondary:hover { background: rgba(56,189,248,0.18); }
+
+.empty-history {
+    text-align: center;
+    padding: 20px;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .stock-detail-hero { padding: 16px; gap: 12px; }
+    .stock-detail-code { font-size: 1.8rem; }
+    .stock-detail-price { font-size: 1.4rem; }
+    .sd-info-grid { grid-template-columns: 1fr 1fr; }
+    .sd-section { padding: 14px; }
+}

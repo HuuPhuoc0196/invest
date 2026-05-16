@@ -22,20 +22,20 @@
     <div class="user-nav-primary__inner">
         <div class="user-nav-primary__mid">
             <div class="user-nav-primary__cluster">
-                <a href="{{ route('home') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isHome])>🏠 Trang chủ</a>
+                <a href="{{ route('home') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isHome]) data-tip="Trang chủ">🏠 <span class="anp-label">Trang chủ</span></a>
 
                 <div class="user-nav-primary__follow-branch">
-                    <a href="{{ url('/user/follow') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isFollowParent])>🔔 Theo dõi</a>
+                    <a href="{{ url('/user/follow') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isFollowParent]) data-tip="Theo dõi">🔔 <span class="anp-label">Theo dõi</span></a>
                 </div>
 
-                <a href="{{ url('/user/investment-performance') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isInvestmentPerf])>📈 Hiệu suất đầu tư</a>
+                <a href="{{ url('/user/investment-performance') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isInvestmentPerf]) data-tip="Hiệu suất đầu tư">📈 <span class="anp-label">Hiệu suất đầu tư</span></a>
 
                 <div class="user-nav-primary__asset-branch">
-                    <a href="{{ url('/user/profile') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isAssetParent])>💼 Tài sản</a>
+                    <a href="{{ url('/user/profile') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isAssetParent]) data-tip="Tài sản">💼 <span class="anp-label">Tài sản</span></a>
                 </div>
 
-                <a href="{{ url('/user/infoProfile') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isInfo])>👤 Thông tin cá nhân</a>
-                <a href="{{ url('/user/email-settings') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isEmail])>📧 Cài đặt thông báo</a>
+                <a href="{{ url('/user/infoProfile') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isInfo]) data-tip="Thông tin cá nhân">👤 <span class="anp-label">Thông tin cá nhân</span></a>
+                <a href="{{ route('user.emailSettings') }}" @class(['button-link', 'user-nav-link', 'user-nav-link--active' => $isEmail]) data-tip="Cài đặt thông báo">📧 <span class="anp-label">Cài đặt thông báo</span></a>
             </div>
         </div>
         <button type="button" class="button-link user-nav-link user-nav-link--logout" onclick="document.getElementById('logout-form-user-nav').submit();">
